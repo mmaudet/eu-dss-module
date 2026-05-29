@@ -2,6 +2,7 @@ package com.linagora.eudss.server.web;
 
 import com.linagora.eudss.server.dto.ValidationResponseDto;
 import com.linagora.eudss.server.service.DocumentValidationService;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,7 +22,7 @@ public class ValidationController {
     public record ValidateRequest(@NotBlank String documentBase64) {}
 
     @PostMapping
-    public ValidationResponseDto validate(@RequestBody ValidateRequest req) {
+    public ValidationResponseDto validate(@Valid @RequestBody ValidateRequest req) {
         return service.validate(req.documentBase64());
     }
 }

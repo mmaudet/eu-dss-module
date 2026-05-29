@@ -13,6 +13,7 @@ import eu.europa.esig.dss.model.SignatureValue;
 import eu.europa.esig.dss.model.ToBeSigned;
 import eu.europa.esig.dss.model.x509.CertificateToken;
 import eu.europa.esig.dss.spi.DSSUtils;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
@@ -22,10 +23,11 @@ import java.util.Base64;
 @Service
 public class DocumentSigningService {
 
-    private final PadesSigningService padesSigner;
-    private final AsicSigningService asicSigner;
+    private final DocumentSigner padesSigner;
+    private final DocumentSigner asicSigner;
 
-    public DocumentSigningService(PadesSigningService padesSigner, AsicSigningService asicSigner) {
+    public DocumentSigningService(@Qualifier("padesSigningService") DocumentSigner padesSigner,
+                                  @Qualifier("asicSigningService") DocumentSigner asicSigner) {
         this.padesSigner = padesSigner;
         this.asicSigner = asicSigner;
     }

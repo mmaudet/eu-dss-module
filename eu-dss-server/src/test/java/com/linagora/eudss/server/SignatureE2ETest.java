@@ -74,6 +74,8 @@ class SignatureE2ETest {
         );
         assertThat(assembled).isNotNull();
         assertThat(assembled.signedDocumentBase64()).isNotBlank();
+        assertThat(assembled.signedFileName()).isEqualTo("document.pdf");
+        assertThat(assembled.mediaType()).contains("pdf");
 
         ValidationResponseDto validated = http.postForObject(
                 "/api/validate",
