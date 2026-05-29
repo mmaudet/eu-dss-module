@@ -1,28 +1,28 @@
 package com.linagora.eudss.server.service;
 
 import com.linagora.eudss.server.dto.SignatureParamsDto;
+import eu.europa.esig.dss.asic.xades.signature.ASiCWithXAdESService;
 import eu.europa.esig.dss.model.DSSDocument;
 import eu.europa.esig.dss.model.SignatureValue;
 import eu.europa.esig.dss.model.ToBeSigned;
-import eu.europa.esig.dss.pades.signature.PAdESService;
 import org.springframework.stereotype.Service;
 
 @Service
-public class PadesSigningService implements DocumentSigner {
+public class AsicSigningService implements DocumentSigner {
 
-    private final PAdESService padesService;
+    private final ASiCWithXAdESService asicService;
 
-    public PadesSigningService(PAdESService padesService) {
-        this.padesService = padesService;
+    public AsicSigningService(ASiCWithXAdESService asicService) {
+        this.asicService = asicService;
     }
 
     @Override
     public ToBeSigned dataToSign(DSSDocument document, SignatureParamsDto params) {
-        return padesService.getDataToSign(document, SignatureMapper.toPadesParams(params));
+        return asicService.getDataToSign(document, SignatureMapper.toAsicParams(params));
     }
 
     @Override
     public DSSDocument sign(DSSDocument document, SignatureParamsDto params, SignatureValue signatureValue) {
-        return padesService.signDocument(document, SignatureMapper.toPadesParams(params), signatureValue);
+        return asicService.signDocument(document, SignatureMapper.toAsicParams(params), signatureValue);
     }
 }

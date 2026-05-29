@@ -12,26 +12,23 @@ import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
-import java.time.format.DateTimeFormatter;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 
 @Service
-public class PdfValidationService {
+public class DocumentValidationService {
 
     private final CommonCertificateVerifier verifier;
 
-    public PdfValidationService(CommonCertificateVerifier verifier) {
+    public DocumentValidationService(CommonCertificateVerifier verifier) {
         this.verifier = verifier;
     }
 
-    public ValidationResponseDto validate(String signedPdfBase64) {
-        DSSDocument document = new InMemoryDocument(
-                Base64.getDecoder().decode(signedPdfBase64),
-                "signed.pdf"
-        );
+    public ValidationResponseDto validate(String documentBase64) {
+        DSSDocument document = new InMemoryDocument(Base64.getDecoder().decode(documentBase64), "document");
         SignedDocumentValidator validator = SignedDocumentValidator.fromDocument(document);
         validator.setCertificateVerifier(verifier);
         Reports reports = validator.validateDocument();
@@ -50,7 +47,6 @@ public class PdfValidationService {
                             : null
             ));
         }
-
         return new ValidationResponseDto(simple.getSignaturesCount(), summaries, marshalSimpleReport(reports));
     }
 

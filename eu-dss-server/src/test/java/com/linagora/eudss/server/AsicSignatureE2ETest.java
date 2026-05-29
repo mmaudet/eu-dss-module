@@ -6,7 +6,6 @@ import com.linagora.eudss.server.dto.PrepareSignatureRequest;
 import com.linagora.eudss.server.dto.PrepareSignatureResponse;
 import com.linagora.eudss.server.dto.SignatureParamsDto;
 import com.linagora.eudss.server.dto.ValidationResponseDto;
-import com.linagora.eudss.server.testutil.SamplePdf;
 import com.linagora.eudss.server.testutil.TestPki;
 import com.linagora.eudss.server.web.ValidationController;
 import org.junit.jupiter.api.BeforeAll;
@@ -16,6 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.test.context.TestPropertySource;
 
+import java.nio.charset.StandardCharsets;
 import java.security.Signature;
 import java.util.Base64;
 import java.util.List;
@@ -24,23 +24,22 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource(properties = "eudss.lotl.enabled=false")
-class SignatureE2ETest {
+class AsicSignatureE2ETest {
 
     @Autowired
     TestRestTemplate http;
 
     static TestPki.SelfSigned pki;
-    static byte[] pdfBytes;
 
     @BeforeAll
     static void setup() throws Exception {
-        pki = TestPki.generateSelfSignedRsa("eu-dss test signer");
-        pdfBytes = SamplePdf.simpleA4WithText("Hello eu-dss");
+        pki = TestPki.generateSelfSignedRsa("eu-dss asic test signer");
     }
 
     @Test
-    void sign_and_validate_pades_b() throws Exception {
-        String pdfB64 = Base64.getEncoder().encodeToString(pdfBytes);
+    void sign_non_pdf_as_asic_and_validate() throws Exception {
+        byte[] docxBytes = "fake office document content".getBytes(StandardCharsets.UTF_8);
+        String docB64 = Base64.getEncoder().encodeToString(docxBytes);
         String certB64 = Base64.getEncoder().encodeToString(pki.certificate().getEncoded());
 
         SignatureParamsDto params = new SignatureParamsDto(
@@ -48,42 +47,34 @@ class SignatureE2ETest {
                 SignatureParamsDto.DigestAlgorithmDto.SHA256,
                 System.currentTimeMillis(),
                 SignatureParamsDto.SignatureLevelDto.BASELINE_B,
-                "Test signing",
-                "Paris",
-                "eu-dss test signer"
+                "ASiC test", "Paris", "eu-dss asic test signer"
         );
 
         PrepareSignatureResponse prepared = http.postForObject(
                 "/api/sign/prepare",
-                new PrepareSignatureRequest(pdfB64, "document.pdf", params),
-                PrepareSignatureResponse.class
-        );
-        assertThat(prepared).isNotNull();
+                new PrepareSignatureRequest(docB64, "report.docx", params),
+                PrepareSignatureResponse.class);
         assertThat(prepared.dataToSignBase64()).isNotBlank();
 
         byte[] dataToSign = Base64.getDecoder().decode(prepared.dataToSignBase64());
         Signature signer = Signature.getInstance("SHA256withRSA");
         signer.initSign(pki.privateKey());
         signer.update(dataToSign);
-        byte[] signatureValue = signer.sign();
+        String signatureValueB64 = Base64.getEncoder().encodeToString(signer.sign());
 
         AssembleSignatureResponse assembled = http.postForObject(
                 "/api/sign/assemble",
-                new AssembleSignatureRequest(pdfB64, "document.pdf", params, Base64.getEncoder().encodeToString(signatureValue)),
-                AssembleSignatureResponse.class
-        );
-        assertThat(assembled).isNotNull();
+                new AssembleSignatureRequest(docB64, "report.docx", params, signatureValueB64),
+                AssembleSignatureResponse.class);
         assertThat(assembled.signedDocumentBase64()).isNotBlank();
+        assertThat(assembled.signedFileName()).isEqualTo("report.asice");
 
         ValidationResponseDto validated = http.postForObject(
                 "/api/validate",
                 new ValidationController.ValidateRequest(assembled.signedDocumentBase64()),
-                ValidationResponseDto.class
-        );
-        assertThat(validated).isNotNull();
+                ValidationResponseDto.class);
         assertThat(validated.signatureCount()).isEqualTo(1);
-        assertThat(validated.signatures()).hasSize(1);
-        assertThat(validated.signatures().get(0).signatureFormat()).contains("PAdES-BASELINE-B");
-        assertThat(validated.signatures().get(0).signedBy()).contains("eu-dss test signer");
+        assertThat(validated.signatures().get(0).signatureFormat()).contains("XAdES");
+        assertThat(validated.signatures().get(0).signedBy()).contains("eu-dss asic test signer");
     }
 }

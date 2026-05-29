@@ -133,7 +133,7 @@ class FullStackE2ETest {
 
         PrepareSignatureResponse prepared = http.postForObject(
                 "/api/sign/prepare",
-                new PrepareSignatureRequest(pdfB64, params),
+                new PrepareSignatureRequest(pdfB64, "document.pdf", params),
                 PrepareSignatureResponse.class
         );
         assertThat(prepared.dataToSignDigestBase64()).isNotBlank();
@@ -149,14 +149,14 @@ class FullStackE2ETest {
 
         AssembleSignatureResponse assembled = http.postForObject(
                 "/api/sign/assemble",
-                new AssembleSignatureRequest(pdfB64, params, signatureValueB64),
+                new AssembleSignatureRequest(pdfB64, "document.pdf", params, signatureValueB64),
                 AssembleSignatureResponse.class
         );
-        assertThat(assembled.signedPdfBase64()).isNotBlank();
+        assertThat(assembled.signedDocumentBase64()).isNotBlank();
 
         ValidationResponseDto validated = http.postForObject(
                 "/api/validate",
-                new ValidationController.ValidateRequest(assembled.signedPdfBase64()),
+                new ValidationController.ValidateRequest(assembled.signedDocumentBase64()),
                 ValidationResponseDto.class
         );
         assertThat(validated.signatureCount()).isEqualTo(1);

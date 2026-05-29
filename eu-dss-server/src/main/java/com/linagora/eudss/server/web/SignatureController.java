@@ -4,7 +4,7 @@ import com.linagora.eudss.server.dto.AssembleSignatureRequest;
 import com.linagora.eudss.server.dto.AssembleSignatureResponse;
 import com.linagora.eudss.server.dto.PrepareSignatureRequest;
 import com.linagora.eudss.server.dto.PrepareSignatureResponse;
-import com.linagora.eudss.server.service.PadesSigningService;
+import com.linagora.eudss.server.service.DocumentSigningService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -15,9 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/sign")
 public class SignatureController {
 
-    private final PadesSigningService service;
+    private final DocumentSigningService service;
 
-    public SignatureController(PadesSigningService service) {
+    public SignatureController(DocumentSigningService service) {
         this.service = service;
     }
 
