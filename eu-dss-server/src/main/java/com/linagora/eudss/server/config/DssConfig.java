@@ -1,5 +1,6 @@
 package com.linagora.eudss.server.config;
 
+import eu.europa.esig.dss.asic.xades.signature.ASiCWithXAdESService;
 import eu.europa.esig.dss.pades.signature.PAdESService;
 import eu.europa.esig.dss.service.crl.OnlineCRLSource;
 import eu.europa.esig.dss.service.http.commons.CommonsDataLoader;
@@ -113,6 +114,13 @@ public class DssConfig {
     @Bean
     public PAdESService padesService(CommonCertificateVerifier verifier, TSPSource tspSource) {
         PAdESService service = new PAdESService(verifier);
+        service.setTspSource(tspSource);
+        return service;
+    }
+
+    @Bean
+    public ASiCWithXAdESService asicWithXAdESService(CommonCertificateVerifier verifier, TSPSource tspSource) {
+        ASiCWithXAdESService service = new ASiCWithXAdESService(verifier);
         service.setTspSource(tspSource);
         return service;
     }
