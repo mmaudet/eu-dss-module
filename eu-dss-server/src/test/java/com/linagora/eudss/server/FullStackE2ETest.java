@@ -125,7 +125,7 @@ class FullStackE2ETest {
                 chain,
                 SignatureParamsDto.DigestAlgorithmDto.SHA256,
                 System.currentTimeMillis(),
-                SignatureParamsDto.SignatureLevelDto.PADES_BASELINE_B,
+                SignatureParamsDto.SignatureLevelDto.BASELINE_B,
                 "Full-stack test",
                 "Paris",
                 "eu-dss full-stack test"

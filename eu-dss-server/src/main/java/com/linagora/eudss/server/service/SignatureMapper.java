@@ -1,6 +1,8 @@
 package com.linagora.eudss.server.service;
 
 import com.linagora.eudss.server.dto.SignatureParamsDto;
+import eu.europa.esig.dss.asic.xades.ASiCWithXAdESSignatureParameters;
+import eu.europa.esig.dss.enumerations.ASiCContainerType;
 import eu.europa.esig.dss.enumerations.DigestAlgorithm;
 import eu.europa.esig.dss.enumerations.SignatureLevel;
 import eu.europa.esig.dss.model.x509.CertificateToken;
@@ -19,7 +21,7 @@ public final class SignatureMapper {
 
     public static PAdESSignatureParameters toPadesParams(SignatureParamsDto dto) {
         PAdESSignatureParameters params = new PAdESSignatureParameters();
-        params.setSignatureLevel(toDssLevel(dto.signatureLevelOrDefault()));
+        params.setSignatureLevel(toPadesLevel(dto.signatureLevelOrDefault()));
         params.setDigestAlgorithm(toDssDigest(dto.digestAlgorithm()));
         params.bLevel().setSigningDate(new Date(dto.signingTimeEpochMs()));
         if (dto.signatureReason() != null && !dto.signatureReason().isBlank()) {
@@ -46,12 +48,38 @@ public final class SignatureMapper {
         };
     }
 
-    public static SignatureLevel toDssLevel(SignatureParamsDto.SignatureLevelDto dto) {
+    public static ASiCWithXAdESSignatureParameters toAsicParams(SignatureParamsDto dto) {
+        ASiCWithXAdESSignatureParameters params = new ASiCWithXAdESSignatureParameters();
+        params.aSiC().setContainerType(ASiCContainerType.ASiC_E);
+        params.setSignatureLevel(toXadesLevel(dto.signatureLevelOrDefault()));
+        params.setDigestAlgorithm(toDssDigest(dto.digestAlgorithm()));
+        params.bLevel().setSigningDate(new Date(dto.signingTimeEpochMs()));
+
+        List<CertificateToken> chain = decodeChain(dto.certificateChainBase64());
+        params.setSigningCertificate(chain.get(0));
+        params.setCertificateChain(chain);
+        return params;
+    }
+
+    public static CertificateToken firstCertificate(List<String> chainBase64) {
+        return decodeChain(chainBase64).get(0);
+    }
+
+    public static SignatureLevel toPadesLevel(SignatureParamsDto.SignatureLevelDto dto) {
         return switch (dto) {
-            case PADES_BASELINE_B -> SignatureLevel.PAdES_BASELINE_B;
-            case PADES_BASELINE_T -> SignatureLevel.PAdES_BASELINE_T;
-            case PADES_BASELINE_LT -> SignatureLevel.PAdES_BASELINE_LT;
-            case PADES_BASELINE_LTA -> SignatureLevel.PAdES_BASELINE_LTA;
+            case BASELINE_B -> SignatureLevel.PAdES_BASELINE_B;
+            case BASELINE_T -> SignatureLevel.PAdES_BASELINE_T;
+            case BASELINE_LT -> SignatureLevel.PAdES_BASELINE_LT;
+            case BASELINE_LTA -> SignatureLevel.PAdES_BASELINE_LTA;
+        };
+    }
+
+    public static SignatureLevel toXadesLevel(SignatureParamsDto.SignatureLevelDto dto) {
+        return switch (dto) {
+            case BASELINE_B -> SignatureLevel.XAdES_BASELINE_B;
+            case BASELINE_T -> SignatureLevel.XAdES_BASELINE_T;
+            case BASELINE_LT -> SignatureLevel.XAdES_BASELINE_LT;
+            case BASELINE_LTA -> SignatureLevel.XAdES_BASELINE_LTA;
         };
     }
 

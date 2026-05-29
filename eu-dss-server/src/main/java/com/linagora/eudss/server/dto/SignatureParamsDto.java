@@ -15,7 +15,7 @@ public record SignatureParamsDto(
         String signerName
 ) {
     public SignatureLevelDto signatureLevelOrDefault() {
-        return signatureLevel != null ? signatureLevel : SignatureLevelDto.PADES_BASELINE_T;
+        return signatureLevel != null ? signatureLevel : SignatureLevelDto.BASELINE_T;
     }
 
     public enum DigestAlgorithmDto {
@@ -23,6 +23,6 @@ public record SignatureParamsDto(
     }
 
     public enum SignatureLevelDto {
-        PADES_BASELINE_B, PADES_BASELINE_T, PADES_BASELINE_LT, PADES_BASELINE_LTA
+        BASELINE_B, BASELINE_T, BASELINE_LT, BASELINE_LTA
     }
 }

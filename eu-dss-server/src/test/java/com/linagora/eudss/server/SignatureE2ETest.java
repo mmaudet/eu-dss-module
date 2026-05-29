@@ -47,7 +47,7 @@ class SignatureE2ETest {
                 List.of(certB64),
                 SignatureParamsDto.DigestAlgorithmDto.SHA256,
                 System.currentTimeMillis(),
-                SignatureParamsDto.SignatureLevelDto.PADES_BASELINE_B,
+                SignatureParamsDto.SignatureLevelDto.BASELINE_B,
                 "Test signing",
                 "Paris",
                 "eu-dss test signer"
