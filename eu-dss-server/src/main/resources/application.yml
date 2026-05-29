@@ -1,0 +1,25 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: eu-dss-server
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 100MB
+
+eudss:
+  lotl:
+    enabled: true   # set false (or EUDSS_LOTL_ENABLED=false) to skip the EU LOTL download at startup
+  tsa:
+    url: https://freetsa.org/tsr
+  cors:
+    allowed-origins:
+      - http://localhost:5173
+      - http://localhost:3000
+
+logging:
+  level:
+    eu.europa.esig.dss: INFO
+    com.linagora.eudss: DEBUG

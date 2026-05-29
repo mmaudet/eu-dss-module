@@ -1,0 +1,30 @@
+target/
+*.class
+*.jar
+*.war
+.idea/
+*.iml
+.vscode/
+.DS_Store
+
+# Node / React
+node_modules/
+dist/
+build/
+
+# Local secrets / certs (never commit)
+*.p12
+*.pfx
+*.pem
+*.key
+# Exception: PUBLIC keystore (DSS demo EU LOTL "Official Journal" CA certs only, password
+# "dss-password") required to bootstrap trusted-list validation — must be committed.
+!eu-dss-server/src/main/resources/lotl-keystore.p12
+application-local.yml
+application-local.properties
+.env
+.env.local
+
+# Logs
+*.log
+logs/
