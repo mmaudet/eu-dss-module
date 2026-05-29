@@ -88,4 +88,44 @@ class SignatureE2ETest {
         assertThat(validated.signatures().get(0).signatureFormat()).contains("PAdES-BASELINE-B");
         assertThat(validated.signatures().get(0).signedBy()).contains("eu-dss test signer");
     }
+
+    @Test
+    void co_signature_adds_a_second_independent_signature() throws Exception {
+        String signedOnce = signPdfOnce(Base64.getEncoder().encodeToString(pdfBytes));
+        String signedTwice = signPdfOnce(signedOnce);
+
+        ValidationResponseDto validated = http.postForObject(
+                "/api/validate",
+                new ValidationController.ValidateRequest(signedTwice),
+                ValidationResponseDto.class);
+        assertThat(validated.signatureCount()).isEqualTo(2);
+    }
+
+    /** Runs prepare -> sign-with-TestPki -> assemble for a base64 PDF, returns the signed PDF base64. */
+    private String signPdfOnce(String pdfB64) throws Exception {
+        String certB64 = Base64.getEncoder().encodeToString(pki.certificate().getEncoded());
+        SignatureParamsDto params = new SignatureParamsDto(
+                List.of(certB64),
+                SignatureParamsDto.DigestAlgorithmDto.SHA256,
+                System.currentTimeMillis(),
+                SignatureParamsDto.SignatureLevelDto.BASELINE_B,
+                "Co-sign test", "Paris", "eu-dss test signer");
+
+        PrepareSignatureResponse prepared = http.postForObject(
+                "/api/sign/prepare",
+                new PrepareSignatureRequest(pdfB64, "document.pdf", params),
+                PrepareSignatureResponse.class);
+
+        byte[] dataToSign = Base64.getDecoder().decode(prepared.dataToSignBase64());
+        Signature signer = Signature.getInstance("SHA256withRSA");
+        signer.initSign(pki.privateKey());
+        signer.update(dataToSign);
+        String signatureValueB64 = Base64.getEncoder().encodeToString(signer.sign());
+
+        AssembleSignatureResponse assembled = http.postForObject(
+                "/api/sign/assemble",
+                new AssembleSignatureRequest(pdfB64, "document.pdf", params, signatureValueB64),
+                AssembleSignatureResponse.class);
+        return assembled.signedDocumentBase64();
+    }
 }
