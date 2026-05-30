@@ -1,0 +1,29 @@
+name: Windows installer (MSI)
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+
+jobs:
+  build-msi:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Build agent jar
+        run: mvn -B -f pom.xml -pl eu-dss-agent -am -DskipTests package
+      - name: Install WiX 3
+        run: choco install wixtoolset --version=3.14.1 -y --no-progress
+      - name: Build MSI (jpackage)
+        shell: pwsh
+        run: ./packaging/windows/build-agent-msi.ps1
+      - name: Upload MSI
+        uses: actions/upload-artifact@v4
+        with:
+          name: eu-dss-agent-msi
+          path: dist/*.msi
+          if-no-files-found: error
