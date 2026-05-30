@@ -17,14 +17,24 @@ public final class AgentMain {
 
     private static final Logger LOG = LoggerFactory.getLogger(AgentMain.class);
 
+    private static final char[] TLS_KEYSTORE_PASSWORD =
+            System.getenv().getOrDefault("EUDSS_AGENT_TLS_PASSWORD", "eudss-agent").toCharArray();
+
     public static void main(String[] args) {
         AgentConfig config = AgentConfig.load();
         TokenService tokenService = new TokenService(config);
         Runtime.getRuntime().addShutdownHook(new Thread(tokenService::close, "token-close"));
 
         Javalin app = buildApp(config, tokenService);
-        app.start(config.port());
-        LOG.info("eu-dss agent listening on http://localhost:{} (CORS hosts: {})", config.port(), config.corsHosts());
+        if (config.tlsEnabled()) {
+            app.start();
+            LOG.info("eu-dss agent listening on https://localhost:{} (TLS, self-signed) — CORS {}",
+                    config.port(), config.corsHosts());
+        } else {
+            app.start(config.port());
+            LOG.info("eu-dss agent listening on http://localhost:{} (no TLS) — CORS {}",
+                    config.port(), config.corsHosts());
+        }
     }
 
     public static Javalin buildApp(AgentConfig config, TokenService tokenService) {
@@ -33,7 +43,24 @@ public final class AgentMain {
                 config.corsHosts().forEach(rule::allowHost);
             }));
             cfg.showJavalinBanner = false;
+            if (config.tlsEnabled()) {
+                try {
+                    java.nio.file.Path ks = com.linagora.eudss.agent.tls.AgentTls.defaultKeystorePath();
+                    com.linagora.eudss.agent.tls.AgentTls.ensureKeystore(ks, TLS_KEYSTORE_PASSWORD);
+                    cfg.registerPlugin(new io.javalin.community.ssl.SslPlugin(ssl -> {
+                        ssl.keystoreFromPath(ks.toString(), new String(TLS_KEYSTORE_PASSWORD));
+                        ssl.insecure = false;
+                        ssl.secure = true;
+                        ssl.securePort = config.port();
+                        ssl.http2 = false;
+                    }));
+                } catch (Exception e) {
+                    throw new IllegalStateException("Failed to set up agent TLS keystore", e);
+                }
+            }
         });
+
+        app.before(ctx -> ctx.header("Access-Control-Allow-Private-Network", "true"));
 
         app.get("/rest/health", ctx -> ctx.json(Map.of("status", "ok")));
 

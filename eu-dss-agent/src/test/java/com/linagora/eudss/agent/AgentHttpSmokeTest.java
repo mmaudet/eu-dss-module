@@ -34,7 +34,8 @@ class AgentHttpSmokeTest {
                 0,
                 0,
                 List.of("localhost:5173"),
-                "0000".toCharArray()
+                "0000".toCharArray(),
+                false
         );
         TokenService stub = new TokenService(cfg) {
             @Override

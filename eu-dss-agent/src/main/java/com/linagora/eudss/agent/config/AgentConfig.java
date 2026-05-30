@@ -11,7 +11,8 @@ public record AgentConfig(
         int slotListIndex,
         int port,
         List<String> corsHosts,
-        char[] pin
+        char[] pin,
+        boolean tlsEnabled
 ) {
     private static final String DEFAULT_DRIVER_MAC = "/Library/SCMiddleware/libidop11.dylib";
     private static final String DEFAULT_DRIVER_LINUX = "/usr/lib/libidop11.so";
@@ -29,12 +30,14 @@ public record AgentConfig(
         int port = Integer.parseInt(env.getOrDefault("EUDSS_AGENT_PORT", "9795"));
         String origins = env.getOrDefault("EUDSS_CORS_HOSTS",
                 "localhost:5173,localhost:8080,localhost:4173");
+        boolean tls = !"false".equalsIgnoreCase(env.getOrDefault("EUDSS_AGENT_TLS", "true"));
         return new AgentConfig(
                 Path.of(driver),
                 slot,
                 port,
                 Arrays.stream(origins.split(",")).map(String::trim).filter(s -> !s.isBlank()).toList(),
-                pin
+                pin,
+                tls
         );
     }
 

@@ -28,10 +28,21 @@
             <artifactId>dss-utils-apache-commons</artifactId>
         </dependency>
 
+        <!-- TLS: self-signed cert generation (BouncyCastle) -->
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcpkix-jdk18on</artifactId>
+        </dependency>
+
         <!-- Javalin = lightweight embedded HTTP server -->
         <dependency>
             <groupId>io.javalin</groupId>
             <artifactId>javalin</artifactId>
+            <version>${javalin.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.javalin.community.ssl</groupId>
+            <artifactId>ssl-plugin</artifactId>
             <version>${javalin.version}</version>
         </dependency>
         <dependency>

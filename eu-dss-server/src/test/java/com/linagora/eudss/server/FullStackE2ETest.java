@@ -63,7 +63,8 @@ class FullStackE2ETest {
                 0,
                 0,
                 List.of("localhost"),
-                "0000".toCharArray()
+                "0000".toCharArray(),
+                false
         );
         TokenService tokenStub = new TokenService(cfg) {
             @Override
