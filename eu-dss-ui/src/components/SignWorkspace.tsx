@@ -133,8 +133,12 @@ export function SignWorkspace() {
         {agentStatus === 'checking' && <div className="status info">Vérification…</div>}
         {agentStatus === 'unavailable' && (
           <div className="status warn">
-            Agent local introuvable. Lance l'agent puis{' '}
-            <button onClick={checkAgent} style={{ marginLeft: 4 }}>recharger</button>.
+            <strong>Agent local non joignable.</strong> Première utilisation : l'agent tourne en HTTPS avec un certificat auto-signé qu'il faut accepter une fois.
+            <ol style={{ margin: '8px 0 0 18px' }}>
+              <li>Lance l'agent local (clé USB branchée, PIN saisi).</li>
+              <li>Ouvre <a href="https://localhost:9795/rest/health" target="_blank" rel="noreferrer">https://localhost:9795/rest/health</a> et accepte le certificat de l'agent.</li>
+              <li>Reviens ici et <button onClick={checkAgent} style={{ marginLeft: 2 }}>recharger</button>.</li>
+            </ol>
           </div>
         )}
         {agentStatus === 'available' && certificates.length === 0 && (
