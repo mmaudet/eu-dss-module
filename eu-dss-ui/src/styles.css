@@ -73,3 +73,10 @@ th { background: #fafafa; font-weight: 600; }
 
 code { background: #f0f0f0; padding: 1px 6px; border-radius: 3px; font-size: 0.85em; }
 .muted { color: #999; font-size: 0.85rem; }
+
+.badge { background: #e7f0fa; color: #003399; border-radius: 10px; padding: 1px 8px; font-size: 0.8rem; }
+.status-inline { font-size: 0.85rem; }
+.status-inline.ok { color: #1a6e1a; }
+.status-inline.error { color: #a00; }
+.status-inline.info { color: #003399; }
+table button { font-size: 0.85rem; padding: 0.3rem 0.6rem; cursor: pointer; }
