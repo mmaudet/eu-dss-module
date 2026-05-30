@@ -123,7 +123,8 @@ export function SignWorkspace() {
   }
 
   const signedDocs = docs.filter((d) => d.status === 'signed' && d.signed);
-  const canSign = agentStatus === 'available' && !!selectedKeyId && docs.length > 0 && !busy;
+  const pendingCount = docs.filter((d) => d.status !== 'signed').length;
+  const canSign = agentStatus === 'available' && !!selectedKeyId && pendingCount > 0 && !busy;
 
   return (
     <div>
@@ -219,7 +220,7 @@ export function SignWorkspace() {
 
       <div className="card">
         <button className="primary" disabled={!canSign} onClick={() => void signAll()}>
-          {busy ? 'Signature en cours…' : `Signer tout (${docs.filter((d) => d.status !== 'signed').length})`}
+          {busy ? 'Signature en cours…' : `Signer tout (${pendingCount})`}
         </button>{' '}
         <button disabled={signedDocs.length === 0 || busy}
           onClick={() => downloadZip(signedDocs.map((d) => ({ name: d.signed!.fileName, base64: d.signed!.base64 })), 'documents-signes.zip')}>
