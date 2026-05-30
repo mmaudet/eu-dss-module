@@ -1,11 +1,7 @@
 const BASE = '/api';
 
 export type DigestAlgo = 'SHA256' | 'SHA384' | 'SHA512';
-export type SignatureLevel =
-  | 'PADES_BASELINE_B'
-  | 'PADES_BASELINE_T'
-  | 'PADES_BASELINE_LT'
-  | 'PADES_BASELINE_LTA';
+export type SignatureLevel = 'BASELINE_B' | 'BASELINE_T' | 'BASELINE_LT' | 'BASELINE_LTA';
 
 export interface SignatureParams {
   certificateChainBase64: string[];
@@ -23,7 +19,9 @@ export interface PrepareResponse {
 }
 
 export interface AssembleResponse {
-  signedPdfBase64: string;
+  signedDocumentBase64: string;
+  signedFileName: string;
+  mediaType: string;
 }
 
 export interface SignatureSummary {
@@ -55,12 +53,16 @@ async function postJson<T>(path: string, body: unknown): Promise<T> {
 }
 
 export const backendApi = {
-  prepare: (pdfBase64: string, params: SignatureParams) =>
-    postJson<PrepareResponse>('/sign/prepare', { pdfBase64, params }),
+  prepare: (documentBase64: string, documentName: string, params: SignatureParams) =>
+    postJson<PrepareResponse>('/sign/prepare', { documentBase64, documentName, params }),
 
-  assemble: (pdfBase64: string, params: SignatureParams, signatureValueBase64: string) =>
-    postJson<AssembleResponse>('/sign/assemble', { pdfBase64, params, signatureValueBase64 }),
+  assemble: (
+    documentBase64: string,
+    documentName: string,
+    params: SignatureParams,
+    signatureValueBase64: string,
+  ) => postJson<AssembleResponse>('/sign/assemble', { documentBase64, documentName, params, signatureValueBase64 }),
 
-  validate: (pdfBase64: string) =>
-    postJson<ValidationResponse>('/validate', { pdfBase64 }),
+  validate: (documentBase64: string) =>
+    postJson<ValidationResponse>('/validate', { documentBase64 }),
 };
