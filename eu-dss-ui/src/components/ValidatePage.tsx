@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { backendApi, ValidationResponse } from '../services/backendApi';
-import { fileToBase64 } from '../services/pdfUtils';
+import { fileToBase64 } from '../services/fileUtils';
 
 export function ValidatePage() {
   const [file, setFile] = useState<File | null>(null);
@@ -27,10 +27,10 @@ export function ValidatePage() {
   return (
     <div>
       <div className="card">
-        <h2>PDF signé à vérifier</h2>
+        <h2>Document signé à vérifier</h2>
         <input
           type="file"
-          accept="application/pdf"
+          accept=".pdf,.asice,.scs,.sce,.p7s,.xml,.docx,.xlsx,.odt"
           onChange={(e) => {
             setFile(e.target.files?.[0] ?? null);
             setResult(null);
