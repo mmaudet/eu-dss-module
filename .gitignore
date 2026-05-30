@@ -28,3 +28,7 @@ application-local.properties
 # Logs
 *.log
 logs/
+.gstack/
+
+# TS build cache
+*.tsbuildinfo
