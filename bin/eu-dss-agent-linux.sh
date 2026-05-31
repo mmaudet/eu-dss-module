@@ -13,7 +13,7 @@ fi
 : "${EUDSS_PKCS11_DRIVER:=/usr/lib/libidop11.so}"
 : "${EUDSS_PKCS11_SLOT:=0}"
 : "${EUDSS_AGENT_PORT:=9795}"
-: "${EUDSS_CORS_HOSTS:=localhost:5173,localhost:8080,localhost:4173}"
+: "${EUDSS_CORS_HOSTS:=http://localhost:5173,http://localhost:8080,http://localhost:4173}"
 
 export EUDSS_PKCS11_DRIVER EUDSS_PKCS11_SLOT EUDSS_AGENT_PORT EUDSS_CORS_HOSTS
 

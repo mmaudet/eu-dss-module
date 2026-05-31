@@ -29,7 +29,7 @@ public record AgentConfig(
         int slot = Integer.parseInt(env.getOrDefault("EUDSS_PKCS11_SLOT", "0"));
         int port = Integer.parseInt(env.getOrDefault("EUDSS_AGENT_PORT", "9795"));
         String origins = env.getOrDefault("EUDSS_CORS_HOSTS",
-                "localhost:5173,localhost:8080,localhost:4173");
+                "http://localhost:5173,http://localhost:8080,http://localhost:4173");
         boolean tls = !"false".equalsIgnoreCase(env.getOrDefault("EUDSS_AGENT_TLS", "true"));
         return new AgentConfig(
                 Path.of(driver),
