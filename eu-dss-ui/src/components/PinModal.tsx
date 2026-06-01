@@ -20,7 +20,7 @@ export function PinModal({ open, busy, errorMessage, onSubmit, onCancel }: PinMo
   }
 
   return (
-    <div className="modal-overlay" role="dialog" aria-modal="true" aria-label="Saisie du PIN">
+    <div className="modal-overlay" role="dialog" aria-modal="true" aria-label="Saisie du PIN" tabIndex={-1} onKeyDown={(e) => { if (e.key === 'Escape' && !busy) onCancel(); }}>
       <div className="modal-card">
         <h3>Déverrouiller la clé de signature</h3>
         <p className="muted">Saisissez le PIN de votre carte pour signer.</p>
@@ -34,9 +34,10 @@ export function PinModal({ open, busy, errorMessage, onSubmit, onCancel }: PinMo
             onChange={(e) => setPin(e.target.value)}
             placeholder="PIN"
             style={{ width: '100%', fontSize: 18, letterSpacing: 4 }}
+            aria-describedby="pin-warning"
           />
           {errorMessage && <div className="status error" style={{ marginTop: 8 }}>{errorMessage}</div>}
-          <div className="status warn" style={{ marginTop: 8 }}>
+          <div id="pin-warning" className="status warn" style={{ marginTop: 8 }}>
             ⚠ Attention : un PIN erroné plusieurs fois (≈3) <strong>bloque la carte</strong>.
           </div>
           <div style={{ marginTop: 12, display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
