@@ -44,6 +44,8 @@ public final class AgentTls {
             return Path.of(envKeystore);
         }
         if (osName.toLowerCase().contains("win")) {
+            // Literal '\' via string-concat (NOT Path.of varargs): produces a correct Windows path
+            // even when resolved on a non-Windows JVM (CI/tests run on macOS/Linux).
             return Path.of(programData + "\\eudss-agent\\agent-keystore.p12");
         }
         return Path.of(userHome, ".eudss-agent", "agent-keystore.p12");

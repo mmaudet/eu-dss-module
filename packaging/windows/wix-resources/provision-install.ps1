@@ -6,6 +6,7 @@ $cer = Join-Path $dataDir 'agent.cer'
 
 # 1. Generate keystore + export agent.cer (agent writes to C:\ProgramData\eudss-agent on Windows)
 & "$exe" --provision-cert | Out-Null
+if ($LASTEXITCODE -ne 0) { throw "provision-cert exited $LASTEXITCODE" }
 if (-not (Test-Path $cer)) { throw "provision-cert did not produce $cer" }
 
 # 2. Trust the cert machine-wide (Edge/Chrome/IE use LocalMachine\Root)
