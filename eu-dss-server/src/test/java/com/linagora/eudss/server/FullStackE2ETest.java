@@ -63,10 +63,17 @@ class FullStackE2ETest {
                 0,
                 0,
                 List.of("localhost"),
-                "0000".toCharArray(),
-                false
+                null,
+                false,
+                300
         );
         TokenService tokenStub = new TokenService(cfg) {
+            @Override public synchronized void unlock(char[] pin) { }
+            @Override public synchronized void lock() { }
+            @Override public synchronized boolean isUnlocked() { return true; }
+            @Override public synchronized Long expiresInSeconds() { return 300L; }
+            @Override public synchronized void touch() { }
+
             @Override
             public List<CertificateInfo> listCertificates() {
                 try {
