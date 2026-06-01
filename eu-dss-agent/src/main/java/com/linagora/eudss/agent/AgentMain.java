@@ -3,6 +3,9 @@ package com.linagora.eudss.agent;
 import com.linagora.eudss.agent.config.AgentConfig;
 import com.linagora.eudss.agent.dto.SignDigestRequest;
 import com.linagora.eudss.agent.dto.SignDigestResponse;
+import com.linagora.eudss.agent.dto.StatusResponse;
+import com.linagora.eudss.agent.dto.UnlockRequest;
+import com.linagora.eudss.agent.service.LockedException;
 import com.linagora.eudss.agent.service.TokenService;
 import eu.europa.esig.dss.enumerations.DigestAlgorithm;
 import io.javalin.Javalin;
@@ -25,23 +28,30 @@ public final class AgentMain {
         TokenService tokenService = new TokenService(config);
         Runtime.getRuntime().addShutdownHook(new Thread(tokenService::close, "token-close"));
 
+        if (config.headless()) {
+            try {
+                tokenService.unlock(config.pin().clone()); // clone: unlock zeroizes the array it gets
+                LOG.info("Headless mode: token auto-unlocked from EUDSS_AGENT_PIN (no idle-lock).");
+            } catch (Exception e) {
+                LOG.warn("Headless auto-unlock failed; agent starts LOCKED: {}", e.getMessage());
+            }
+        }
+
         Javalin app = buildApp(config, tokenService);
         if (config.tlsEnabled()) {
             app.start();
-            LOG.info("eu-dss agent listening on https://localhost:{} (TLS, self-signed) — CORS {}",
-                    config.port(), config.corsHosts());
+            LOG.info("eu-dss agent listening on https://localhost:{} (TLS) mode={} CORS {}",
+                    config.port(), config.mode(), config.corsHosts());
         } else {
             app.start(config.port());
-            LOG.info("eu-dss agent listening on http://localhost:{} (no TLS) — CORS {}",
-                    config.port(), config.corsHosts());
+            LOG.info("eu-dss agent listening on http://localhost:{} (no TLS) mode={} CORS {}",
+                    config.port(), config.mode(), config.corsHosts());
         }
     }
 
     public static Javalin buildApp(AgentConfig config, TokenService tokenService) {
         Javalin app = Javalin.create(cfg -> {
-            cfg.bundledPlugins.enableCors(cors -> cors.addRule(rule -> {
-                config.corsHosts().forEach(rule::allowHost);
-            }));
+            cfg.bundledPlugins.enableCors(cors -> cors.addRule(rule -> config.corsHosts().forEach(rule::allowHost)));
             cfg.showJavalinBanner = false;
             if (config.tlsEnabled()) {
                 try {
@@ -64,15 +74,37 @@ public final class AgentMain {
 
         app.get("/rest/health", ctx -> ctx.json(Map.of("status", "ok")));
 
+        app.get("/rest/status", ctx -> ctx.json(new StatusResponse(
+                tokenService.isUnlocked(), tokenService.expiresInSeconds(), config.mode())));
+
+        app.post("/rest/unlock", ctx -> {
+            UnlockRequest req = ctx.bodyAsClass(UnlockRequest.class);
+            if (req.pin() == null || req.pin().isEmpty()) {
+                ctx.status(HttpStatus.BAD_REQUEST).json(Map.of("error", "bad_request", "message", "pin required"));
+                return;
+            }
+            char[] pin = req.pin().toCharArray();
+            try {
+                tokenService.unlock(pin);
+                ctx.json(new StatusResponse(true, tokenService.expiresInSeconds(), config.mode()));
+            } catch (Exception e) {
+                mapTokenError(ctx, e);
+            }
+        });
+
+        app.post("/rest/lock", ctx -> {
+            tokenService.lock();
+            ctx.json(Map.of("status", "locked"));
+        });
+
         app.get("/rest/certificates", ctx -> {
             try {
                 ctx.json(Map.of("certificates", tokenService.listCertificates()));
+            } catch (LockedException e) {
+                locked(ctx);
             } catch (Exception e) {
                 LOG.error("Failed to list certificates", e);
-                ctx.status(HttpStatus.SERVICE_UNAVAILABLE).json(Map.of(
-                        "error", "token_unavailable",
-                        "message", e.getMessage() == null ? e.getClass().getSimpleName() : e.getMessage()
-                ));
+                mapTokenError(ctx, e);
             }
         });
 
@@ -83,20 +115,46 @@ public final class AgentMain {
                 DigestAlgorithm algo = DigestAlgorithm.valueOf(req.digestAlgorithm());
                 byte[] sigValue = tokenService.signDigest(req.keyId(), digest, algo);
                 ctx.json(new SignDigestResponse(Base64.getEncoder().encodeToString(sigValue)));
+            } catch (LockedException e) {
+                locked(ctx);
             } catch (IllegalArgumentException e) {
-                ctx.status(HttpStatus.BAD_REQUEST).json(Map.of("error", "bad_request", "message", e.getMessage()));
+                ctx.status(HttpStatus.BAD_REQUEST).json(Map.of("error", "bad_request", "message", String.valueOf(e.getMessage())));
             } catch (Exception e) {
                 LOG.error("Sign failure", e);
-                ctx.status(HttpStatus.INTERNAL_SERVER_ERROR).json(Map.of("error", "sign_failed", "message", e.getMessage()));
+                mapTokenError(ctx, e);
             }
         });
 
         app.exception(Exception.class, (e, ctx) -> {
             LOG.error("Unhandled error", e);
-            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR).json(Map.of("error", "internal", "message", e.getMessage()));
+            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR).json(Map.of("error", "internal", "message", String.valueOf(e.getMessage())));
         });
 
         return app;
+    }
+
+    private static void locked(io.javalin.http.Context ctx) {
+        ctx.status(HttpStatus.UNAUTHORIZED).json(Map.of("error", "locked", "message", "PIN required: call /rest/unlock"));
+    }
+
+    /** Best-effort PKCS#11 error mapping; never auto-retries. */
+    private static void mapTokenError(io.javalin.http.Context ctx, Exception e) {
+        String msg = deepMessage(e);
+        if (msg.contains("CKR_PIN_INCORRECT")) {
+            ctx.status(HttpStatus.UNAUTHORIZED).json(Map.of("error", "pin_incorrect", "message", "Incorrect PIN"));
+        } else if (msg.contains("CKR_PIN_LOCKED") || msg.contains("CKR_PIN_EXPIRED")) {
+            ctx.status(HttpStatus.LOCKED).json(Map.of("error", "pin_locked", "message", "Card PIN is locked"));
+        } else {
+            ctx.status(HttpStatus.SERVICE_UNAVAILABLE).json(Map.of("error", "token_unavailable", "message", msg));
+        }
+    }
+
+    private static String deepMessage(Throwable t) {
+        StringBuilder sb = new StringBuilder();
+        for (Throwable c = t; c != null && c != c.getCause(); c = c.getCause()) {
+            if (c.getMessage() != null) sb.append(c.getMessage()).append(" | ");
+        }
+        return sb.toString();
     }
 
     private AgentMain() {}
