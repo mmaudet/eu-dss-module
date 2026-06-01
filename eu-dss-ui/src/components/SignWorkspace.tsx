@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { agentApi, AgentCertificate, AgentError, AgentSessionStatus } from '../services/agentApi';
 import { backendApi, SignatureParams } from '../services/backendApi';
 import { downloadBase64, downloadZip, fileToBase64 } from '../services/fileUtils';
@@ -34,6 +34,7 @@ export function SignWorkspace() {
   const [pinError, setPinError] = useState<string | undefined>();
   // resolver for the unlock promise the signing flow awaits
   const [pinResolver, setPinResolver] = useState<{ resolve: (certs: AgentCertificate[]) => void; reject: (e: Error) => void } | null>(null);
+  const checkingRef = useRef(false); // anti-rafale: ignore a re-check while one is in flight
 
   useEffect(() => {
     void checkAgent();
@@ -41,7 +42,7 @@ export function SignWorkspace() {
 
   // Re-check when the user returns to the tab (e.g. after installing/launching the agent).
   useEffect(() => {
-    const recheck = () => { if (!pinOpen && !busy) void checkAgent(); };
+    const recheck = () => { if (!pinOpen && !busy && !document.hidden) void checkAgent(); };
     window.addEventListener('focus', recheck);
     document.addEventListener('visibilitychange', recheck);
     return () => {
@@ -51,16 +52,22 @@ export function SignWorkspace() {
   }, [pinOpen, busy]);
 
   async function checkAgent() {
-    setAgentStatus('checking');
-    const ok = await agentApi.isAvailable();
-    if (!ok) { setAgentStatus('unavailable'); return; }
-    setAgentStatus('available');
+    if (checkingRef.current) return;
+    checkingRef.current = true;
     try {
-      const st = await agentApi.getStatus();
-      setStatus(st);
-      if (st.unlocked) await loadCertificates();
-    } catch {
-      setStatus(null);
+      setAgentStatus('checking');
+      const ok = await agentApi.isAvailable();
+      if (!ok) { setAgentStatus('unavailable'); return; }
+      setAgentStatus('available');
+      try {
+        const st = await agentApi.getStatus();
+        setStatus(st);
+        if (st.unlocked) await loadCertificates();
+      } catch {
+        setStatus(null);
+      }
+    } finally {
+      checkingRef.current = false;
     }
   }
 
