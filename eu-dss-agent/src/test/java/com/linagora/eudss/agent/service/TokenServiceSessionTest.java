@@ -74,4 +74,14 @@ class TokenServiceSessionTest {
         Thread.sleep(1300);
         assertThat(t.isUnlocked()).isTrue(); // no idle lock in headless mode
     }
+
+    @Test
+    void touch_extends_idle_window() throws Exception {
+        FakeTokenService t = new FakeTokenService(cfg(2, null)); // 2s TTL
+        t.unlock("1234".toCharArray());
+        Thread.sleep(1200);
+        t.touch();               // reset timer at ~1.2s -> expires ~3.2s
+        Thread.sleep(1200);      // now ~2.4s since unlock: would have expired at 2.0s without touch
+        assertThat(t.isUnlocked()).isTrue();
+    }
 }

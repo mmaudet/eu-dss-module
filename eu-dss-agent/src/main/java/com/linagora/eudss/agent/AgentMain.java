@@ -30,7 +30,7 @@ public final class AgentMain {
 
         if (config.headless()) {
             try {
-                tokenService.unlock(config.pin().clone()); // clone: unlock zeroizes the array it gets
+                tokenService.unlock(config.pin().clone()); // headless auto-unlock; PIN intentionally retained for the agent lifetime (no UI to re-prompt)
                 LOG.info("Headless mode: token auto-unlocked from EUDSS_AGENT_PIN (no idle-lock).");
             } catch (Exception e) {
                 LOG.warn("Headless auto-unlock failed; agent starts LOCKED: {}", e.getMessage());
@@ -154,7 +154,7 @@ public final class AgentMain {
         for (Throwable c = t; c != null && c != c.getCause(); c = c.getCause()) {
             if (c.getMessage() != null) sb.append(c.getMessage()).append(" | ");
         }
-        return sb.toString();
+        return sb.toString().replaceAll(" \\| $", "");
     }
 
     private AgentMain() {}

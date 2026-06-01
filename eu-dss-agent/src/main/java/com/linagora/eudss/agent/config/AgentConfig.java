@@ -32,7 +32,7 @@ public record AgentConfig(
         String origins = env.getOrDefault("EUDSS_CORS_HOSTS",
                 "http://localhost:5173,http://localhost:8080,http://localhost:4173");
         boolean tls = !"false".equalsIgnoreCase(env.getOrDefault("EUDSS_AGENT_TLS", "true"));
-        int ttl = Integer.parseInt(env.getOrDefault("EUDSS_PIN_SESSION_TTL", "300"));
+        int ttl = Math.max(1, Integer.parseInt(env.getOrDefault("EUDSS_PIN_SESSION_TTL", "300")));
         String envPin = env.get("EUDSS_AGENT_PIN");
         char[] pin = (envPin != null && !envPin.isBlank()) ? envPin.toCharArray() : null;
         return new AgentConfig(

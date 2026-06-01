@@ -17,7 +17,6 @@ import java.security.KeyStore;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -46,6 +45,7 @@ public class TokenService implements AutoCloseable {
     protected void doOpenAndLogin(char[] pin) {
         Pkcs11SignatureToken t = new Pkcs11SignatureToken(
                 config.pkcs11Driver().toString(),
+                // NOTE: KeyStore.PasswordProtection keeps an internal PIN copy; not destroyed here because the SunPKCS11 callback may be reused on sign. Known JDK limitation; acceptable for a localhost agent.
                 new PrefilledPasswordCallback(new KeyStore.PasswordProtection(pin)),
                 -1,
                 config.slotListIndex(),
@@ -63,6 +63,11 @@ public class TokenService implements AutoCloseable {
     }
 
     public synchronized void unlock(char[] pin) {
+        if (token != null) {                 // I2: close a prior real session before reopening
+            if (idleTask != null) { idleTask.cancel(false); idleTask = null; }
+            doClose();
+            token = null;
+        }
         try {
             LOG.info("Unlocking PKCS#11 token: driver={} slotListIndex={}", config.pkcs11Driver(), config.slotListIndex());
             doOpenAndLogin(pin);
@@ -105,7 +110,7 @@ public class TokenService implements AutoCloseable {
         expiresAtEpochMs = 0;
     }
 
-    private Pkcs11SignatureToken requireUnlocked() {
+    private synchronized Pkcs11SignatureToken requireUnlocked() {
         if (!isUnlocked()) throw new LockedException();
         return token;
     }
@@ -121,7 +126,7 @@ public class TokenService implements AutoCloseable {
         DSSPrivateKeyEntry key = t.getKeys().stream()
                 .filter(k -> keyId.equals(aliasOf(k)))
                 .findFirst()
-                .orElseThrow(() -> new NoSuchElementException("Unknown keyId: " + keyId));
+                .orElseThrow(() -> new IllegalArgumentException("Unknown keyId: " + keyId));
         SignatureValue sv = t.signDigest(new Digest(algorithm, digestBytes), key);
         touch();
         return sv.getValue();

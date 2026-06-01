@@ -134,4 +134,12 @@ class AgentHttpSmokeTest {
         assertThat(res.statusCode()).isEqualTo(401);
         assertThat(res.body()).contains("\"error\":\"pin_incorrect\"");
     }
+
+    @Test
+    void sign_unknown_key_returns_400_when_unlocked() throws Exception {
+        post("/rest/unlock", "{\"pin\":\"1234\"}");
+        String body = json.writeValueAsString(java.util.Map.of(
+                "keyId", "missing", "digestBase64", "AA==", "digestAlgorithm", "SHA256"));
+        assertThat(post("/rest/sign", body).statusCode()).isEqualTo(400);
+    }
 }
