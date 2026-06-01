@@ -29,7 +29,24 @@ public final class AgentTls {
     private static final long YEAR_MS = 365L * 24 * 60 * 60 * 1000;
 
     public static Path defaultKeystorePath() {
-        return Path.of(System.getProperty("user.home"), ".eudss-agent", "agent-keystore.p12");
+        return defaultKeystorePath(
+                System.getProperty("os.name", ""),
+                System.getProperty("user.home", ""),
+                System.getenv().getOrDefault("ProgramData", "C:\\ProgramData"),
+                System.getenv("EUDSS_AGENT_KEYSTORE"));
+    }
+
+    /** Pure resolution (visible for tests). Windows → machine-wide ProgramData so the MSI
+     *  (SYSTEM) and the user-launched agent share one keystore; other OS → user home. Override via
+     *  EUDSS_AGENT_KEYSTORE. */
+    public static Path defaultKeystorePath(String osName, String userHome, String programData, String envKeystore) {
+        if (envKeystore != null && !envKeystore.isBlank()) {
+            return Path.of(envKeystore);
+        }
+        if (osName.toLowerCase().contains("win")) {
+            return Path.of(programData + "\\eudss-agent\\agent-keystore.p12");
+        }
+        return Path.of(userHome, ".eudss-agent", "agent-keystore.p12");
     }
 
     public static void ensureKeystore(Path path, char[] password) throws Exception {

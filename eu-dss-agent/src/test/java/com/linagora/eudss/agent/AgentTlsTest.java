@@ -30,4 +30,18 @@ class AgentTlsTest {
         AgentTls.ensureKeystore(ks, pwd); // reuse, must not throw
         assertThat(Files.exists(ks)).isTrue();
     }
+
+    @org.junit.jupiter.api.Test
+    void keystorePath_is_machinewide_on_windows_else_home() {
+        assertThat(com.linagora.eudss.agent.tls.AgentTls.defaultKeystorePath(
+                "Windows 11", "C:\\Users\\u", "C:\\ProgramData", null).toString())
+            .isEqualTo("C:\\ProgramData\\eudss-agent\\agent-keystore.p12");
+        assertThat(com.linagora.eudss.agent.tls.AgentTls.defaultKeystorePath(
+                "Mac OS X", "/Users/u", "/ignored", null).toString())
+            .isEqualTo("/Users/u/.eudss-agent/agent-keystore.p12");
+        // explicit override wins on any OS
+        assertThat(com.linagora.eudss.agent.tls.AgentTls.defaultKeystorePath(
+                "Windows 11", "C:\\Users\\u", "C:\\ProgramData", "D:\\custom\\ks.p12").toString())
+            .isEqualTo("D:\\custom\\ks.p12");
+    }
 }
