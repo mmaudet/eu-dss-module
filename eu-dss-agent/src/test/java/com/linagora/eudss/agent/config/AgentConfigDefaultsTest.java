@@ -1,36 +1,42 @@
 package com.linagora.eudss.agent.config;
 
 import org.junit.jupiter.api.Test;
-
 import java.util.Map;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * Locks in the agent config defaults (notably slotListIndex=0 -> the qualified signing slot on the
- * IDEMIA card, see project memory) without needing real env vars or a console PIN.
- */
 class AgentConfigDefaultsTest {
 
-    private static final char[] PIN = "0000".toCharArray();
-
     @Test
-    void defaults_to_slot_0_and_macos_driver() {
-        AgentConfig cfg = AgentConfig.fromEnv(Map.of(), "Mac OS X", PIN);
+    void defaults_interactive_no_pin_ttl_300() {
+        AgentConfig cfg = AgentConfig.fromEnv(Map.of(), "Mac OS X");
         assertThat(cfg.slotListIndex()).isEqualTo(0);
         assertThat(cfg.pkcs11Driver().toString()).isEqualTo("/Library/SCMiddleware/libidop11.dylib");
         assertThat(cfg.port()).isEqualTo(9795);
         assertThat(cfg.corsHosts()).contains("http://localhost:5173");
+        assertThat(cfg.pin()).isNull();
+        assertThat(cfg.headless()).isFalse();
+        assertThat(cfg.mode()).isEqualTo("interactive");
+        assertThat(cfg.pinSessionTtlSeconds()).isEqualTo(300);
     }
 
     @Test
-    void env_overrides_slot_and_driver() {
+    void env_pin_makes_it_headless() {
+        AgentConfig cfg = AgentConfig.fromEnv(Map.of("EUDSS_AGENT_PIN", "1234"), "Mac OS X");
+        assertThat(cfg.pin()).containsExactly('1', '2', '3', '4');
+        assertThat(cfg.headless()).isTrue();
+        assertThat(cfg.mode()).isEqualTo("headless");
+    }
+
+    @Test
+    void env_overrides_slot_driver_port_ttl() {
         AgentConfig cfg = AgentConfig.fromEnv(
-                Map.of("EUDSS_PKCS11_SLOT", "1", "EUDSS_PKCS11_DRIVER", "/custom/lib.so", "EUDSS_AGENT_PORT", "9999"),
-                "Mac OS X", PIN);
+                Map.of("EUDSS_PKCS11_SLOT", "1", "EUDSS_PKCS11_DRIVER", "/custom/lib.so",
+                        "EUDSS_AGENT_PORT", "9999", "EUDSS_PIN_SESSION_TTL", "60"),
+                "Mac OS X");
         assertThat(cfg.slotListIndex()).isEqualTo(1);
         assertThat(cfg.pkcs11Driver().toString()).isEqualTo("/custom/lib.so");
         assertThat(cfg.port()).isEqualTo(9999);
+        assertThat(cfg.pinSessionTtlSeconds()).isEqualTo(60);
     }
 
     @Test
