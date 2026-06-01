@@ -16,7 +16,9 @@ public record AgentConfig(
 ) {
     private static final String DEFAULT_DRIVER_MAC = "/Library/SCMiddleware/libidop11.dylib";
     private static final String DEFAULT_DRIVER_LINUX = "/usr/lib/libidop11.so";
-    private static final String DEFAULT_DRIVER_WIN = "C:\\Windows\\System32\\idop11.dll";
+    // IDOPTE/ChamberSign Windows middleware: PKCS#11 lib is idoPKCS.dll under "Smart Card Middleware\bin"
+    // (verified 2026-06-01 on Windows 11; NOT System32\idop11.dll). Override with EUDSS_PKCS11_DRIVER.
+    private static final String DEFAULT_DRIVER_WIN = "C:\\Program Files\\Smart Card Middleware\\bin\\idoPKCS.dll";
 
     public static AgentConfig load() {
         return fromEnv(System.getenv(), System.getProperty("os.name", ""), loadPin());

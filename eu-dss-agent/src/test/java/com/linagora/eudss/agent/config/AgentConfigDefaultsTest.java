@@ -20,7 +20,7 @@ class AgentConfigDefaultsTest {
         assertThat(cfg.slotListIndex()).isEqualTo(0);
         assertThat(cfg.pkcs11Driver().toString()).isEqualTo("/Library/SCMiddleware/libidop11.dylib");
         assertThat(cfg.port()).isEqualTo(9795);
-        assertThat(cfg.corsHosts()).contains("localhost:5173");
+        assertThat(cfg.corsHosts()).contains("http://localhost:5173");
     }
 
     @Test
@@ -36,7 +36,7 @@ class AgentConfigDefaultsTest {
     @Test
     void default_driver_is_os_specific() {
         assertThat(AgentConfig.defaultDriver("Linux")).isEqualTo("/usr/lib/libidop11.so");
-        assertThat(AgentConfig.defaultDriver("Windows 11")).isEqualTo("C:\\Windows\\System32\\idop11.dll");
+        assertThat(AgentConfig.defaultDriver("Windows 11")).isEqualTo("C:\\Program Files\\Smart Card Middleware\\bin\\idoPKCS.dll");
         assertThat(AgentConfig.defaultDriver("Mac OS X")).isEqualTo("/Library/SCMiddleware/libidop11.dylib");
     }
 }
