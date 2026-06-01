@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { agentApi, AgentCertificate } from '../services/agentApi';
+import { agentApi, AgentCertificate, AgentError, AgentSessionStatus } from '../services/agentApi';
 import { backendApi, SignatureParams } from '../services/backendApi';
 import { downloadBase64, downloadZip, fileToBase64 } from '../services/fileUtils';
+import { PinModal } from './PinModal';
 
 type AgentStatus = 'checking' | 'available' | 'unavailable';
 type DocStatus = 'pending' | 'signing' | 'signed' | 'error';
@@ -26,6 +27,12 @@ export function SignWorkspace() {
   const [reason, setReason] = useState('Signature électronique');
   const [location, setLocation] = useState('');
   const [busy, setBusy] = useState(false);
+  const [status, setStatus] = useState<AgentSessionStatus | null>(null);
+  const [pinOpen, setPinOpen] = useState(false);
+  const [pinBusy, setPinBusy] = useState(false);
+  const [pinError, setPinError] = useState<string | undefined>();
+  // resolver for the unlock promise the signing flow awaits
+  const [pinResolver, setPinResolver] = useState<{ resolve: () => void; reject: (e: Error) => void } | null>(null);
 
   useEffect(() => {
     void checkAgent();
@@ -34,16 +41,66 @@ export function SignWorkspace() {
   async function checkAgent() {
     setAgentStatus('checking');
     const ok = await agentApi.isAvailable();
-    setAgentStatus(ok ? 'available' : 'unavailable');
-    if (ok) {
-      try {
-        const { certificates } = await agentApi.listCertificates();
-        setCertificates(certificates);
-        if (certificates[0]) setSelectedKeyId(certificates[0].keyId);
-      } catch {
-        setAgentStatus('unavailable');
-      }
+    if (!ok) { setAgentStatus('unavailable'); return; }
+    setAgentStatus('available');
+    try {
+      const st = await agentApi.getStatus();
+      setStatus(st);
+      if (st.unlocked) await loadCertificates();
+    } catch {
+      setStatus(null);
     }
+  }
+
+  async function loadCertificates() {
+    const { certificates } = await agentApi.listCertificates();
+    setCertificates(certificates);
+    if (certificates[0]) setSelectedKeyId(certificates[0].keyId);
+  }
+
+  // Shows the modal and resolves once the token is unlocked (or rejects on cancel).
+  function promptUnlock(): Promise<void> {
+    setPinError(undefined);
+    setPinOpen(true);
+    return new Promise<void>((resolve, reject) => setPinResolver({ resolve, reject }));
+  }
+
+  async function submitPin(pin: string) {
+    setPinBusy(true);
+    setPinError(undefined);
+    try {
+      const st = await agentApi.unlock(pin);
+      setStatus(st);
+      await loadCertificates();
+      setPinOpen(false);
+      pinResolver?.resolve();
+      setPinResolver(null);
+    } catch (e) {
+      const ae = e as AgentError;
+      setPinError(ae.code === 'pin_locked'
+        ? 'Carte bloquée (trop d\'essais). Déblocage par PUK nécessaire.'
+        : ae.code === 'pin_incorrect' ? 'PIN incorrect.' : (ae.message || 'Échec du déverrouillage.'));
+    } finally {
+      setPinBusy(false);
+    }
+  }
+
+  function cancelPin() {
+    setPinOpen(false);
+    pinResolver?.reject(new Error('PIN annulé'));
+    setPinResolver(null);
+  }
+
+  // Ensures unlocked before a signing operation; prompts if needed.
+  async function ensureUnlocked() {
+    const st = await agentApi.getStatus().catch(() => null);
+    setStatus(st);
+    if (!st?.unlocked) await promptUnlock();
+  }
+
+  async function lockNow() {
+    try { await agentApi.lock(); } catch { /* ignore */ }
+    setStatus(await agentApi.getStatus().catch(() => null));
   }
 
   function patch(id: string, p: Partial<SignDoc>) {
@@ -100,12 +157,23 @@ export function SignWorkspace() {
         },
       });
     } catch (e) {
+      if (e instanceof AgentError && e.code === 'locked') {
+        try {
+          await promptUnlock();      // idle-locked mid-batch → re-prompt
+          await signOne(doc, cert);  // retry this doc once
+          return;
+        } catch (cancel) {
+          patch(doc.id, { status: 'error', error: 'Signature annulée (PIN requis)' });
+          return;
+        }
+      }
       patch(doc.id, { status: 'error', error: (e as Error).message });
     }
   }
 
   async function signAll() {
-    const cert = certificates.find((c) => c.keyId === selectedKeyId);
+    try { await ensureUnlocked(); } catch { return; }
+    const cert = certificates.find((c) => c.keyId === selectedKeyId) ?? certificates[0];
     if (!cert) return;
     setBusy(true);
     for (const doc of docs) {
@@ -115,7 +183,8 @@ export function SignWorkspace() {
   }
 
   async function signSingle(doc: SignDoc) {
-    const cert = certificates.find((c) => c.keyId === selectedKeyId);
+    try { await ensureUnlocked(); } catch { return; }
+    const cert = certificates.find((c) => c.keyId === selectedKeyId) ?? certificates[0];
     if (!cert) return;
     setBusy(true);
     await signOne(doc, cert);
@@ -124,7 +193,7 @@ export function SignWorkspace() {
 
   const signedDocs = docs.filter((d) => d.status === 'signed' && d.signed);
   const pendingCount = docs.filter((d) => d.status !== 'signed').length;
-  const canSign = agentStatus === 'available' && !!selectedKeyId && pendingCount > 0 && !busy;
+  const canSign = agentStatus === 'available' && pendingCount > 0 && !busy;
 
   return (
     <div>
@@ -141,12 +210,17 @@ export function SignWorkspace() {
             </ol>
           </div>
         )}
-        {agentStatus === 'available' && certificates.length === 0 && (
+        {agentStatus === 'available' && status?.unlocked && certificates.length === 0 && (
           <div className="status warn">Agent OK mais aucun certificat. Vérifie la clé USB et le PIN.</div>
         )}
         {agentStatus === 'available' && certificates.length > 0 && (
           <>
-            <div className="status ok">Agent connecté, {certificates.length} certificat(s).</div>
+            <div className="status ok">
+              Agent connecté{certificates.length > 0 ? `, ${certificates.length} certificat(s)` : ''}.{' '}
+              {status?.unlocked
+                ? <>🔓 déverrouillé{status.expiresInSeconds != null ? ` (${status.expiresInSeconds}s)` : ''} <button onClick={() => void lockNow()}>Verrouiller</button></>
+                : <>🔒 verrouillé <button onClick={() => void ensureUnlocked()}>Déverrouiller</button></>}
+            </div>
             <label>
               Certificat :{' '}
               <select value={selectedKeyId} onChange={(e) => setSelectedKeyId(e.target.value)}>
@@ -158,6 +232,12 @@ export function SignWorkspace() {
               </select>
             </label>
           </>
+        )}
+        {agentStatus === 'available' && !status?.unlocked && certificates.length === 0 && (
+          <div className="status ok">
+            Agent connecté.{' '}
+            🔒 verrouillé <button onClick={() => void ensureUnlocked()}>Déverrouiller</button>
+          </div>
         )}
       </div>
 
@@ -231,6 +311,14 @@ export function SignWorkspace() {
           Tout télécharger (ZIP)
         </button>
       </div>
+
+      <PinModal
+        open={pinOpen}
+        busy={pinBusy}
+        errorMessage={pinError}
+        onSubmit={(pin) => void submitPin(pin)}
+        onCancel={cancelPin}
+      />
     </div>
   );
 }
