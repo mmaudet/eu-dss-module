@@ -24,6 +24,20 @@ public final class AgentMain {
             System.getenv().getOrDefault("EUDSS_AGENT_TLS_PASSWORD", "eudss-agent").toCharArray();
 
     public static void main(String[] args) {
+        if (java.util.Arrays.asList(args).contains("--provision-cert")) {
+            try {
+                java.nio.file.Path ks = com.linagora.eudss.agent.tls.AgentTls.defaultKeystorePath();
+                com.linagora.eudss.agent.tls.AgentTls.ensureKeystore(ks, TLS_KEYSTORE_PASSWORD);
+                java.nio.file.Path cer = ks.resolveSibling("agent.cer");
+                com.linagora.eudss.agent.tls.AgentTls.exportCertificate(ks, TLS_KEYSTORE_PASSWORD, cer);
+                LOG.info("Provisioned agent cert: keystore={} cer={}", ks, cer);
+                System.out.println("PROVISIONED keystore=" + ks + " cer=" + cer);
+                return; // do not start the server
+            } catch (Exception e) {
+                System.err.println("PROVISION FAILED: " + e.getMessage());
+                System.exit(2);
+            }
+        }
         AgentConfig config = AgentConfig.load();
         TokenService tokenService = new TokenService(config);
         Runtime.getRuntime().addShutdownHook(new Thread(tokenService::close, "token-close"));

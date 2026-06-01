@@ -86,5 +86,18 @@ public final class AgentTls {
         LOG.info("Generated self-signed agent TLS keystore: {} (CN=localhost, SAN localhost/127.0.0.1)", path);
     }
 
+    /** Exports the "agent" cert from the keystore as a DER .cer (for certutil -addstore). */
+    public static void exportCertificate(Path keystorePath, char[] password, Path cerOut) throws Exception {
+        KeyStore ks = KeyStore.getInstance("PKCS12");
+        try (var in = Files.newInputStream(keystorePath)) {
+            ks.load(in, password);
+        }
+        Certificate cert = ks.getCertificate("agent");
+        if (cert == null) throw new IllegalStateException("No 'agent' cert in keystore " + keystorePath);
+        Files.createDirectories(cerOut.getParent());
+        Files.write(cerOut, cert.getEncoded());
+        LOG.info("Exported agent cert (DER) to {}", cerOut);
+    }
+
     private AgentTls() {}
 }

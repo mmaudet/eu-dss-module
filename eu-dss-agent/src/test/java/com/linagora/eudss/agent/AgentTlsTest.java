@@ -44,4 +44,19 @@ class AgentTlsTest {
                 "Windows 11", "C:\\Users\\u", "C:\\ProgramData", "D:\\custom\\ks.p12").toString())
             .isEqualTo("D:\\custom\\ks.p12");
     }
+
+    @org.junit.jupiter.api.Test
+    void exportCertificate_writes_a_localhost_der_cert() throws Exception {
+        java.nio.file.Path dir = java.nio.file.Files.createTempDirectory("eudss-tls-export");
+        java.nio.file.Path ks = dir.resolve("agent-keystore.p12");
+        char[] pw = "eudss-agent".toCharArray();
+        com.linagora.eudss.agent.tls.AgentTls.ensureKeystore(ks, pw);
+        java.nio.file.Path cer = dir.resolve("agent.cer");
+        com.linagora.eudss.agent.tls.AgentTls.exportCertificate(ks, pw, cer);
+        assertThat(java.nio.file.Files.exists(cer)).isTrue();
+        java.security.cert.X509Certificate c = (java.security.cert.X509Certificate)
+            java.security.cert.CertificateFactory.getInstance("X.509")
+                .generateCertificate(java.nio.file.Files.newInputStream(cer));
+        assertThat(c.getSubjectX500Principal().getName()).contains("CN=localhost");
+    }
 }
