@@ -1,6 +1,9 @@
 # Runs elevated at MSI install. Provisions the agent's localhost cert, trusts it machine-wide, sets auto-start.
 $ErrorActionPreference = 'Stop'
-$exe = Join-Path ${env:ProgramFiles} 'EU-DSS Agent\EU-DSS Agent.exe'
+# This script installs at INSTALLDIR\app\wix-resources\; the launcher sits at INSTALLDIR\EU-DSS Agent.exe.
+# Derive it from our own location so a non-default install dir still works; fall back to Program Files.
+$exe = if ($PSScriptRoot) { Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'EU-DSS Agent.exe' } else { '' }
+if (-not (Test-Path $exe)) { $exe = Join-Path ${env:ProgramFiles} 'EU-DSS Agent\EU-DSS Agent.exe' }
 $dataDir = Join-Path $env:ProgramData 'eudss-agent'
 $cer = Join-Path $dataDir 'agent.cer'
 
