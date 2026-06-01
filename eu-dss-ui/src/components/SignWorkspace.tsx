@@ -3,6 +3,7 @@ import { agentApi, AgentCertificate, AgentError, AgentSessionStatus } from '../s
 import { backendApi, SignatureParams } from '../services/backendApi';
 import { downloadBase64, downloadZip, fileToBase64 } from '../services/fileUtils';
 import { PinModal } from './PinModal';
+import { PrerequisitesPanel } from './PrerequisitesPanel';
 
 type AgentStatus = 'checking' | 'available' | 'unavailable';
 type DocStatus = 'pending' | 'signing' | 'signed' | 'error';
@@ -37,6 +38,17 @@ export function SignWorkspace() {
   useEffect(() => {
     void checkAgent();
   }, []);
+
+  // Re-check when the user returns to the tab (e.g. after installing/launching the agent).
+  useEffect(() => {
+    const recheck = () => { if (!pinOpen && !busy) void checkAgent(); };
+    window.addEventListener('focus', recheck);
+    document.addEventListener('visibilitychange', recheck);
+    return () => {
+      window.removeEventListener('focus', recheck);
+      document.removeEventListener('visibilitychange', recheck);
+    };
+  }, [pinOpen, busy]);
 
   async function checkAgent() {
     setAgentStatus('checking');
@@ -78,9 +90,15 @@ export function SignWorkspace() {
       setPinResolver(null);
     } catch (e) {
       if (e instanceof AgentError) {
-        setPinError(e.code === 'pin_locked'
-          ? 'Carte bloquée (trop d\'essais). Déblocage par PUK nécessaire.'
-          : e.code === 'pin_incorrect' ? 'PIN incorrect.' : (e.message || 'Échec du déverrouillage.'));
+        setPinError(
+          e.code === 'pin_locked'
+            ? 'Carte bloquée (trop d\'essais). Déblocage par PUK nécessaire.'
+            : e.code === 'pin_incorrect'
+              ? 'PIN incorrect.'
+              : e.code === 'token_unavailable'
+                ? 'Carte non détectée ou middleware ChamberSign manquant. Branche la carte / installe le middleware (voir la checklist Prérequis ci-dessous).'
+                : (e.message || 'Échec du déverrouillage.'),
+        );
       } else {
         setPinError((e as Error).message || 'Échec du déverrouillage.');
       }
@@ -208,45 +226,25 @@ export function SignWorkspace() {
     <div>
       <div className="card">
         <h2>1. Agent local (clé USB)</h2>
-        {agentStatus === 'checking' && <div className="status info">Vérification…</div>}
-        {agentStatus === 'unavailable' && (
-          <div className="status warn">
-            <strong>Agent local non joignable.</strong> Première utilisation : l'agent tourne en HTTPS avec un certificat auto-signé qu'il faut accepter une fois.
-            <ol style={{ margin: '8px 0 0 18px' }}>
-              <li>Lance l'agent local (clé USB branchée, PIN saisi).</li>
-              <li>Ouvre <a href="https://localhost:9795/rest/health" target="_blank" rel="noreferrer">https://localhost:9795/rest/health</a> et accepte le certificat de l'agent.</li>
-              <li>Reviens ici et <button onClick={checkAgent} style={{ marginLeft: 2 }}>recharger</button>.</li>
-            </ol>
-          </div>
-        )}
-        {agentStatus === 'available' && status?.unlocked && certificates.length === 0 && (
-          <div className="status warn">Agent OK mais aucun certificat. Vérifie la clé USB et le PIN.</div>
-        )}
+        <PrerequisitesPanel
+          agentStatus={agentStatus}
+          status={status}
+          hasCertificates={certificates.length > 0}
+          onRecheck={() => void checkAgent()}
+          onUnlock={() => void ensureUnlocked()}
+          onLock={() => void lockNow()}
+        />
         {agentStatus === 'available' && certificates.length > 0 && (
-          <>
-            <div className="status ok">
-              Agent connecté, {certificates.length} certificat(s).{' '}
-              {status?.unlocked
-                ? <>🔓 déverrouillé{status.expiresInSeconds != null ? ` (re-verrou ~${status.expiresInSeconds}s)` : ''} <button onClick={() => void lockNow()}>Verrouiller</button></>
-                : <>🔒 verrouillé <button onClick={() => void ensureUnlocked()}>Déverrouiller</button></>}
-            </div>
-            <label>
-              Certificat :{' '}
-              <select value={selectedKeyId} onChange={(e) => setSelectedKeyId(e.target.value)}>
-                {certificates.map((c) => (
-                  <option key={c.keyId} value={c.keyId}>
-                    {c.subjectDn} (exp. {c.notAfter.slice(0, 10)})
-                  </option>
-                ))}
-              </select>
-            </label>
-          </>
-        )}
-        {agentStatus === 'available' && !status?.unlocked && certificates.length === 0 && (
-          <div className="status ok">
-            Agent connecté.{' '}
-            🔒 verrouillé <button onClick={() => void ensureUnlocked()}>Déverrouiller</button>
-          </div>
+          <label style={{ display: 'block', marginTop: 8 }}>
+            Certificat :{' '}
+            <select value={selectedKeyId} onChange={(e) => setSelectedKeyId(e.target.value)}>
+              {certificates.map((c) => (
+                <option key={c.keyId} value={c.keyId}>
+                  {c.subjectDn} (exp. {c.notAfter.slice(0, 10)})
+                </option>
+              ))}
+            </select>
+          </label>
         )}
       </div>
 
