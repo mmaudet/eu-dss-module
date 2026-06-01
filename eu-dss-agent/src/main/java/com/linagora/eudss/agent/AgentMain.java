@@ -140,6 +140,7 @@ public final class AgentMain {
     /** Best-effort PKCS#11 error mapping; never auto-retries. */
     private static void mapTokenError(io.javalin.http.Context ctx, Exception e) {
         String msg = deepMessage(e);
+        LOG.warn("PKCS#11 token operation failed (mapping to HTTP): {}", msg, e);
         if (msg.contains("CKR_PIN_INCORRECT")) {
             ctx.status(HttpStatus.UNAUTHORIZED).json(Map.of("error", "pin_incorrect", "message", "Incorrect PIN"));
         } else if (msg.contains("CKR_PIN_LOCKED") || msg.contains("CKR_PIN_EXPIRED")) {
