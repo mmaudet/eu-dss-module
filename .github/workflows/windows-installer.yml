@@ -37,6 +37,7 @@ jobs:
           path: dist/*.msi
           if-no-files-found: error
       - name: Upload generated WiX (main.wxs) for inspection
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: jpackage-wxs

@@ -37,6 +37,7 @@ $jpArgs = @(
   '--win-menu',
   '--win-shortcut',
   '--temp',$jpTemp,
+  '--verbose',
   '--dest',$out
 )
 
@@ -52,8 +53,10 @@ if (Test-Path $mainWxs) {
 }
 
 & jpackage @jpArgs
+$jpExit = $LASTEXITCODE
 
 # Surface the effective WiX source so CI can archive it (capture jpackage's template / verify our override compiled).
+# Done even on failure so a candle/light error can be diagnosed from the exact post-substitution file.
 $genWxs = Join-Path $jpTemp 'config\main.wxs'
 if (Test-Path $genWxs) {
   Copy-Item $genWxs (Join-Path $out 'main.wxs') -Force
@@ -62,4 +65,5 @@ if (Test-Path $genWxs) {
   Write-Warning "jpackage did not produce $genWxs (config dir layout may differ)"
 }
 
+if ($jpExit -ne 0) { Write-Error "jpackage failed with exit code $jpExit"; exit $jpExit }
 Write-Host "MSI written to $out"
