@@ -10,6 +10,8 @@
 
 **Spec:** `docs/superpowers/specs/2026-06-01-sp2-windows-trusted-cert-autostart-design.md`
 
+> **STATUS — COMPLETE (2026-06-01).** All tasks done and verified on the Parallels Win11 ARM VM. The MSI (a `main.wxs` override fed to jpackage via `--resource-dir`) provisions a `localhost` cert trusted in `LocalMachine\Root` + an `HKLM\Run` user-session auto-start; uninstall reverses it; reinstall is idempotent. Trusted HTTPS confirmed (`Invoke-WebRequest` with no cert-skip -> 200, i.e. no browser warning). The Inno-wrapper fallback (Task 4 Step 5) was NOT needed. Provisioning MSI published to release `eu-dss-agent-v0.1.0` (asset `EU-DSS-Agent-0.1.0.msi`). Build gotcha: a literal `--` inside an XML comment makes candle.exe reject the override (exit 104) and jpackage hides the error unless run with `--verbose`. Auto-start caveat: the full reboot->logon e2e couldn't be driven headlessly (VM `AutoAdminLogon=0`); covered by the verified HKLM\Run entry + the proven-working launcher.
+
 ---
 
 ## File Structure
