@@ -2,7 +2,7 @@
 <!-- EU-DSS override of jpackage's generated main.wxs (captured from JDK 21 jpackage on windows-latest).
      Adds SP2 provisioning: trust a localhost cert in LocalMachine\Root + register HKLM\Run auto-start
      at install (deferred, no-impersonate => SYSTEM, valid because this is a perMachine install), and
-     reverse it at uninstall. Keep the Jp* preprocessor vars and the overrides.wxi include intact —
+     reverse it at uninstall. Keep the Jp* preprocessor vars and the overrides.wxi include intact;
      jpackage still feeds the same candle -d defines and generates overrides.wxi in JpConfigDir. -->
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi"
      xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
@@ -94,7 +94,7 @@
          read the property table, so INSTALLDIR is handed over as CustomActionData via the type-51
          "...Data" actions (a property whose name equals the deferred action's Id becomes its
          CustomActionData). INSTALLDIR resolves with a trailing backslash, and jpackage lays the
-         --input payload under INSTALLDIR\app\, so the scripts live at INSTALLDIR\app\wix-resources\. -->
+         input payload under INSTALLDIR\app\, so the scripts live at INSTALLDIR\app\wix-resources\. -->
     <CustomAction Id="EudssProvisionData"   Property="EudssProvision"   Value="[INSTALLDIR]" />
     <CustomAction Id="EudssUnprovisionData" Property="EudssUnprovision" Value="[INSTALLDIR]" />
     <CustomAction Id="EudssProvision" Directory="INSTALLDIR" Execute="deferred" Impersonate="no" Return="check"
