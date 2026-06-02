@@ -38,17 +38,31 @@ démarrage automatique). Aucune étape « accepter le certificat ».
 
 > Rien d'autre à faire : pas de PIN à saisir au démarrage, pas de certificat à accepter manuellement.
 
-### À quoi ça ressemble
+### À quoi ça ressemble — le parcours de signature
+
+> L'interface **EU-DSS Sign** est identique sur Windows et macOS.
 
 **Avant l'installation** (ou si l'agent est arrêté), l'application affiche un bandeau d'aide avec les
 liens de téléchargement :
 
-![Agent non détecté — l'application propose de télécharger l'agent et le middleware](images/win/01-agent-non-detecte.png)
+![Agent non détecté — l'application propose de télécharger l'agent et le middleware](images/app/01-agent-non-detecte.png)
 
-**Une fois l'agent installé et la carte reconnue**, l'application affiche « Agent connecté », l'état
-de la carte et le certificat de signature : vous pouvez signer.
+**Une fois l'agent installé et la carte reconnue** : « Agent connecté », l'état de la carte et le
+**certificat de signature qualifié** s'affichent.
 
-![Agent connecté — carte reconnue, certificat de signature affiché](images/win/02-agent-connecte.png)
+![Agent connecté — carte reconnue, certificat de signature qualifié](images/app/02-signer-connecte.png)
+
+**Au moment de signer**, saisissez votre **code PIN** sur le pavé numérique (jamais stocké ni transmis) :
+
+![Saisie du code PIN de la carte](images/app/03-pin.png)
+
+**Documents signés** — récapitulatif, métadonnées scellées, téléchargement individuel ou ZIP :
+
+![Documents signés — récapitulatif et téléchargements](images/app/04-succes.png)
+
+**Vérifier** une signature — verdict eIDAS (TOTAL_PASSED) et rapport DSS détaillé :
+
+![Vérification — verdict TOTAL_PASSED et rapport DSS](images/app/05-verifier.png)
 
 ---
 

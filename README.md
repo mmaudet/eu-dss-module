@@ -11,6 +11,20 @@ Public visé : utilisateurs disposant d'un token de signature qualifiée (ex. **
 
 ---
 
+## Aperçu
+
+**Signer** — agent local connecté, certificat de signature qualifié détaillé, puis flux de signature :
+
+![EU-DSS Sign — Signer : agent connecté + certificat qualifié](docs/images/app/02-signer-connecte.png)
+
+**Vérifier** — verdict eIDAS (TOTAL_PASSED) et rapport DSS détaillé :
+
+![EU-DSS Sign — Vérifier : TOTAL_PASSED + rapport DSS](docs/images/app/05-verifier.png)
+
+> Interface identique sur Windows et macOS. Parcours complet (PIN, signature, récapitulatif) dans le [guide d'installation](docs/INSTALL.md#à-quoi-ça-ressemble--le-parcours-de-signature).
+
+---
+
 ## Comment ça marche
 
 Le **modèle de sécurité** repose sur trois principes :
