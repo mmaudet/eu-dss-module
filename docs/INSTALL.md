@@ -54,22 +54,26 @@ de la carte et le certificat de signature : vous pouvez signer.
 
 ## 3. macOS
 
-Sous macOS, l'agent se lance à partir du dépôt (pas encore d'installeur `.pkg` ; à venir). La
-différence avec Windows : vous **acceptez le certificat une fois** dans le navigateur (l'approbation
-automatique est pour l'instant réservée à Windows).
+### Installeur .pkg (recommandé)
 
-1. Installez **Temurin JDK 21** et le **middleware ChamberSign** (le module PKCS#11 macOS est
-   `/Library/SCMiddleware/libidop11.dylib`). Branchez votre token.
-2. Construisez l'agent une fois : `mvn -DskipTests package`
-3. Lancez-le : `bin/eu-dss-agent-macos.sh`
-   L'agent démarre **verrouillé** et sert `https://localhost:9795` (votre PIN sera demandé plus tard,
-   dans l'application, au moment de signer).
-4. Dans votre navigateur, ouvrez **une fois** `https://localhost:9795/rest/health` et acceptez le
-   certificat auto-signé. Vous devez voir `{"status":"ok"}`.
-5. Ouvrez l'application de signature : « Agent connecté » doit apparaître.
+1. Installez le **middleware ChamberSign** (module PKCS#11 `/Library/SCMiddleware/libidop11.dylib`) et branchez votre token.
+2. Téléchargez **`EU-DSS-Agent-0.1.0.pkg`** (voir [Releases](https://github.com/mmaudet/twake-eu-dss-module/releases)). Comme il n'est pas encore signé, au premier lancement : **clic droit sur le .pkg → Ouvrir** (puis confirmez), ou Réglages Système → Confidentialité et sécurité → « Ouvrir quand même ».
+3. Installez (mot de passe administrateur demandé). À la fin, l'agent :
+   - fait confiance à son certificat `localhost` dans le **trousseau Système** (aucun avertissement dans Safari/Chrome) ;
+   - démarre automatiquement à l'ouverture de session (LaunchAgent).
+4. Ouvrez l'application de signature : « Agent connecté » doit apparaître.
 
-> **Linux** : identique à macOS, avec le module PKCS#11 `/usr/lib/libidop11.so` et le script
-> `bin/eu-dss-agent-linux.sh`.
+> **Désinstaller** : `sudo "/Library/Application Support/eudss-agent/uninstall.sh"` (macOS n'a pas de désinstalleur .pkg natif).
+> **Firefox** garde son propre magasin de certificats (NSS) — non couvert par le trousseau Système (suivi séparé).
+
+### Alternative développeur (exécuter le jar)
+
+1. Installez **Temurin JDK 21** et le middleware ChamberSign. Branchez votre token.
+2. Construisez l'agent : `mvn -DskipTests package`
+3. Lancez-le : `bin/eu-dss-agent-macos.sh` (l'agent démarre **verrouillé** ; le PIN sera demandé dans l'application au moment de signer).
+4. Ouvrez **une fois** `https://localhost:9795/rest/health` et acceptez le certificat auto-signé (l'approbation automatique est gérée par le .pkg ci-dessus).
+
+> **Linux** : identique à l'alternative développeur, avec le module PKCS#11 `/usr/lib/libidop11.so` et le script `bin/eu-dss-agent-linux.sh`.
 
 ---
 
