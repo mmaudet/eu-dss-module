@@ -1,5 +1,10 @@
 # eu-dss
 
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](LICENSE)
+![Java 21](https://img.shields.io/badge/Java-21-007396?logo=openjdk&logoColor=white)
+![React 19](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
+![EU DSS 6.4](https://img.shields.io/badge/EU_DSS-6.4-003399)
+
 > Application web pour **signer et vérifier des documents** (PAdES / ASiC) à l'aide d'une **clé USB cryptographique** (carte à puce / token PKCS#11), construite sur la bibliothèque **EU DSS** (Digital Signature Services, v6.4).
 
 La signature se fait dans le navigateur, mais **la clé privée ne quitte jamais la carte** : un agent local fait le pont entre l'application web et le token, et c'est la carte qui calcule la signature. Le code **PIN est demandé au moment de signer**.
@@ -237,8 +242,14 @@ En cours / conception : confiance **Firefox/NSS**, **signature/notarisation** du
 
 ---
 
-## Éditeur / licence
+## Contribuer
+
+Les contributions sont les bienvenues — ouvrez une **issue** ou une **pull request**. Pour démarrer, voir les sections **Installation / démarrage rapide** et **Développement** (build `mvn -DskipTests package`, tests `mvn test`, UI `npm run build`). Merci de garder des commits ciblés et de vérifier que `mvn test` et `npm run build` passent avant d'ouvrir une PR.
+
+---
+
+## Licence
 
 Développé par **LINAGORA**. Construit sur la bibliothèque open source [EU DSS](https://ec.europa.eu/digital-building-blocks/sites/display/DIGITAL/Digital+Signature+Service+-++DSS) de la Commission européenne.
 
-> **Licence** : aucun fichier `LICENSE` n'est présent dans le dépôt à ce jour. Le contenu n'est donc pas (encore) couvert par une licence open source explicite — à ajouter par l'éditeur si la diffusion publique est prévue.
+Sous licence **[GNU AGPL-3.0](LICENSE)** — © 2026 LINAGORA. Vous pouvez utiliser, étudier, modifier et redistribuer ce logiciel selon les termes de l'AGPL-3.0 ; toute version modifiée mise à disposition via un réseau doit elle aussi être publiée sous AGPL-3.0.
