@@ -16,13 +16,13 @@ Public visé : utilisateurs disposant d'un token de signature qualifiée (ex. **
 
 ## Aperçu
 
-**Signer** — agent local connecté, certificat de signature qualifié détaillé, puis flux de signature :
+**Signer** : agent local connecté, certificat de signature qualifié détaillé, puis flux de signature :
 
-![EU-DSS Sign — Signer : agent connecté + certificat qualifié](docs/images/app/02-signer-connecte.png)
+![EU-DSS Sign, Signer : agent connecté + certificat qualifié](docs/images/app/02-signer-connecte.png)
 
-**Vérifier** — verdict eIDAS (TOTAL_PASSED) et rapport DSS détaillé :
+**Vérifier** : verdict eIDAS (TOTAL_PASSED) et rapport DSS détaillé :
 
-![EU-DSS Sign — Vérifier : TOTAL_PASSED + rapport DSS](docs/images/app/05-verifier.png)
+![EU-DSS Sign, Vérifier : TOTAL_PASSED + rapport DSS](docs/images/app/05-verifier.png)
 
 > Interface identique sur Windows et macOS. Parcours complet (PIN, signature, récapitulatif) dans le [guide d'installation](docs/INSTALL.md#à-quoi-ça-ressemble--le-parcours-de-signature).
 
@@ -76,16 +76,16 @@ L'agent expose en plus `/rest/unlock` (saisie du PIN), `/rest/lock`, `/rest/stat
 |---|---|
 | **Token USB branché** | Carte à puce / clé cryptographique de signature, insérée. |
 | **Middleware ChamberSign / IDOPTE** | Le pilote PKCS#11 de la carte (l'agent ne le fournit pas). Voir [`docs/INSTALL.md`](docs/INSTALL.md) pour le lien de téléchargement. |
-| **Java 21** | Requis pour exécuter ou compiler l'agent et le serveur — **sauf l'installeur MSI Windows**, qui embarque son propre runtime Java. Sous macOS/Linux : Temurin JDK 21. |
+| **Java 21** | Requis pour exécuter ou compiler l'agent et le serveur (sauf l'installeur MSI Windows, qui embarque son propre runtime Java). Sous macOS/Linux : Temurin JDK 21. |
 | **Node.js + npm** | Uniquement pour le développement de l'UI (`eu-dss-ui`). |
 
-Le guide d'installation détaillé pour les utilisateurs finaux est dans **[`docs/INSTALL.md`](docs/INSTALL.md)** (Windows MSI, macOS) — non dupliqué ici.
+Le guide d'installation détaillé pour les utilisateurs finaux est dans **[`docs/INSTALL.md`](docs/INSTALL.md)** (Windows MSI, macOS) ; il n'est pas dupliqué ici.
 
 ---
 
 ## Installation / démarrage rapide
 
-### Windows (recommandé — installeur MSI)
+### Windows (installeur MSI, recommandé)
 
 L'installeur fait tout automatiquement (certificat de confiance + démarrage à l'ouverture de session, aucun PIN au démarrage, aucun certificat à accepter) :
 
@@ -95,7 +95,7 @@ L'installeur fait tout automatiquement (certificat de confiance + démarrage à 
 
 Détails et captures d'écran : [`docs/INSTALL.md`](docs/INSTALL.md).
 
-### macOS (recommandé — installeur .pkg)
+### macOS (installeur .pkg, recommandé)
 
 Comme le MSI Windows, le `.pkg` fait tout automatiquement (certificat de confiance dans le trousseau Système + démarrage à l'ouverture de session, aucun certificat à accepter) :
 
@@ -103,16 +103,16 @@ Comme le MSI Windows, le `.pkg` fait tout automatiquement (certificat de confian
 2. Télécharger **`EU-DSS-Agent-0.1.0.pkg`** ([Releases](https://github.com/mmaudet/eu-dss-module/releases/tag/eu-dss-agent-v0.1.0)) ; non signé → premier lancement par **clic droit → Ouvrir**.
 3. Installer (mot de passe administrateur), puis ouvrir l'application de signature.
 
-Détails + désinstallation : [`docs/INSTALL.md`](docs/INSTALL.md). (Firefox garde son propre magasin NSS — suivi séparé.)
+Détails + désinstallation : [`docs/INSTALL.md`](docs/INSTALL.md). (Firefox garde son propre magasin NSS, suivi séparé.)
 
-### macOS / Linux (exécuter le jar — développement)
+### macOS / Linux (exécuter le jar, pour le développement)
 
 Compiler l'agent et le serveur, puis lancer l'agent avec le script adapté à votre OS :
 
 ```bash
 mvn -DskipTests package
 
-# Agent local (token PKCS#11) — choisir le script de votre OS :
+# Agent local (token PKCS#11), choisir le script de votre OS :
 ./bin/eu-dss-agent-macos.sh       # macOS
 ./bin/eu-dss-agent-linux.sh       # Linux
 # Windows (PowerShell, hors MSI) :  ./bin/eu-dss-agent-windows.ps1
@@ -180,16 +180,16 @@ Résolues dans [`eu-dss-agent/.../config/AgentConfig.java`](eu-dss-agent/src/mai
 
 Configuré via [`application.yml`](eu-dss-server/src/main/resources/application.yml) :
 
-- `EUDSS_LOTL_ENABLED` (`eudss.lotl.enabled`, défaut `true`) — télécharge la trust list de l'UE (liste FR) au démarrage. À `false`, la validation reste *INDETERMINATE* faute d'ancres de confiance (utile en dev hors-ligne).
+- `EUDSS_LOTL_ENABLED` (`eudss.lotl.enabled`, défaut `true`) : télécharge la trust list de l'UE (liste FR) au démarrage. À `false`, la validation reste *INDETERMINATE* faute d'ancres de confiance (utile en dev hors-ligne).
 - TSA d'horodatage : `eudss.tsa.url` (défaut `https://freetsa.org/tsr`).
 
 ### Disposition / API
 
 ```
 eu-dss/
-├── eu-dss-agent/   # Javalin :9795 — /rest/{health,status,unlock,lock,certificates,sign}
-├── eu-dss-server/  # Spring Boot :8080 — /api/sign/{prepare,assemble}, /api/validate
-├── eu-dss-ui/      # Vite + React :5173 — onglets Signer / Vérifier
+├── eu-dss-agent/   # Javalin :9795, /rest/{health,status,unlock,lock,certificates,sign}
+├── eu-dss-server/  # Spring Boot :8080, /api/sign/{prepare,assemble}, /api/validate
+├── eu-dss-ui/      # Vite + React :5173, onglets Signer / Vérifier
 ├── bin/            # scripts de lancement (agent par OS, server, ui-dev)
 ├── packaging/      # build de l'installeur MSI Windows (jpackage + WiX)
 ├── macos/          # artefacts macOS (jar + script de lancement)
@@ -213,7 +213,7 @@ eu-dss/
 | Release | Contenu |
 |---|---|
 | [`eu-dss-agent-v0.1.0`](https://github.com/mmaudet/eu-dss-module/releases/tag/eu-dss-agent-v0.1.0) | Installeurs de l'agent (runtime Java embarqué, certificat de confiance + démarrage automatique) : **Windows MSI** [`EU-DSS-Agent-0.1.0.msi`](https://github.com/mmaudet/eu-dss-module/releases/download/eu-dss-agent-v0.1.0/EU-DSS-Agent-0.1.0.msi) · **macOS pkg** [`EU-DSS-Agent-0.1.0.pkg`](https://github.com/mmaudet/eu-dss-module/releases/download/eu-dss-agent-v0.1.0/EU-DSS-Agent-0.1.0.pkg) (non signé) |
-| [`eu-dss-docs-v0.1.0`](https://github.com/mmaudet/eu-dss-module/releases/tag/eu-dss-docs-v0.1.0) | Guide d'installation — [PDF](https://github.com/mmaudet/eu-dss-module/releases/download/eu-dss-docs-v0.1.0/Guide-installation-eu-dss.pdf) · [HTML](https://github.com/mmaudet/eu-dss-module/releases/download/eu-dss-docs-v0.1.0/Guide-installation-eu-dss.html) |
+| [`eu-dss-docs-v0.1.0`](https://github.com/mmaudet/eu-dss-module/releases/tag/eu-dss-docs-v0.1.0) | Guide d'installation : [PDF](https://github.com/mmaudet/eu-dss-module/releases/download/eu-dss-docs-v0.1.0/Guide-installation-eu-dss.pdf) · [HTML](https://github.com/mmaudet/eu-dss-module/releases/download/eu-dss-docs-v0.1.0/Guide-installation-eu-dss.html) |
 
 Les installeurs sont construits par GitHub Actions via `jpackage` : Windows ([`windows-installer.yml`](.github/workflows/windows-installer.yml), + WiX) et macOS ([`macos-installer.yml`](.github/workflows/macos-installer.yml), + `pkgbuild`/`productbuild`), sur tag `v*` ou déclenchement manuel.
 
@@ -221,8 +221,8 @@ Les installeurs sont construits par GitHub Actions via `jpackage` : Windows ([`w
 
 ## Documentation
 
-- **[`docs/INSTALL.md`](docs/INSTALL.md)** — guide d'installation et de premiers pas (Windows MSI, macOS), avec captures d'écran.
-- **[`docs/superpowers/`](docs/superpowers)** — specs et plans d'implémentation des incréments (signature multi-format, accès navigateur multiplateforme, PIN au moment de signer, assistant de prérequis, provisionnement Windows + macOS).
+- **[`docs/INSTALL.md`](docs/INSTALL.md)** : guide d'installation et de premiers pas (Windows MSI, macOS), avec captures d'écran.
+- **[`docs/superpowers/`](docs/superpowers)** : specs et plans d'implémentation des incréments (signature multi-format, accès navigateur multiplateforme, PIN au moment de signer, assistant de prérequis, provisionnement Windows + macOS).
 
 ---
 
@@ -234,7 +234,7 @@ Disponible et vérifié :
 - **Vérification** de documents signés (avec trust list FR via LOTL).
 - **PIN saisi au moment de signer** (l'agent démarre verrouillé, reverrouillage après inactivité).
 - **Assistant de prérequis** dans l'UI (détecte l'agent / la carte / le middleware et propose les téléchargements adaptés à l'OS).
-- **Installeurs auto-provisionnants** (certificat de confiance + démarrage automatique, sans étape « accepter le certificat ») : **Windows MSI** et **macOS `.pkg`** — ce dernier vérifié de bout en bout (signature + vérification avec une clé ChamberSign qualifiée).
+- **Installeurs auto-provisionnants** (certificat de confiance + démarrage automatique, sans étape « accepter le certificat ») : **Windows MSI** et **macOS `.pkg`** (ce dernier vérifié de bout en bout, signature + vérification avec une clé ChamberSign qualifiée).
 
 En cours / conception : confiance **Firefox/NSS**, **signature/notarisation** du `.pkg` macOS, étude de faisabilité **Linux/Ubuntu** (`.deb`).
 
@@ -242,7 +242,7 @@ En cours / conception : confiance **Firefox/NSS**, **signature/notarisation** du
 
 ## Contribuer
 
-Les contributions sont les bienvenues — ouvrez une **issue** ou une **pull request**. Pour démarrer, voir les sections **Installation / démarrage rapide** et **Développement** (build `mvn -DskipTests package`, tests `mvn test`, UI `npm run build`). Merci de garder des commits ciblés et de vérifier que `mvn test` et `npm run build` passent avant d'ouvrir une PR.
+Les contributions sont les bienvenues ; ouvrez une **issue** ou une **pull request**. Pour démarrer, voir les sections **Installation / démarrage rapide** et **Développement** (build `mvn -DskipTests package`, tests `mvn test`, UI `npm run build`). Merci de garder des commits ciblés et de vérifier que `mvn test` et `npm run build` passent avant d'ouvrir une PR.
 
 ---
 
@@ -250,4 +250,4 @@ Les contributions sont les bienvenues — ouvrez une **issue** ou une **pull req
 
 Développé par **LINAGORA**. Construit sur la bibliothèque open source [EU DSS](https://ec.europa.eu/digital-building-blocks/sites/display/DIGITAL/Digital+Signature+Service+-++DSS) de la Commission européenne.
 
-Sous licence **[GNU AGPL-3.0](LICENSE)** — © 2026 LINAGORA. Vous pouvez utiliser, étudier, modifier et redistribuer ce logiciel selon les termes de l'AGPL-3.0 ; toute version modifiée mise à disposition via un réseau doit elle aussi être publiée sous AGPL-3.0.
+Sous licence **[GNU AGPL-3.0](LICENSE)**, © 2026 LINAGORA. Vous pouvez utiliser, étudier, modifier et redistribuer ce logiciel selon les termes de l'AGPL-3.0 ; toute version modifiée mise à disposition via un réseau doit elle aussi être publiée sous AGPL-3.0.
