@@ -54,7 +54,7 @@ export interface PrereqLinks {
 }
 
 const CHAMBERSIGN_URL = 'https://support.chambersign.fr/pilotes/';
-const INSTALL_DOC_URL = 'https://github.com/mmaudet/twake-eu-dss-module/blob/eu-dss/docs/INSTALL.md';
+const INSTALL_DOC_URL = 'https://github.com/mmaudet/eu-dss-module/blob/eu-dss/docs/INSTALL.md';
 // Set to the published GitHub Release asset URL once the MSI is released (see Task 4).
 // While empty, the Windows agent link falls back to the install guide (no dead 404).
 const WINDOWS_AGENT_MSI_URL = '';
@@ -310,15 +310,15 @@ git commit -m "feat(ui): render PrerequisitesPanel on Sign tab + focus re-check 
 - [ ] **Step 1: Download the latest successful MSI artifact**
 
 ```bash
-gh run download 26748527116 -R mmaudet/twake-eu-dss-module -n eu-dss-agent-msi -D /tmp/eudss-msi-release
+gh run download 26748527116 -R mmaudet/eu-dss-module -n eu-dss-agent-msi -D /tmp/eudss-msi-release
 ls -lh /tmp/eudss-msi-release/
 ```
-(If that run's artifact has expired, list recent runs with `gh run list --workflow windows-installer.yml -R mmaudet/twake-eu-dss-module -L 5` and download the newest successful one.)
+(If that run's artifact has expired, list recent runs with `gh run list --workflow windows-installer.yml -R mmaudet/eu-dss-module -L 5` and download the newest successful one.)
 
 - [ ] **Step 2: Create the release with the MSI asset**
 
 ```bash
-gh release create eu-dss-agent-v0.1.0 -R mmaudet/twake-eu-dss-module \
+gh release create eu-dss-agent-v0.1.0 -R mmaudet/eu-dss-module \
   --target eu-dss --title "EU-DSS Agent 0.1.0" \
   --notes "Local PKCS#11 signing agent (Windows MSI, x64). PIN at signing time." \
   "/tmp/eudss-msi-release/EU-DSS Agent-0.1.0.msi"
@@ -326,8 +326,8 @@ gh release create eu-dss-agent-v0.1.0 -R mmaudet/twake-eu-dss-module \
 
 - [ ] **Step 3: Wire the URL into the manifest**
 
-Get the asset URL: `gh release view eu-dss-agent-v0.1.0 -R mmaudet/twake-eu-dss-module --json assets --jq '.assets[].url'`
-Set `WINDOWS_AGENT_MSI_URL` in `eu-dss-ui/src/services/prerequisites.ts` to that download URL (e.g. `https://github.com/mmaudet/twake-eu-dss-module/releases/download/eu-dss-agent-v0.1.0/EU-DSS%20Agent-0.1.0.msi`), then `cd eu-dss-ui && npm run build` (expect green), `cd ..`.
+Get the asset URL: `gh release view eu-dss-agent-v0.1.0 -R mmaudet/eu-dss-module --json assets --jq '.assets[].url'`
+Set `WINDOWS_AGENT_MSI_URL` in `eu-dss-ui/src/services/prerequisites.ts` to that download URL (e.g. `https://github.com/mmaudet/eu-dss-module/releases/download/eu-dss-agent-v0.1.0/EU-DSS%20Agent-0.1.0.msi`), then `cd eu-dss-ui && npm run build` (expect green), `cd ..`.
 
 - [ ] **Step 4: Commit**
 

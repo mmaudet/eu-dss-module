@@ -92,7 +92,7 @@ Le guide d'installation détaillé pour les utilisateurs finaux est dans **[`doc
 L'installeur fait tout automatiquement (certificat de confiance + démarrage à l'ouverture de session, aucun PIN au démarrage, aucun certificat à accepter) :
 
 1. Installer le middleware ChamberSign et brancher le token.
-2. Télécharger et exécuter **[`EU-DSS-Agent-0.1.0.msi`](https://github.com/mmaudet/twake-eu-dss-module/releases/download/eu-dss-agent-v0.1.0/EU-DSS-Agent-0.1.0.msi)**.
+2. Télécharger et exécuter **[`EU-DSS-Agent-0.1.0.msi`](https://github.com/mmaudet/eu-dss-module/releases/download/eu-dss-agent-v0.1.0/EU-DSS-Agent-0.1.0.msi)**.
 3. Ouvrir l'application de signature dans le navigateur.
 
 Détails et captures d'écran : [`docs/INSTALL.md`](docs/INSTALL.md).
@@ -102,7 +102,7 @@ Détails et captures d'écran : [`docs/INSTALL.md`](docs/INSTALL.md).
 Comme le MSI Windows, le `.pkg` fait tout automatiquement (certificat de confiance dans le trousseau Système + démarrage à l'ouverture de session, aucun certificat à accepter) :
 
 1. Installer le middleware ChamberSign et brancher le token.
-2. Télécharger **`EU-DSS-Agent-0.1.0.pkg`** ([Releases](https://github.com/mmaudet/twake-eu-dss-module/releases/tag/eu-dss-agent-v0.1.0)) ; non signé → premier lancement par **clic droit → Ouvrir**.
+2. Télécharger **`EU-DSS-Agent-0.1.0.pkg`** ([Releases](https://github.com/mmaudet/eu-dss-module/releases/tag/eu-dss-agent-v0.1.0)) ; non signé → premier lancement par **clic droit → Ouvrir**.
 3. Installer (mot de passe administrateur), puis ouvrir l'application de signature.
 
 Détails + désinstallation : [`docs/INSTALL.md`](docs/INSTALL.md). (Firefox garde son propre magasin NSS — suivi séparé.)
@@ -214,8 +214,8 @@ eu-dss/
 
 | Release | Contenu |
 |---|---|
-| [`eu-dss-agent-v0.1.0`](https://github.com/mmaudet/twake-eu-dss-module/releases/tag/eu-dss-agent-v0.1.0) | Installeurs de l'agent (runtime Java embarqué, certificat de confiance + démarrage automatique) : **Windows MSI** [`EU-DSS-Agent-0.1.0.msi`](https://github.com/mmaudet/twake-eu-dss-module/releases/download/eu-dss-agent-v0.1.0/EU-DSS-Agent-0.1.0.msi) · **macOS pkg** [`EU-DSS-Agent-0.1.0.pkg`](https://github.com/mmaudet/twake-eu-dss-module/releases/download/eu-dss-agent-v0.1.0/EU-DSS-Agent-0.1.0.pkg) (non signé) |
-| [`eu-dss-docs-v0.1.0`](https://github.com/mmaudet/twake-eu-dss-module/releases/tag/eu-dss-docs-v0.1.0) | Guide d'installation — [PDF](https://github.com/mmaudet/twake-eu-dss-module/releases/download/eu-dss-docs-v0.1.0/Guide-installation-eu-dss.pdf) · [HTML](https://github.com/mmaudet/twake-eu-dss-module/releases/download/eu-dss-docs-v0.1.0/Guide-installation-eu-dss.html) |
+| [`eu-dss-agent-v0.1.0`](https://github.com/mmaudet/eu-dss-module/releases/tag/eu-dss-agent-v0.1.0) | Installeurs de l'agent (runtime Java embarqué, certificat de confiance + démarrage automatique) : **Windows MSI** [`EU-DSS-Agent-0.1.0.msi`](https://github.com/mmaudet/eu-dss-module/releases/download/eu-dss-agent-v0.1.0/EU-DSS-Agent-0.1.0.msi) · **macOS pkg** [`EU-DSS-Agent-0.1.0.pkg`](https://github.com/mmaudet/eu-dss-module/releases/download/eu-dss-agent-v0.1.0/EU-DSS-Agent-0.1.0.pkg) (non signé) |
+| [`eu-dss-docs-v0.1.0`](https://github.com/mmaudet/eu-dss-module/releases/tag/eu-dss-docs-v0.1.0) | Guide d'installation — [PDF](https://github.com/mmaudet/eu-dss-module/releases/download/eu-dss-docs-v0.1.0/Guide-installation-eu-dss.pdf) · [HTML](https://github.com/mmaudet/eu-dss-module/releases/download/eu-dss-docs-v0.1.0/Guide-installation-eu-dss.html) |
 
 Les installeurs sont construits par GitHub Actions via `jpackage` : Windows ([`windows-installer.yml`](.github/workflows/windows-installer.yml), + WiX) et macOS ([`macos-installer.yml`](.github/workflows/macos-installer.yml), + `pkgbuild`/`productbuild`), sur tag `v*` ou déclenchement manuel.
 

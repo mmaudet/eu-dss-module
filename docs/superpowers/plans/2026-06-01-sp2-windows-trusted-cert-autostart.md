@@ -279,7 +279,7 @@ and add `--resource-dir $wixRes` to the `jpackage` arguments (so `main.wxs` over
 
 - [ ] **Step 4: Build the MSI on CI**
 
-Trigger: `gh workflow run windows-installer.yml -R mmaudet/twake-eu-dss-module --ref eu-dss`, then `gh run watch <id> --exit-status`. Expected: BUILD SUCCESS, `eu-dss-agent-msi` artifact produced. If the WiX override fights jpackage (build error), switch to the **fallback** (Step 5).
+Trigger: `gh workflow run windows-installer.yml -R mmaudet/eu-dss-module --ref eu-dss`, then `gh run watch <id> --exit-status`. Expected: BUILD SUCCESS, `eu-dss-agent-msi` artifact produced. If the WiX override fights jpackage (build error), switch to the **fallback** (Step 5).
 
 - [ ] **Step 5: FALLBACK (only if Step 2–4 WiX override proves intractable): Inno wrapper**
 

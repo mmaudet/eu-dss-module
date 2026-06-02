@@ -347,10 +347,10 @@ git push origin eu-dss
 
 Run:
 ```bash
-gh workflow run macos-installer.yml -R mmaudet/twake-eu-dss-module --ref eu-dss
-sleep 8 && gh run list --workflow=macos-installer.yml -R mmaudet/twake-eu-dss-module -L 1
+gh workflow run macos-installer.yml -R mmaudet/eu-dss-module --ref eu-dss
+sleep 8 && gh run list --workflow=macos-installer.yml -R mmaudet/eu-dss-module -L 1
 # then watch the newest run id:
-gh run watch <run-id> -R mmaudet/twake-eu-dss-module --exit-status --interval 15
+gh run watch <run-id> -R mmaudet/eu-dss-module --exit-status --interval 15
 ```
 Expected: `BUILD SUCCESS`; the `eu-dss-agent-pkg` artifact is produced. If the build fails, read `gh run view <id> --log-failed` and fix `build-agent-pkg.sh`.
 

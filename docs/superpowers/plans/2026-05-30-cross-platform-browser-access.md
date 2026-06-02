@@ -492,7 +492,7 @@ sleep 10
 RUN=$(gh run list --workflow=windows-installer.yml --branch eu-dss --limit 1 --json databaseId -q '.[0].databaseId')
 gh run watch "$RUN" --exit-status   # waits; non-zero exit if the build fails
 gh run view "$RUN" --json conclusion -q '.conclusion'   # expect: success
-gh api repos/mmaudet/twake-eu-dss-module/actions/runs/$RUN/artifacts -q '.artifacts[].name'  # expect: eu-dss-agent-msi
+gh api repos/mmaudet/eu-dss-module/actions/runs/$RUN/artifacts -q '.artifacts[].name'  # expect: eu-dss-agent-msi
 ```
 Expected: workflow `success`, artifact `eu-dss-agent-msi` present. If WiX/jpackage args fail on the runner, read `gh run view "$RUN" --log-failed`, fix `build-agent-msi.ps1` / the workflow, commit, push, re-run.
 

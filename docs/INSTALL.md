@@ -29,7 +29,7 @@ démarrage automatique). Aucune étape « accepter le certificat ».
 
 1. **Installez le middleware ChamberSign** (lien ci-dessus) et branchez votre token.
 2. **Téléchargez l'agent** :
-   **[EU-DSS-Agent-0.1.0.msi](https://github.com/mmaudet/twake-eu-dss-module/releases/download/eu-dss-agent-v0.1.0/EU-DSS-Agent-0.1.0.msi)**
+   **[EU-DSS-Agent-0.1.0.msi](https://github.com/mmaudet/eu-dss-module/releases/download/eu-dss-agent-v0.1.0/EU-DSS-Agent-0.1.0.msi)**
 3. **Double-cliquez le MSI** et laissez l'installation se dérouler. À la fin, l'agent est :
    - **lancé**, et **relancé automatiquement** à chaque ouverture de session Windows ;
    - servi en HTTPS sur `https://localhost:9795` avec un **certificat déjà approuvé** par Windows
@@ -71,7 +71,7 @@ liens de téléchargement :
 ### Installeur .pkg (recommandé)
 
 1. Installez le **middleware ChamberSign** (module PKCS#11 `/Library/SCMiddleware/libidop11.dylib`) et branchez votre token.
-2. Téléchargez **`EU-DSS-Agent-0.1.0.pkg`** (voir [Releases](https://github.com/mmaudet/twake-eu-dss-module/releases)). Comme il n'est pas encore signé, au premier lancement : **clic droit sur le .pkg → Ouvrir** (puis confirmez), ou Réglages Système → Confidentialité et sécurité → « Ouvrir quand même ».
+2. Téléchargez **`EU-DSS-Agent-0.1.0.pkg`** (voir [Releases](https://github.com/mmaudet/eu-dss-module/releases)). Comme il n'est pas encore signé, au premier lancement : **clic droit sur le .pkg → Ouvrir** (puis confirmez), ou Réglages Système → Confidentialité et sécurité → « Ouvrir quand même ».
 3. Installez (mot de passe administrateur demandé). À la fin, l'agent :
    - fait confiance à son certificat `localhost` dans le **trousseau Système** (aucun avertissement dans Safari/Chrome) ;
    - démarre automatiquement à l'ouverture de session (LaunchAgent).

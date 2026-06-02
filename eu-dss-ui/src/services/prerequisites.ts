@@ -22,10 +22,10 @@ export interface PrereqLinks {
 }
 
 const CHAMBERSIGN_URL = 'https://support.chambersign.fr/pilotes/';
-const INSTALL_DOC_URL = 'https://github.com/mmaudet/twake-eu-dss-module/blob/eu-dss/docs/INSTALL.md';
+const INSTALL_DOC_URL = 'https://github.com/mmaudet/eu-dss-module/blob/eu-dss/docs/INSTALL.md';
 // Published GitHub Release asset (repo is public). Update on new agent releases.
 // If emptied, the Windows agent link falls back to the install guide (no dead 404).
-const WINDOWS_AGENT_MSI_URL = 'https://github.com/mmaudet/twake-eu-dss-module/releases/download/eu-dss-agent-v0.1.0/EU-DSS-Agent-0.1.0.msi';
+const WINDOWS_AGENT_MSI_URL = 'https://github.com/mmaudet/eu-dss-module/releases/download/eu-dss-agent-v0.1.0/EU-DSS-Agent-0.1.0.msi';
 
 const MIDDLEWARE = { url: CHAMBERSIGN_URL, label: 'Télécharger le middleware ChamberSign' };
 
