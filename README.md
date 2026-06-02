@@ -172,7 +172,7 @@ Résolues dans [`eu-dss-agent/.../config/AgentConfig.java`](eu-dss-agent/src/mai
 | `EUDSS_PIN_SESSION_TTL` | `300` | Délai (s) d'inactivité avant reverrouillage de la session PIN |
 | `EUDSS_AGENT_PIN` | *(absent)* | Si défini → mode **headless** (déverrouillage auto au démarrage) ; sinon mode **interactif** (verrouillé jusqu'à `/rest/unlock`) |
 
-¹ macOS `/Library/SCMiddleware/libidop11.dylib` · Linux `/usr/lib/libidop11.so` · Windows `C:\Program Files\Smart Card Middleware\bin\idoPKCS.dll`
+¹ macOS `/Library/SCMiddleware/libidop11.dylib` · Linux `/usr/lib/SCMiddleware/libidop11.so` · Windows `C:\Program Files\Smart Card Middleware\bin\idoPKCS.dll`
 ² `http://localhost:5173,http://localhost:8080,http://localhost:4173`
 ³ Windows `%ProgramData%\eudss-agent\agent-keystore.p12` (machine) · sinon `~/.eudss-agent/agent-keystore.p12`
 

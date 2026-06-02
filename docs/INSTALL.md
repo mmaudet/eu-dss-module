@@ -87,7 +87,7 @@ liens de téléchargement :
 3. Lancez-le : `bin/eu-dss-agent-macos.sh` (l'agent démarre **verrouillé** ; le PIN sera demandé dans l'application au moment de signer).
 4. Ouvrez **une fois** `https://localhost:9795/rest/health` et acceptez le certificat auto-signé (l'approbation automatique est gérée par le .pkg ci-dessus).
 
-> **Linux** : identique à l'alternative développeur, avec le module PKCS#11 `/usr/lib/libidop11.so` et le script `bin/eu-dss-agent-linux.sh`.
+> **Linux** : identique à l'alternative développeur, avec le module PKCS#11 `/usr/lib/SCMiddleware/libidop11.so` et le script `bin/eu-dss-agent-linux.sh`.
 
 ---
 
@@ -157,7 +157,7 @@ L'agent se configure entièrement par variables d'environnement (utile pour un d
 | `EUDSS_AGENT_TLS_PASSWORD` | `eudss-agent` | Mot de passe du keystore TLS. |
 
 ¹ Pilote par défaut : Windows `C:\Program Files\Smart Card Middleware\bin\idoPKCS.dll` ·
-macOS `/Library/SCMiddleware/libidop11.dylib` · Linux `/usr/lib/libidop11.so`.
+macOS `/Library/SCMiddleware/libidop11.dylib` · Linux `/usr/lib/SCMiddleware/libidop11.so`.
 ² Keystore par défaut : Windows `C:\ProgramData\eudss-agent\agent-keystore.p12` ·
 macOS/Linux `~/.eudss-agent/agent-keystore.p12`.
 
