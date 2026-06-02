@@ -5,6 +5,7 @@ Maintainer: LINAGORA <contact@linagora.com>
 Depends: pcscd, libccid, libnss3-tools, ca-certificates
 Section: utils
 Priority: optional
+Installed-Size: @INSTALLED_SIZE@
 Description: EU-DSS Agent (local PKCS#11 signing bridge)
  Local HTTPS agent that bridges a PKCS#11 smart-card token to the EU-DSS
  signing web application. On install it trusts its self-signed localhost
