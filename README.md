@@ -7,8 +7,6 @@
 
 > Application web pour **signer et vérifier des documents** (PAdES / ASiC) à l'aide d'une **clé USB cryptographique** (carte à puce / token PKCS#11), construite sur la bibliothèque **EU DSS** (Digital Signature Services, v6.4).
 
-La signature se fait dans le navigateur, mais **la clé privée ne quitte jamais la carte** : un agent local fait le pont entre l'application web et le token, et c'est la carte qui calcule la signature. Le code **PIN est demandé au moment de signer**.
-
 Public visé : utilisateurs disposant d'un token de signature qualifiée (ex. **ChamberSign**, middleware **IDOPTE**) qui souhaitent signer des PDF ou d'autres documents en PAdES-B-T / ASiC depuis leur poste, ainsi que les développeurs qui font tourner ou étendent la plateforme.
 
 - **Installation utilisateur (Windows & macOS)** : voir le guide pas-à-pas [`docs/INSTALL.md`](docs/INSTALL.md).
