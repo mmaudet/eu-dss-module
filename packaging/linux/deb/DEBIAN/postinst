@@ -17,7 +17,12 @@ EUDSS_AGENT_KEYSTORE="$DATA/agent-keystore.p12" "$LAUNCHER" --provision-cert
 chmod 644 "$DATA/agent-keystore.p12" "$CERT"
 
 # 2. Trust in the system store (read by curl/wget/openssl/Java, NOT by browsers).
-install -m 644 "$CERT" "$SYSCERT"
+# update-ca-certificates requires PEM under /usr/local/share/ca-certificates/*.crt, but
+# agent.cer is DER (the format NSS/macOS/Windows expect), so convert it here. openssl is a
+# hard dependency of ca-certificates, whose update-ca-certificates we run on the next line.
+openssl x509 -inform DER -in "$CERT" -out "$SYSCERT"
+chmod 644 "$SYSCERT"
+grep -q "BEGIN CERTIFICATE" "$SYSCERT" || { echo "postinst: DER->PEM conversion failed for $SYSCERT" >&2; exit 1; }
 update-ca-certificates
 
 exit 0
