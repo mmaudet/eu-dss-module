@@ -43,10 +43,16 @@ public final class AgentTls {
         if (envKeystore != null && !envKeystore.isBlank()) {
             return Path.of(envKeystore);
         }
-        if (osName.toLowerCase().contains("win")) {
+        String os = osName.toLowerCase();
+        if (os.contains("win")) {
             // Literal '\' via string-concat (NOT Path.of varargs): produces a correct Windows path
             // even when resolved on a non-Windows JVM (CI/tests run on macOS/Linux).
             return Path.of(programData + "\\eudss-agent\\agent-keystore.p12");
+        }
+        if (os.contains("nux")) {
+            // Machine-wide on Linux so the .deb postinst (root) and the user-launched agent share
+            // one keystore; parallels Windows ProgramData and macOS /Library/Application Support.
+            return Path.of("/var/lib/eudss-agent/agent-keystore.p12");
         }
         return Path.of(userHome, ".eudss-agent", "agent-keystore.p12");
     }

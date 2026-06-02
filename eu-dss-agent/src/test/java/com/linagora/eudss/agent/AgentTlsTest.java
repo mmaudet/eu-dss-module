@@ -46,6 +46,21 @@ class AgentTlsTest {
     }
 
     @org.junit.jupiter.api.Test
+    void keystorePath_is_machinewide_on_linux() {
+        assertThat(com.linagora.eudss.agent.tls.AgentTls.defaultKeystorePath(
+                "Linux", "/home/u", "/ignored", null).toString())
+            .isEqualTo("/var/lib/eudss-agent/agent-keystore.p12");
+        // override still wins on Linux
+        assertThat(com.linagora.eudss.agent.tls.AgentTls.defaultKeystorePath(
+                "Linux", "/home/u", "/ignored", "/tmp/ks.p12").toString())
+            .isEqualTo("/tmp/ks.p12");
+        // macOS stays on the user home (no "nux" / "win" substring)
+        assertThat(com.linagora.eudss.agent.tls.AgentTls.defaultKeystorePath(
+                "Mac OS X", "/Users/u", "/ignored", null).toString())
+            .isEqualTo("/Users/u/.eudss-agent/agent-keystore.p12");
+    }
+
+    @org.junit.jupiter.api.Test
     void exportCertificate_writes_a_localhost_der_cert() throws Exception {
         java.nio.file.Path dir = java.nio.file.Files.createTempDirectory("eudss-tls-export");
         java.nio.file.Path ks = dir.resolve("agent-keystore.p12");
