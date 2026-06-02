@@ -15,7 +15,7 @@ public record AgentConfig(
         int pinSessionTtlSeconds
 ) {
     private static final String DEFAULT_DRIVER_MAC = "/Library/SCMiddleware/libidop11.dylib";
-    private static final String DEFAULT_DRIVER_LINUX = "/usr/lib/libidop11.so";
+    private static final String DEFAULT_DRIVER_LINUX = "/usr/lib/SCMiddleware/libidop11.so";
     // IDOPTE/ChamberSign Windows middleware: idoPKCS.dll under "Smart Card Middleware\bin" (see cea555d).
     private static final String DEFAULT_DRIVER_WIN = "C:\\Program Files\\Smart Card Middleware\\bin\\idoPKCS.dll";
 

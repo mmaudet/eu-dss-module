@@ -10,7 +10,7 @@ if [[ ! -f "$JAR" ]]; then
   exit 1
 fi
 
-: "${EUDSS_PKCS11_DRIVER:=/usr/lib/libidop11.so}"
+: "${EUDSS_PKCS11_DRIVER:=/usr/lib/SCMiddleware/libidop11.so}"
 : "${EUDSS_PKCS11_SLOT:=0}"
 : "${EUDSS_AGENT_PORT:=9795}"
 : "${EUDSS_CORS_HOSTS:=http://localhost:5173,http://localhost:8080,http://localhost:4173}"

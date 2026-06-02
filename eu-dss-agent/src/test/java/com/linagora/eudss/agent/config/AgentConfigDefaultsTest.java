@@ -41,7 +41,7 @@ class AgentConfigDefaultsTest {
 
     @Test
     void default_driver_is_os_specific() {
-        assertThat(AgentConfig.defaultDriver("Linux")).isEqualTo("/usr/lib/libidop11.so");
+        assertThat(AgentConfig.defaultDriver("Linux")).isEqualTo("/usr/lib/SCMiddleware/libidop11.so");
         assertThat(AgentConfig.defaultDriver("Windows 11")).isEqualTo("C:\\Program Files\\Smart Card Middleware\\bin\\idoPKCS.dll");
         assertThat(AgentConfig.defaultDriver("Mac OS X")).isEqualTo("/Library/SCMiddleware/libidop11.dylib");
     }
