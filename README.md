@@ -9,7 +9,7 @@
 
 Public visé : utilisateurs disposant d'un token de signature qualifiée (ex. **ChamberSign**, middleware **IDOPTE**) qui souhaitent signer des PDF ou d'autres documents en PAdES-B-T / ASiC depuis leur poste, ainsi que les développeurs qui font tourner ou étendent la plateforme.
 
-- **Installation utilisateur (Windows & macOS)** : voir le guide pas-à-pas [`docs/INSTALL.md`](docs/INSTALL.md).
+- **Installation utilisateur (Windows, macOS & Linux)** : voir le guide pas-à-pas [`docs/INSTALL.md`](docs/INSTALL.md).
 - **Téléchargements** : voir [Releases](#téléchargements--releases).
 
 ---
@@ -24,7 +24,7 @@ Public visé : utilisateurs disposant d'un token de signature qualifiée (ex. **
 
 ![EU-DSS Sign, Vérifier : TOTAL_PASSED + rapport DSS](docs/images/app/05-verifier.png)
 
-> Interface identique sur Windows et macOS. Parcours complet (PIN, signature, récapitulatif) dans le [guide d'installation](docs/INSTALL.md#à-quoi-ça-ressemble--le-parcours-de-signature).
+> Interface identique sur Windows, macOS et Linux. Parcours complet (PIN, signature, récapitulatif) dans le [guide d'installation](docs/INSTALL.md#à-quoi-ça-ressemble--le-parcours-de-signature).
 
 ---
 
@@ -79,7 +79,7 @@ L'agent expose en plus `/rest/unlock` (saisie du PIN), `/rest/lock`, `/rest/stat
 | **Java 21** | Requis pour exécuter ou compiler l'agent et le serveur (sauf l'installeur MSI Windows, qui embarque son propre runtime Java). Sous macOS/Linux : Temurin JDK 21. |
 | **Node.js + npm** | Uniquement pour le développement de l'UI (`eu-dss-ui`). |
 
-Le guide d'installation détaillé pour les utilisateurs finaux est dans **[`docs/INSTALL.md`](docs/INSTALL.md)** (Windows MSI, macOS) ; il n'est pas dupliqué ici.
+Le guide d'installation détaillé pour les utilisateurs finaux est dans **[`docs/INSTALL.md`](docs/INSTALL.md)** (Windows MSI, macOS, Linux) ; il n'est pas dupliqué ici.
 
 ---
 
@@ -105,6 +105,16 @@ Comme le MSI Windows, le `.pkg` fait tout automatiquement (certificat de confian
 
 Détails + désinstallation : [`docs/INSTALL.md`](docs/INSTALL.md). (Firefox garde son propre magasin NSS, suivi séparé.)
 
+### Linux (paquet .deb)
+
+Le `.deb` (amd64) fait tout automatiquement, comme le MSI / le `.pkg` (certificat de confiance **système** + magasin **NSS** de Chrome/Chromium + démarrage à l'ouverture de session graphique). Construit par l'intégration continue ([`linux-installer.yml`](.github/workflows/linux-installer.yml)) ; mécanisme de confiance/autostart vérifié sur Ubuntu 24.04. Publication en Release et validation de la signature réelle sur amd64 : en cours.
+
+1. Installer le middleware ChamberSign (amd64) et brancher le token.
+2. Récupérer **`eu-dss-agent_0.1.0_amd64.deb`** (artefact de CI, ou le construire avec `packaging/linux/build-agent-deb.sh`), puis l'installer : `sudo apt install ./eu-dss-agent_0.1.0_amd64.deb`.
+3. Ouvrir l'application de signature dans le navigateur.
+
+Détails + désinstallation (`apt remove`) : [`docs/INSTALL.md`](docs/INSTALL.md). **amd64 uniquement** pour la signature (middleware ChamberSign) ; Firefox/NSS suivi séparé.
+
 ### macOS / Linux (exécuter le jar, pour le développement)
 
 Compiler l'agent et le serveur, puis lancer l'agent avec le script adapté à votre OS :
@@ -120,7 +130,7 @@ mvn -DskipTests package
 
 L'agent démarre **verrouillé** et écoute sur `https://localhost:9795`. Le PIN est saisi dans l'application au moment de signer. Les scripts positionnent des valeurs par défaut (pilote PKCS#11, slot, port, hôtes CORS) que vous pouvez surcharger via les variables `EUDSS_*` (voir [Développement](#développement)).
 
-Par cette voie « jar » sous macOS/Linux, vous acceptez le certificat `localhost` **une fois** dans le navigateur (l'auto-confiance est gérée par les installeurs MSI / `.pkg`).
+Par cette voie « jar » sous macOS/Linux, vous acceptez le certificat `localhost` **une fois** dans le navigateur (l'auto-confiance est gérée par les installeurs MSI / `.pkg` / `.deb`).
 
 ### Stack de développement (serveur + UI)
 
@@ -174,7 +184,7 @@ Résolues dans [`eu-dss-agent/.../config/AgentConfig.java`](eu-dss-agent/src/mai
 
 ¹ macOS `/Library/SCMiddleware/libidop11.dylib` · Linux `/usr/lib/SCMiddleware/libidop11.so` · Windows `C:\Program Files\Smart Card Middleware\bin\idoPKCS.dll`
 ² `http://localhost:5173,http://localhost:8080,http://localhost:4173`
-³ Windows `%ProgramData%\eudss-agent\agent-keystore.p12` (machine) · sinon `~/.eudss-agent/agent-keystore.p12`
+³ Windows `%ProgramData%\eudss-agent\agent-keystore.p12` · Linux `/var/lib/eudss-agent/agent-keystore.p12` (machine) · sinon macOS `~/.eudss-agent/agent-keystore.p12`
 
 ### Variables d'environnement du serveur
 
@@ -201,7 +211,7 @@ eu-dss/
 ## Sécurité
 
 - **Signature de l'empreinte uniquement** : l'agent reçoit un digest, jamais le document complet ni la clé. La clé privée ne quitte pas le token.
-- **Certificat TLS auto-signé par poste** (`CN=localhost`, SAN `localhost`/`127.0.0.1`). Windows : provisionné de confiance par le MSI ; macOS/Linux : accepté une fois.
+- **Certificat TLS auto-signé par poste** (`CN=localhost`, SAN `localhost`/`127.0.0.1`), généré sur chaque machine. Provisionné de confiance par les installeurs (Windows MSI ; macOS `.pkg` ; Linux `.deb` : magasin système **PEM** + NSS Chrome/Chromium) ; par la voie jar, accepté une fois dans le navigateur.
 - **PIN demandé au moment de signer** (`POST /rest/unlock`), jamais persisté ; il est effacé de la mémoire (`zeroize`) après ouverture de la session du token.
 - **TTL de session** : la session PIN se reverrouille après inactivité (défaut 300 s, `EUDSS_PIN_SESSION_TTL`). Les endpoints sensibles renvoient `401 locked` quand l'agent est verrouillé.
 - **Mapping d'erreurs PKCS#11** sans nouvelle tentative automatique : PIN incorrect (`401`), PIN bloqué (`423`), token indisponible (`503`).
@@ -215,14 +225,14 @@ eu-dss/
 | [`eu-dss-agent-v0.1.0`](https://github.com/mmaudet/eu-dss-module/releases/tag/eu-dss-agent-v0.1.0) | Installeurs de l'agent (runtime Java embarqué, certificat de confiance + démarrage automatique) : **Windows MSI** [`EU-DSS-Agent-0.1.0.msi`](https://github.com/mmaudet/eu-dss-module/releases/download/eu-dss-agent-v0.1.0/EU-DSS-Agent-0.1.0.msi) · **macOS pkg** [`EU-DSS-Agent-0.1.0.pkg`](https://github.com/mmaudet/eu-dss-module/releases/download/eu-dss-agent-v0.1.0/EU-DSS-Agent-0.1.0.pkg) (non signé) |
 | [`eu-dss-docs-v0.1.0`](https://github.com/mmaudet/eu-dss-module/releases/tag/eu-dss-docs-v0.1.0) | Guide d'installation : [PDF](https://github.com/mmaudet/eu-dss-module/releases/download/eu-dss-docs-v0.1.0/Guide-installation-eu-dss.pdf) · [HTML](https://github.com/mmaudet/eu-dss-module/releases/download/eu-dss-docs-v0.1.0/Guide-installation-eu-dss.html) |
 
-Les installeurs sont construits par GitHub Actions via `jpackage` : Windows ([`windows-installer.yml`](.github/workflows/windows-installer.yml), + WiX) et macOS ([`macos-installer.yml`](.github/workflows/macos-installer.yml), + `pkgbuild`/`productbuild`), sur tag `v*` ou déclenchement manuel.
+Les installeurs sont construits par GitHub Actions via `jpackage` : Windows ([`windows-installer.yml`](.github/workflows/windows-installer.yml), + WiX), macOS ([`macos-installer.yml`](.github/workflows/macos-installer.yml), + `pkgbuild`/`productbuild`) et Linux ([`linux-installer.yml`](.github/workflows/linux-installer.yml), + `dpkg-deb`, amd64), sur tag `v*` ou déclenchement manuel.
 
 ---
 
 ## Documentation
 
-- **[`docs/INSTALL.md`](docs/INSTALL.md)** : guide d'installation et de premiers pas (Windows MSI, macOS), avec captures d'écran.
-- **[`docs/superpowers/`](docs/superpowers)** : specs et plans d'implémentation des incréments (signature multi-format, accès navigateur multiplateforme, PIN au moment de signer, assistant de prérequis, provisionnement Windows + macOS).
+- **[`docs/INSTALL.md`](docs/INSTALL.md)** : guide d'installation et de premiers pas (Windows MSI, macOS, Linux), avec captures d'écran.
+- **[`docs/superpowers/`](docs/superpowers)** : specs et plans d'implémentation des incréments (signature multi-format, accès navigateur multiplateforme, PIN au moment de signer, assistant de prérequis, provisionnement Windows + macOS + Linux).
 
 ---
 
@@ -234,9 +244,9 @@ Disponible et vérifié :
 - **Vérification** de documents signés (avec trust list FR via LOTL).
 - **PIN saisi au moment de signer** (l'agent démarre verrouillé, reverrouillage après inactivité).
 - **Assistant de prérequis** dans l'UI (détecte l'agent / la carte / le middleware et propose les téléchargements adaptés à l'OS).
-- **Installeurs auto-provisionnants** (certificat de confiance + démarrage automatique, sans étape « accepter le certificat ») : **Windows MSI** et **macOS `.pkg`** (ce dernier vérifié de bout en bout, signature + vérification avec une clé ChamberSign qualifiée).
+- **Installeurs auto-provisionnants** (certificat de confiance + démarrage automatique, sans étape « accepter le certificat ») : **Windows MSI** et **macOS `.pkg`** (tous deux vérifiés de bout en bout, signature + vérification avec une clé ChamberSign qualifiée). **Linux `.deb`** (amd64) : mécanisme de confiance (magasin système PEM + NSS Chrome/Chromium) et autostart XDG vérifiés sur VM Ubuntu 24.04 ; signature réelle sur amd64 à valider.
 
-En cours / conception : confiance **Firefox/NSS**, **signature/notarisation** du `.pkg` macOS, étude de faisabilité **Linux/Ubuntu** (`.deb`).
+En cours / conception : **validation de la signature réelle sur Linux amd64** + publication du `.deb` en Release, confiance **Firefox/NSS**, **signature/notarisation** du `.pkg` macOS, **multi-utilisateur / hébergement**.
 
 ---
 
