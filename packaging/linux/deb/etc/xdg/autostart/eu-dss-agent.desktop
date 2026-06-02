@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=EU-DSS Agent
+Exec=/opt/eu-dss-agent/bin/eu-dss-agent
+X-GNOME-Autostart-enabled=true
+NoDisplay=true

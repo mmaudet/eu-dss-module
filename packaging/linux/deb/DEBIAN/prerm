@@ -1,0 +1,6 @@
+#!/bin/sh
+# Runs as root before files are removed (on remove and upgrade). Best-effort stop of any
+# running agent; XDG autostart relaunches it at the next GUI login.
+set -e
+pkill -f '/opt/eu-dss-agent/bin/eu-dss-agent' 2>/dev/null || true
+exit 0

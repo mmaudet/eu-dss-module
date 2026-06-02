@@ -1,0 +1,23 @@
+#!/bin/sh
+# Runs as root after files are unpacked. Provisions the localhost keystore + cert at the
+# machine-wide path and trusts the cert in the system store (curl/Java/diagnostics). Browsers
+# are handled per-user at the agent's first run. Idempotent / re-install safe.
+set -e
+
+DATA=/var/lib/eudss-agent
+LAUNCHER=/opt/eu-dss-agent/bin/eu-dss-agent
+CERT="$DATA/agent.cer"
+SYSCERT=/usr/local/share/ca-certificates/eudss-agent.crt
+
+mkdir -p "$DATA"
+
+# 1. Generate the keystore + export agent.cer at the machine-wide path.
+EUDSS_AGENT_KEYSTORE="$DATA/agent-keystore.p12" "$LAUNCHER" --provision-cert
+[ -f "$CERT" ] || { echo "postinst: --provision-cert did not produce $CERT" >&2; exit 1; }
+chmod 644 "$DATA/agent-keystore.p12" "$CERT"
+
+# 2. Trust in the system store (read by curl/wget/openssl/Java, NOT by browsers).
+install -m 644 "$CERT" "$SYSCERT"
+update-ca-certificates
+
+exit 0

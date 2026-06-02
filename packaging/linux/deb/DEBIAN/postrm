@@ -1,0 +1,14 @@
+#!/bin/sh
+# Runs as root after files are removed. On remove/purge: drop the system-store cert and the
+# machine-wide state. The per-user ~/.pki/nssdb cert + ~/.eudss-agent/.nss-trusted marker are
+# NOT removed here (a root postrm cannot reliably reach every user home); harmless localhost cert.
+set -e
+SYSCERT=/usr/local/share/ca-certificates/eudss-agent.crt
+case "$1" in
+  remove|purge)
+    rm -f "$SYSCERT"
+    update-ca-certificates --fresh >/dev/null 2>&1 || true
+    rm -rf /var/lib/eudss-agent
+    ;;
+esac
+exit 0
