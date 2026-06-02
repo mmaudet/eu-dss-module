@@ -1,0 +1,48 @@
+#!/bin/bash
+# pkg postinstall (runs as root). Provisions the localhost cert, trusts it machine-wide in the System
+# keychain, installs the user-session LaunchAgent, and drops uninstall.sh. No-op-safe on re-install.
+set -euo pipefail
+
+APP="/Applications/EU-DSS Agent.app"
+LAUNCHER="$APP/Contents/MacOS/EU-DSS Agent"
+DATA="/Library/Application Support/eudss-agent"
+KS="$DATA/agent-keystore.p12"
+CER="$DATA/agent.cer"
+HERE="$(cd "$(dirname "$0")" && pwd)"
+PLIST_SRC="$HERE/com.linagora.eudss.agent.plist"
+PLIST_DST="/Library/LaunchAgents/com.linagora.eudss.agent.plist"
+KEYCHAIN="/Library/Keychains/System.keychain"
+
+mkdir -p "$DATA"
+
+# 1. Generate the keystore + export agent.cer at the machine-wide path (agent reads EUDSS_AGENT_KEYSTORE).
+EUDSS_AGENT_KEYSTORE="$KS" "$LAUNCHER" --provision-cert
+[ -f "$CER" ] || { echo "postinstall: --provision-cert did not produce $CER" >&2; exit 1; }
+chmod 644 "$KS" "$CER"
+
+# 2. Trust the cert machine-wide (Safari + Chrome read the System keychain on macOS).
+security add-trusted-cert -d -r trustRoot -k "$KEYCHAIN" "$CER"
+
+# 3. Save the SHA-1 (no colons) for a targeted uninstall.
+SHA="$(openssl x509 -inform der -in "$CER" -noout -fingerprint -sha1 | sed 's/.*=//; s/://g')"
+printf '%s' "$SHA" > "$DATA/trusted-sha.txt"
+
+# 4. Install the LaunchAgent plist (user-session launch, NOT a LaunchDaemon).
+cp "$PLIST_SRC" "$PLIST_DST"
+chown root:wheel "$PLIST_DST"
+chmod 644 "$PLIST_DST"
+
+# 5. Drop uninstall.sh in the data dir (macOS has no native .pkg uninstaller).
+cp "$HERE/uninstall.sh" "$DATA/uninstall.sh"
+chmod 755 "$DATA/uninstall.sh"
+
+# 6. Start now for the console user (else it starts at next login). Non-fatal if no GUI user.
+CONSOLE_USER="$(stat -f%Su /dev/console 2>/dev/null || true)"
+if [ -n "$CONSOLE_USER" ] && [ "$CONSOLE_USER" != "root" ] && [ "$CONSOLE_USER" != "loginwindow" ]; then
+  UID_N="$(id -u "$CONSOLE_USER")"
+  launchctl bootout "gui/$UID_N/com.linagora.eudss.agent" 2>/dev/null || true
+  launchctl bootstrap "gui/$UID_N" "$PLIST_DST" 2>/dev/null || true
+fi
+
+echo "EU-DSS Agent provisioned: cert trusted (SHA $SHA), LaunchAgent installed."
+exit 0
