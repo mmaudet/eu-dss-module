@@ -15,18 +15,18 @@
 ## File Structure
 
 `eu-dss-agent/`:
-- `pom.xml` — add `bcpkix-jdk18on` + `io.javalin.community.ssl:ssl-plugin`.
-- `src/main/java/.../config/AgentConfig.java` — add `boolean tlsEnabled` (+ keystore path/password defaults).
-- `src/main/java/.../tls/AgentTls.java` — CREATE: load-or-generate the self-signed PKCS12 keystore.
-- `src/main/java/.../AgentMain.java` — register the SSL plugin when TLS on; PNA header; start without a fixed HTTP port when TLS on.
-- `src/test/java/.../AgentHttpSmokeTest.java`, `src/test/.../AgentTlsTest.java` (CREATE) — TLS off for existing tests; a new HTTPS test.
-- `eu-dss-server/src/test/.../FullStackE2ETest.java` — update the `new AgentConfig(...)` call for the new field.
+- `pom.xml` : add `bcpkix-jdk18on` + `io.javalin.community.ssl:ssl-plugin`.
+- `src/main/java/.../config/AgentConfig.java` : add `boolean tlsEnabled` (+ keystore path/password defaults).
+- `src/main/java/.../tls/AgentTls.java` : CREATE: load-or-generate the self-signed PKCS12 keystore.
+- `src/main/java/.../AgentMain.java` : register the SSL plugin when TLS on; PNA header; start without a fixed HTTP port when TLS on.
+- `src/test/java/.../AgentHttpSmokeTest.java`, `src/test/.../AgentTlsTest.java` (CREATE) : TLS off for existing tests; a new HTTPS test.
+- `eu-dss-server/src/test/.../FullStackE2ETest.java` : update the `new AgentConfig(...)` call for the new field.
 
 `bin/`: add `eu-dss-agent-windows.ps1`; refresh `eu-dss-agent-macos.sh` / `eu-dss-agent-linux.sh` wording.
-`packaging/windows/build-agent-msi.ps1` — CREATE: jpackage MSI build.
-`.github/workflows/windows-installer.yml` — CREATE: build MSI on windows-latest.
-`docs/INSTALL.md` — CREATE: per-OS install + cert-trust guide.
-`eu-dss-ui/src/components/SignWorkspace.tsx` — actionable cert-trust card.
+`packaging/windows/build-agent-msi.ps1` : CREATE: jpackage MSI build.
+`.github/workflows/windows-installer.yml` : CREATE: build MSI on windows-latest.
+`docs/INSTALL.md` : CREATE: per-OS install + cert-trust guide.
+`eu-dss-ui/src/components/SignWorkspace.tsx` : actionable cert-trust card.
 
 ---
 
@@ -36,7 +36,7 @@
 
 - [ ] **Step 1: Add dependencies**
 
-In `eu-dss-agent/pom.xml`, inside `<dependencies>` add (versions: bcpkix via `dss-bom`; ssl-plugin matches Javalin — if `${javalin.version}` is not published for ssl-plugin, use the latest `6.x` from Maven Central):
+In `eu-dss-agent/pom.xml`, inside `<dependencies>` add (versions: bcpkix via `dss-bom`; ssl-plugin matches Javalin; if `${javalin.version}` is not published for ssl-plugin, use the latest `6.x` from Maven Central):
 
 ```xml
         <!-- Self-signed cert generation for the agent's HTTPS listener -->
@@ -174,11 +174,11 @@ In `AgentMain.java`: add the keystore password constant + imports, register the 
         Javalin app = buildApp(config, tokenService);
         if (config.tlsEnabled()) {
             app.start();   // the SSL plugin binds the secure port
-            LOG.info("eu-dss agent listening on https://localhost:{} (TLS, self-signed) — CORS {}",
+            LOG.info("eu-dss agent listening on https://localhost:{} (TLS, self-signed) : CORS {}",
                     config.port(), config.corsHosts());
         } else {
             app.start(config.port());
-            LOG.info("eu-dss agent listening on http://localhost:{} (no TLS) — CORS {}",
+            LOG.info("eu-dss agent listening on http://localhost:{} (no TLS) : CORS {}",
                     config.port(), config.corsHosts());
         }
     }
@@ -216,10 +216,10 @@ Keep the existing `/rest/certificates`, `/rest/sign`, and `app.exception(...)` b
 
 - [ ] **Step 6: Update existing tests to the new record field (TLS off)**
 
-In `eu-dss-agent/.../AgentHttpSmokeTest.java` the config is `new AgentConfig(Path.of("/nonexistent/driver"), 0, 0, List.of("localhost:5173"), "0000".toCharArray())` — append `, false` (tlsEnabled=false) so it stays HTTP on a random port.
-In `eu-dss-server/.../FullStackE2ETest.java` the config `new AgentConfig(Path.of("/nonexistent/driver"), 0, 0, List.of("localhost"), "0000".toCharArray())` — append `, false`.
+In `eu-dss-agent/.../AgentHttpSmokeTest.java` the config is `new AgentConfig(Path.of("/nonexistent/driver"), 0, 0, List.of("localhost:5173"), "0000".toCharArray())`; append `, false` (tlsEnabled=false) so it stays HTTP on a random port.
+In `eu-dss-server/.../FullStackE2ETest.java` the config `new AgentConfig(Path.of("/nonexistent/driver"), 0, 0, List.of("localhost"), "0000".toCharArray())`; append `, false`.
 
-- [ ] **Step 7: Add a TLS test** — create `eu-dss-agent/src/test/java/com/linagora/eudss/agent/AgentTlsTest.java`:
+- [ ] **Step 7: Add a TLS test** : create `eu-dss-agent/src/test/java/com/linagora/eudss/agent/AgentTlsTest.java`:
 
 ```java
 package com.linagora.eudss.agent;
@@ -350,13 +350,13 @@ Write-Host "Enter your Card PIN when prompted."
 - [ ] **Step 2: Create `docs/INSTALL.md`** (per-OS install + cert-trust):
 
 ```markdown
-# eu-dss agent — install & first-run
+# eu-dss agent : install & first-run
 
 The agent bridges the website to your USB token (PKCS#11). It runs locally and serves **HTTPS on https://localhost:9795** with a self-signed certificate you accept once per browser.
 
 ## Prerequisites (all OSes)
 - The **IDOPRO PKCS#11 driver** for your token (the agent does not ship it).
-- Java 21 — **except on Windows**, where the MSI bundles its own runtime.
+- Java 21 : **except on Windows**, where the MSI bundles its own runtime.
 
 ## Windows (MSI)
 1. Install the IDOPRO Windows driver.
@@ -504,9 +504,9 @@ Expected: workflow `success`, artifact `eu-dss-agent-msi` present. If WiX/jpacka
 
 **Spec coverage:** agent HTTPS self-signed (T1) ✔; CORS already wired + PNA header (T1) ✔; `EUDSS_AGENT_TLS` flag default true, HTTP for tests (T1) ✔; UI accept-once card (T2) ✔; cross-OS scripts + install guide (T3) ✔; **Windows MSI via jpackage + CI** with trigger+verify (T4, T5) ✔; keystore at `~/.eudss-agent/agent-keystore.p12` (T1) ✔.
 
-**Placeholder scan:** none — complete code/scripts/yaml; commands with expected output. Two explicit *verification points* (ssl-plugin version + API) are flagged with how to resolve, not left vague.
+**Placeholder scan:** none. Complete code/scripts/yaml; commands with expected output. Two explicit *verification points* (ssl-plugin version + API) are flagged with how to resolve, not left vague.
 
 **Type consistency:** `AgentConfig` gains a trailing `boolean tlsEnabled`; every `new AgentConfig(...)` site updated (fromEnv, AgentHttpSmokeTest, FullStackE2ETest; AgentConfigDefaultsTest uses `fromEnv` so it picks up the default). `AgentTls.ensureKeystore(Path, char[])` / `defaultKeystorePath()` used consistently in AgentMain and the test.
 
-**Out of scope (flagged):** native `.pkg`/`.deb`, MSI code-signing, public-cert-domain transport, multi-user (C). Windows/Linux launch scripts and the MSI are not run from macOS — the MSI is built+verified on CI; the scripts are smoke-tested by the user on those OSes.
+**Out of scope (flagged):** native `.pkg`/`.deb`, MSI code-signing, public-cert-domain transport, multi-user (C). Windows/Linux launch scripts and the MSI are not run from macOS; the MSI is built+verified on CI; the scripts are smoke-tested by the user on those OSes.
 ```

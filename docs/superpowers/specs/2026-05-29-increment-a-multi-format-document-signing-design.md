@@ -1,12 +1,12 @@
-# eu-dss — Increment A: multi-format document signing (design)
+# eu-dss : Increment A: multi-format document signing (design)
 
 - **Date:** 2026-05-29
-- **Status:** design APPROVED — ready for implementation planning
+- **Status:** design APPROVED, ready for implementation planning
 - **Scope:** Increment A of the eu-dss signing webapp. Increments B and C are deferred (see §10).
 
 ## 1. Goal & context
 
-Product vision: a React web app where a connected user can **upload one or more documents, sign them, co-sign them (a second signer adds their own signature), and validate them** — from a browser, using the beneficiary's **own** cryptographic keys (USB token / PKCS#11), at eIDAS **AES** level minimum.
+Product vision: a React web app where a connected user can **upload one or more documents, sign them, co-sign them (a second signer adds their own signature), and validate them**, from a browser, using the beneficiary's **own** cryptographic keys (USB token / PKCS#11), at eIDAS **AES** level minimum.
 
 Works today: single-PDF PAdES-B-T signing end-to-end (UI → backend `prepare`/`assemble` → local agent signs a digest with the IDEMIA/ChamberSign token on slot 0) + validation against the EU LOTL (FR) → `TOTAL_PASSED` / `AdESig-QC`. Stack: `eu-dss-server` (Spring Boot / DSS 6.4), `eu-dss-agent` (Javalin PKCS#11 bridge), `eu-dss-ui` (React 19 / Vite).
 
@@ -28,7 +28,7 @@ Out of this project (user decision 2026-05-29): "signature d'un mail" (S/MIME) a
 
 - **Counter-signature = multiple INDEPENDENT signatures** (co-signature). Technically = signing a document that may already contain signatures (PDF incremental update; ASiC add-signature). Same backend operation as a first signature.
 - **Invisible** signatures (no visible appearance) for MVP.
-- **"Sign all"**: batch — sign N selected documents in one action, **one token session** (single PIN entered at agent start).
+- **"Sign all"**: batch, sign N selected documents in one action, **one token session** (single PIN entered at agent start).
 - **Formats:** PDF → **PAdES-B-T**; docx/xlsx/ODF (+ any other type) → **ASiC-E + XAdES-B-T**. Signed office artifact = a **`.asice` container** (eIDAS standard), **not** a native OOXML/ODF embedded signature.
 - Keep the **3-round-trip external-signing flow**; the **agent is unchanged** (signs a raw digest, format-agnostic).
 - **Topology unchanged for A:** UI :5173 + agent :9795 + backend :8080 over HTTP, single machine.
@@ -44,7 +44,7 @@ Per document: UI → `POST /api/sign/prepare` (format-aware) → `{dataToSign, d
   - `PadesSigningService` (existing) for `application/pdf`;
   - new `AsicSigningService` for docx/xlsx/ODF/others → `ASiCWithXAdESService`, ASiC-E, XAdES-BASELINE-T.
   - Both expose the same contract: `prepare(doc, params) → {dataToSign, digest}` and `assemble(doc, params, signatureValue) → signedDoc`.
-- Generalize DTOs: make `SignatureParamsDto` packaging-agnostic — derive PAdES vs ASiC/XAdES from the document type; keep the level conceptually "B-T". Add `documentName` (and/or detected MIME) to drive dispatch; responses carry suggested filename + content type (`application/pdf` or `application/vnd.etsi.asic-e+zip`).
+- Generalize DTOs: make `SignatureParamsDto` packaging-agnostic (derive PAdES vs ASiC/XAdES from the document type); keep the level conceptually "B-T". Add `documentName` (and/or detected MIME) to drive dispatch; responses carry suggested filename + content type (`application/pdf` or `application/vnd.etsi.asic-e+zip`).
 - `/api/validate`: generalize the response to report the detected container/format and per-signature results for any type (already auto-detects; trust + revocation + LOTL wired from prior work).
 - TSA: reuse the configured `OnlineTSPSource` for the -T timestamp on both PAdES and XAdES.
 
@@ -71,16 +71,16 @@ A **multi-document signing workspace** (React 19 / Vite, current stack):
 
 ## 9. Testing
 
-- Backend: extend the E2E suite — an **ASiC sign+validate** test (mirroring the PAdES E2E with the stubbed PKCS#11 + `TestPki`), multi-format dispatch unit tests, and validation of a **co-signed (2-signature)** document. Keep the LOTL gated off in tests (`eudss.lotl.enabled=false`).
+- Backend: extend the E2E suite with an **ASiC sign+validate** test (mirroring the PAdES E2E with the stubbed PKCS#11 + `TestPki`), multi-format dispatch unit tests, and validation of a **co-signed (2-signature)** document. Keep the LOTL gated off in tests (`eudss.lotl.enabled=false`).
 - UI: minimal smoke of the upload → sign → download flow if feasible.
 
 ## 10. Out of scope (A) / deferred / dropped
 
-- **Deferred** (later increments): **B** — cross-platform browser access (mixed-content; agent packaging Win/macOS/Linux); **C** — multi-user / access / hosting.
+- **Deferred** (later increments): **B** (cross-platform browser access, mixed-content, agent packaging Win/macOS/Linux); **C** (multi-user / access / hosting).
 - **Dropped from project:** mail / S-MIME signing; DocuSign/YouSign-equivalent remote signing; visible signatures; full parapheur workflow.
 
 ## 11. Assumptions / open points
 
-- **ASiC-E + XAdES-B-T accepted** for office formats (vs native OOXML/ODF embedded signatures). If the buyer requires native embedded signatures, that is a separate technology (outside DSS) — to confirm with the buyer.
+- **ASiC-E + XAdES-B-T accepted** for office formats (vs native OOXML/ODF embedded signatures). If the buyer requires native embedded signatures, that is a separate technology (outside DSS); to confirm with the buyer.
 - Single signing certificate per user = the local token's slot-0 cert (AES / AdES-QC).
 - All documents in a batch are signed by the same connected user/token.

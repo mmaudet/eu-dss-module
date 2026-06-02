@@ -1,4 +1,4 @@
-# eu-dss — Increment B: cross-platform browser access (design)
+# eu-dss : Increment B: cross-platform browser access (design)
 
 - **Date:** 2026-05-30
 - **Status:** design APPROVED (strategy chosen, Windows MSI added)
@@ -8,7 +8,7 @@
 
 After increment A, the document-signing core works and validation runs end-to-end from the browser. The **sign** flow from a browser is blocked: a hosted **HTTPS** site cannot call the agent at `http://localhost:9795` (mixed content / Private Network restrictions), and even in HTTP dev the UI targets `https://localhost:9795`. Increment B makes the agent reachable from a browser across OSes.
 
-**Chosen transport strategy (brainstorm 2026-05-30):** the agent serves **HTTPS on localhost with a self-signed certificate**; the user accepts it once per browser (NexU-style). Rejected for now: a public cert on a 127.0.0.1-resolving domain (zero-friction but needs domain/cert provisioning — future), and HTTP+Private-Network-Access only (Chromium-only).
+**Chosen transport strategy (brainstorm 2026-05-30):** the agent serves **HTTPS on localhost with a self-signed certificate**; the user accepts it once per browser (NexU-style). Rejected for now: a public cert on a 127.0.0.1-resolving domain (zero-friction but needs domain/cert provisioning, future), and HTTP+Private-Network-Access only (Chromium-only).
 
 ## 2. Transport / mixed-content
 
@@ -36,7 +36,7 @@ After increment A, the document-signing core works and validation runs end-to-en
 
 ## 6. Windows MSI installer (priority demo)
 
-Built with **`jpackage`** (bundled in JDK 21) — produces a self-contained MSI that bundles a JRE, so the end user double-clicks to install; no separate Java needed.
+Built with **`jpackage`** (bundled in JDK 21): produces a self-contained MSI that bundles a JRE, so the end user double-clicks to install; no separate Java needed.
 
 - **Build script** `packaging/windows/build-agent-msi.ps1`: runs `jpackage --type msi --name "EU-DSS Agent" --app-version <v> --input <staging> --main-jar eu-dss-agent-<v>.jar --main-class com.linagora.eudss.agent.AgentMain --win-console --win-menu --win-shortcut --dest <out>` (console app so the `PIN signature :` prompt works). Requires WiX 3.x on PATH.
 - **CI workflow** `.github/workflows/windows-installer.yml` (`workflow_dispatch` + tags): on `windows-latest` → checkout, setup Temurin JDK 21, `mvn -pl eu-dss-agent -am -DskipTests package`, stage the jar, install WiX 3 (`choco install wixtoolset`), run the build script, `upload-artifact` the `.msi`. This produces a downloadable MSI without a local Windows machine and is the reproducible "installer creation".
@@ -59,6 +59,6 @@ Native macOS `.pkg` / Linux `.deb`/`.rpm`; code-signing the MSI; the zero-fricti
 
 ## 10. Assumptions
 
-- The Windows demo box has the **IDOPRO Windows driver** installed (the agent does not ship the PKCS#11 driver — same as macOS).
+- The Windows demo box has the **IDOPRO Windows driver** installed (the agent does not ship the PKCS#11 driver, same as macOS).
 - JDK 21 is the runtime everywhere (the MSI bundles it; mac/linux use an installed Temurin 21).
 - WiX 3.x is acceptable for `jpackage --type msi` (jpackage requires WiX 3, not 4+).

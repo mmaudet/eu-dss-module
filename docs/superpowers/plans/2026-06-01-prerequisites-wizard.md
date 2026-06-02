@@ -1,4 +1,4 @@
-# Prerequisites Wizard (SP1) — Implementation Plan
+# Prerequisites Wizard (SP1) : Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
@@ -14,9 +14,9 @@
 
 ## File Structure
 
-- `eu-dss-ui/src/services/prerequisites.ts` — CREATE: `detectOs()` + `PREREQ_MANIFEST` (per-OS links). One responsibility: OS → download links.
-- `eu-dss-ui/src/components/PrerequisitesPanel.tsx` — CREATE: the checklist UI (agent / card-session / middleware items). Presentational; state comes via props.
-- `eu-dss-ui/src/components/SignWorkspace.tsx` — MODIFY: render the panel in the agent card; add focus/visibility re-check; map `token_unavailable` in `submitPin`.
+- `eu-dss-ui/src/services/prerequisites.ts` : CREATE: `detectOs()` + `PREREQ_MANIFEST` (per-OS links). One responsibility: OS → download links.
+- `eu-dss-ui/src/components/PrerequisitesPanel.tsx` : CREATE: the checklist UI (agent / card-session / middleware items). Presentational; state comes via props.
+- `eu-dss-ui/src/components/SignWorkspace.tsx` : MODIFY: render the panel in the agent card; add focus/visibility re-check; map `token_unavailable` in `submitPin`.
 
 No new CSS (reuses existing `.status info|ok|warn` + `<button>` styles). No new dependency.
 
@@ -94,7 +94,7 @@ Expected: build succeeds (0 TS errors).
 
 - [ ] **Step 3 (optional): sanity-check detectOs logic**
 
-If `npx tsx` is available: `cd eu-dss-ui && npx tsx -e "import {detectOs} from './src/services/prerequisites.ts'; console.log(detectOs('Mozilla Windows NT 10.0'), detectOs('Mozilla Mac OS X'), detectOs('X11; Linux x86_64'), detectOs('weird'))"` → expect `windows macos linux other`. (If tsx is unavailable, skip — the build is the gate.) Then `cd ..`.
+If `npx tsx` is available: `cd eu-dss-ui && npx tsx -e "import {detectOs} from './src/services/prerequisites.ts'; console.log(detectOs('Mozilla Windows NT 10.0'), detectOs('Mozilla Mac OS X'), detectOs('X11; Linux x86_64'), detectOs('weird'))"` → expect `windows macos linux other`. (If tsx is unavailable, skip; the build is the gate.) Then `cd ..`.
 
 - [ ] **Step 4: Commit**
 
@@ -163,7 +163,7 @@ export function PrerequisitesPanel({
           </div>
         ) : (
           <div className="status info">
-            🔒 Carte verrouillée — clique « Signer » et saisis ton PIN.{' '}
+            🔒 Carte verrouillée : clique « Signer » et saisis ton PIN.{' '}
             <button onClick={onUnlock}>Déverrouiller</button>
           </div>
         )

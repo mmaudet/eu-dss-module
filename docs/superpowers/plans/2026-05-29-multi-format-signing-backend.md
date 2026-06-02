@@ -1,4 +1,4 @@
-# Multi-format document signing — Backend (A1) Implementation Plan
+# Multi-format document signing : Backend (A1) Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
@@ -13,7 +13,7 @@
 **Conventions used throughout:**
 - JDK 21 for all builds: `JAVA_HOME=/Library/Java/JavaVirtualMachines/temurin-21.jdk/Contents/Home`
 - Build one module + deps: `mvn -f /Users/mmaudet/work/eu-dss/pom.xml -pl eu-dss-server -am`
-- Tests already gate the LOTL download off via `@TestPropertySource(properties = "eudss.lotl.enabled=false")` on the `@SpringBootTest` classes — keep that on any new `@SpringBootTest`.
+- Tests already gate the LOTL download off via `@TestPropertySource(properties = "eudss.lotl.enabled=false")` on the `@SpringBootTest` classes; keep that on any new `@SpringBootTest`.
 - If any DSS class/method name below does not resolve, verify the exact signature with:
   `javap -classpath "$(find ~/.m2/repository/eu/europa/ec/joinup/sd-dss -name '*-6.4.jar' | tr '\n' ':')" <fully.qualified.ClassName>`
 
@@ -22,26 +22,26 @@
 ## File Structure
 
 **Backend (`eu-dss-server/src/main/java/com/linagora/eudss/server/`):**
-- `dto/PrepareSignatureRequest.java` — MODIFY: `pdfBase64` → `documentBase64` + add `documentName`.
-- `dto/AssembleSignatureRequest.java` — MODIFY: same rename + add `documentName`.
-- `dto/AssembleSignatureResponse.java` — MODIFY: `signedPdfBase64` → `signedDocumentBase64` + add `signedFileName`, `mediaType`.
-- `dto/SignatureParamsDto.java` — MODIFY: rename level enum values to format-agnostic `BASELINE_*`.
-- `service/SignatureMapper.java` — MODIFY: split level mapping (PAdES + XAdES), add `toAsicParams`, add `firstCertificate`.
-- `service/DocumentSigner.java` — CREATE: interface (`dataToSign`, `sign`).
-- `service/SigningFormat.java` — CREATE: enum + extension detector.
-- `service/PadesSigningService.java` — MODIFY: implement `DocumentSigner` (pure DSSDocument in/out; drop request decoding).
-- `service/AsicSigningService.java` — CREATE: `DocumentSigner` for ASiC-E/XAdES.
-- `service/DocumentSigningService.java` — CREATE: facade (`prepare`/`assemble`), format dispatch + common digest/SignatureValue.
-- `service/PdfValidationService.java` → RENAME to `service/DocumentValidationService.java` — MODIFY: param name only (already container-agnostic).
-- `web/SignatureController.java` — MODIFY: depend on `DocumentSigningService`.
-- `web/ValidationController.java` — MODIFY: `ValidateRequest.pdfBase64` → `documentBase64`; depend on `DocumentValidationService`.
-- `config/DssConfig.java` — MODIFY: add `ASiCWithXAdESService` bean.
-- `eu-dss-server/pom.xml` — MODIFY: add `dss-asic-xades`.
+- `dto/PrepareSignatureRequest.java` : MODIFY: `pdfBase64` → `documentBase64` + add `documentName`.
+- `dto/AssembleSignatureRequest.java` : MODIFY: same rename + add `documentName`.
+- `dto/AssembleSignatureResponse.java` : MODIFY: `signedPdfBase64` → `signedDocumentBase64` + add `signedFileName`, `mediaType`.
+- `dto/SignatureParamsDto.java` : MODIFY: rename level enum values to format-agnostic `BASELINE_*`.
+- `service/SignatureMapper.java` : MODIFY: split level mapping (PAdES + XAdES), add `toAsicParams`, add `firstCertificate`.
+- `service/DocumentSigner.java` : CREATE: interface (`dataToSign`, `sign`).
+- `service/SigningFormat.java` : CREATE: enum + extension detector.
+- `service/PadesSigningService.java` : MODIFY: implement `DocumentSigner` (pure DSSDocument in/out; drop request decoding).
+- `service/AsicSigningService.java` : CREATE: `DocumentSigner` for ASiC-E/XAdES.
+- `service/DocumentSigningService.java` : CREATE: facade (`prepare`/`assemble`), format dispatch + common digest/SignatureValue.
+- `service/PdfValidationService.java` → RENAME to `service/DocumentValidationService.java` : MODIFY: param name only (already container-agnostic).
+- `web/SignatureController.java` : MODIFY: depend on `DocumentSigningService`.
+- `web/ValidationController.java` : MODIFY: `ValidateRequest.pdfBase64` → `documentBase64`; depend on `DocumentValidationService`.
+- `config/DssConfig.java` : MODIFY: add `ASiCWithXAdESService` bean.
+- `eu-dss-server/pom.xml` : MODIFY: add `dss-asic-xades`.
 
 **Tests (`eu-dss-server/src/test/java/com/linagora/eudss/server/`):**
-- `SignatureE2ETest.java` — MODIFY: new DTO field names + enum; add a co-signature test method.
-- `FullStackE2ETest.java` — MODIFY: new DTO field names + enum.
-- `AsicSignatureE2ETest.java` — CREATE: sign a non-PDF via ASiC + validate.
+- `SignatureE2ETest.java` : MODIFY: new DTO field names + enum; add a co-signature test method.
+- `FullStackE2ETest.java` : MODIFY: new DTO field names + enum.
+- `AsicSignatureE2ETest.java` : CREATE: sign a non-PDF via ASiC + validate.
 
 ---
 
@@ -180,7 +180,7 @@ Replace the old `toDssLevel` method with these three methods, and add `toAsicPar
 
 In `SignatureE2ETest.java` and `FullStackE2ETest.java`, replace `SignatureParamsDto.SignatureLevelDto.PADES_BASELINE_B` with `SignatureParamsDto.SignatureLevelDto.BASELINE_B`.
 
-- [ ] **Step 4: Verify the module compiles** (tests will still fail to compile until Task 3 renames DTO fields — that's expected; just compile main sources here)
+- [ ] **Step 4: Verify the module compiles** (tests will still fail to compile until Task 3 renames DTO fields; that's expected; just compile main sources here)
 
 Run: `JAVA_HOME=/Library/Java/JavaVirtualMachines/temurin-21.jdk/Contents/Home mvn -f /Users/mmaudet/work/eu-dss/pom.xml -pl eu-dss-server -am -DskipTests compile`
 Expected: `BUILD SUCCESS` (main sources compile).
@@ -782,7 +782,7 @@ Add this method to `SignatureE2ETest.java` (it reuses the class fields `pki`, `p
 Run: `JAVA_HOME=/Library/Java/JavaVirtualMachines/temurin-21.jdk/Contents/Home mvn -f /Users/mmaudet/work/eu-dss/pom.xml -pl eu-dss-server -am test -Dtest=SignatureE2ETest`
 Expected: PASS, including `co_signature_adds_a_second_independent_signature` (`signatureCount == 2`).
 
-Note: if the second signature reports `signatureCount == 1`, the first signature was overwritten instead of incrementally added — check that PAdES uses the default incremental update (it does by default; do NOT set a packaging that flattens the document).
+Note: if the second signature reports `signatureCount == 1`, the first signature was overwritten instead of incrementally added; check that PAdES uses the default incremental update (it does by default; do NOT set a packaging that flattens the document).
 
 - [ ] **Step 3: Commit**
 
@@ -802,7 +802,7 @@ git commit -m "test(backend): co-signature adds a second independent signature"
 Run: `JAVA_HOME=/Library/Java/JavaVirtualMachines/temurin-21.jdk/Contents/Home mvn -f /Users/mmaudet/work/eu-dss/pom.xml test`
 Expected: `BUILD SUCCESS`; agent tests (5: 4 smoke + `AgentConfigDefaultsTest` 3 → actually 4+3) and server tests all green, including the new ASiC + co-signature tests. Confirm `Failures: 0, Errors: 0`.
 
-- [ ] **Step 2: Optional manual smoke (real token)** — only if a signer wants to verify against hardware:
+- [ ] **Step 2: Optional manual smoke (real token)** : only if a signer wants to verify against hardware:
 
 Rebuild + run the backend (`eudss.lotl.enabled` default true) and the agent (slot 0, 4-digit PIN), then sign a `.docx` via the 3-call flow and confirm `/api/validate` reports an `XAdES` signature inside an ASiC container. (Reuse the pattern in `/tmp/eudss_sign_flow.py`, changing the document + `documentName` to `*.docx`.)
 
@@ -817,10 +817,10 @@ git status
 
 ## Self-Review (completed by plan author)
 
-**Spec coverage:** §5 backend items map to tasks — ASiC dep + bean (T1), format-agnostic levels + XAdES/ASiC mapping (T2), `DocumentSigningService` dispatch + `AsicSigningService` + DTO generalization (T3), validation generalization/rename (T3), co-signature (T4), TSA reuse (bean in T1, used by both services). Multi-document "sign all", ZIP, and the workspace UI are explicitly in **A2 (UI plan)**, not here.
+**Spec coverage:** §5 backend items map to tasks: ASiC dep + bean (T1), format-agnostic levels + XAdES/ASiC mapping (T2), `DocumentSigningService` dispatch + `AsicSigningService` + DTO generalization (T3), validation generalization/rename (T3), co-signature (T4), TSA reuse (bean in T1, used by both services). Multi-document "sign all", ZIP, and the workspace UI are explicitly in **A2 (UI plan)**, not here.
 
 **Placeholder scan:** No TBD/TODO; every code step shows complete code; every run step shows the command + expected result.
 
 **Type consistency:** `DocumentSigner.dataToSign/sign`, `SignatureMapper.toPadesParams/toAsicParams/toDssDigest/toPadesLevel/toXadesLevel/firstCertificate`, `SigningFormat.forFileName`, DTO fields `documentBase64`/`documentName`/`signedDocumentBase64`/`signedFileName`/`mediaType`, and `ValidateRequest.documentBase64` are used consistently across tasks and tests.
 
-**Known risk:** exact DSS 6.4 ASiC API names (`ASiCWithXAdESService`, `ASiCWithXAdESSignatureParameters`, `params.aSiC().setContainerType`, `ASiCContainerType.ASiC_E`) — if any does not resolve, confirm with the `javap` one-liner in the conventions section before adapting.
+**Known risk:** exact DSS 6.4 ASiC API names (`ASiCWithXAdESService`, `ASiCWithXAdESSignatureParameters`, `params.aSiC().setContainerType`, `ASiCContainerType.ASiC_E`); if any does not resolve, confirm with the `javap` one-liner in the conventions section before adapting.

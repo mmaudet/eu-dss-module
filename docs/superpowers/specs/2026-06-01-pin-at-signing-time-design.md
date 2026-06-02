@@ -1,4 +1,4 @@
-# Design — PIN au moment de la signature (session déverrouillée à TTL idle)
+# Design : PIN au moment de la signature (session déverrouillée à TTL idle)
 
 Date : 2026-06-01 · Branche : `eu-dss` · Module(s) : `eu-dss-agent`, `eu-dss-ui`
 
@@ -41,11 +41,11 @@ demandé **au moment de signer**, pas au lancement de l'agent.
 | Méthode | Endpoint | Corps | Réponses |
 |--------|----------|-------|----------|
 | POST | `/rest/unlock` | `{ "pin": "1234" }` | `200 {status:"unlocked", expiresInSeconds}` · `401 {error:"pin_incorrect", message}` · `423 {error:"pin_locked", message}` · `503 {error:"token_unavailable", message}` |
-| POST | `/rest/lock` | — | `200 {status:"locked"}` |
-| GET | `/rest/status` | — | `200 {unlocked:bool, expiresInSeconds:int\|null, mode:"interactive"\|"headless"}` |
-| GET | `/rest/certificates` | — | `200 {certificates:[...]}` (réarme le timer) · `401 {error:"locked"}` |
+| POST | `/rest/lock` | *(aucun)* | `200 {status:"locked"}` |
+| GET | `/rest/status` | *(aucun)* | `200 {unlocked:bool, expiresInSeconds:int\|null, mode:"interactive"\|"headless"}` |
+| GET | `/rest/certificates` | *(aucun)* | `200 {certificates:[...]}` (réarme le timer) · `401 {error:"locked"}` |
 | POST | `/rest/sign` | `{keyId,digestBase64,digestAlgorithm}` | `200 {signatureValueBase64}` (réarme le timer) · `401 {error:"locked"}` · 400/500 inchangés |
-| GET | `/rest/health` | — | `200 {status:"ok"}` (inchangé, ne touche jamais le token) |
+| GET | `/rest/health` | *(aucun)* | `200 {status:"ok"}` (inchangé, ne touche jamais le token) |
 
 Nouveaux DTO : `UnlockRequest(String pin)`, `StatusResponse(boolean unlocked, Long expiresInSeconds, String mode)`.
 En-tête `Access-Control-Allow-Private-Network: true` et règles CORS s'appliquent aussi aux nouveaux endpoints (le `before`/plugin CORS couvre toutes les routes).

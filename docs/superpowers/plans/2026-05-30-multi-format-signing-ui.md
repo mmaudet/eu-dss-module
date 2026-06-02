@@ -1,14 +1,14 @@
-# Multi-format document signing — UI (A2) Implementation Plan
+# Multi-format document signing : UI (A2) Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax.
 
-**Goal:** Turn the `eu-dss-ui` Sign page into a multi-document workspace that signs PDF **and** office files, updates to the new backend wire contract, isolates per-file errors, and downloads results individually or as a ZIP — plus generalize the Validate view to any signed document.
+**Goal:** Turn the `eu-dss-ui` Sign page into a multi-document workspace that signs PDF **and** office files, updates to the new backend wire contract, isolates per-file errors, and downloads results individually or as a ZIP, plus generalize the Validate view to any signed document.
 
 **Architecture:** React 19 / Vite, no router (tab state in `App`). A `SignWorkspace` component holds a list of per-file `SignDoc` records (status machine), drives the 3-round-trip flow per file through `backendApi` (new contract) + the unchanged `agentApi`, and downloads via `fileUtils`. Client-side ZIP via `fflate`.
 
-**Tech Stack:** React 19, TypeScript ~5.7, Vite 6, `fflate` (new). **No unit-test runner exists** in this module, so each task is verified with `npm run build` (which runs `tsc -b && vite build` — a real typecheck + bundle) and the final task adds a browser smoke.
+**Tech Stack:** React 19, TypeScript ~5.7, Vite 6, `fflate` (new). **No unit-test runner exists** in this module, so each task is verified with `npm run build` (which runs `tsc -b && vite build`, a real typecheck + bundle) and the final task adds a browser smoke.
 
-**HARD DEPENDENCY (why this plan exists):** the backend wire contract changed in A1 and the current UI still speaks the old one. After A1, requests use `documentBase64` + `documentName`, the level enum is `BASELINE_*` (not `PADES_BASELINE_*`), the assemble response is `{signedDocumentBase64, signedFileName, mediaType}`, and validate takes `documentBase64`. This plan updates the UI to that contract. (The agent contract — `keyId`/`digestBase64`/`digestAlgorithm` → `signatureValueBase64` — is unchanged; `agentApi.ts` stays as-is. The `https://localhost:9795` agent URL and mixed-content/HTTPS are increment **B**, out of scope here.)
+**HARD DEPENDENCY (why this plan exists):** the backend wire contract changed in A1 and the current UI still speaks the old one. After A1, requests use `documentBase64` + `documentName`, the level enum is `BASELINE_*` (not `PADES_BASELINE_*`), the assemble response is `{signedDocumentBase64, signedFileName, mediaType}`, and validate takes `documentBase64`. This plan updates the UI to that contract. (The agent contract, `keyId`/`digestBase64`/`digestAlgorithm` → `signatureValueBase64`, is unchanged; `agentApi.ts` stays as-is. The `https://localhost:9795` agent URL and mixed-content/HTTPS are increment **B**, out of scope here.)
 
 **Conventions:** work in `/Users/mmaudet/work/eu-dss/eu-dss-ui`. Build = `cd eu-dss-ui && npm run build`. Commit on branch `eu-dss`.
 
@@ -17,13 +17,13 @@
 ## File Structure
 
 `eu-dss-ui/`:
-- `package.json` — ADD dependency `fflate`.
-- `src/services/backendApi.ts` — MODIFY: new contract (types + calls).
-- `src/services/pdfUtils.ts` → RENAME to `src/services/fileUtils.ts` — generalize download (any media type) + add `downloadZip`.
-- `src/components/SignPage.tsx` → REPLACE with `src/components/SignWorkspace.tsx` — per-file workspace.
-- `src/components/ValidatePage.tsx` — MODIFY: accept any file; wording.
-- `src/App.tsx` — MODIFY: render `SignWorkspace`; header wording.
-- `src/styles.css` — MODIFY: add styles for the document list + status badges.
+- `package.json` : ADD dependency `fflate`.
+- `src/services/backendApi.ts` : MODIFY: new contract (types + calls).
+- `src/services/pdfUtils.ts` → RENAME to `src/services/fileUtils.ts` : generalize download (any media type) + add `downloadZip`.
+- `src/components/SignPage.tsx` → REPLACE with `src/components/SignWorkspace.tsx` : per-file workspace.
+- `src/components/ValidatePage.tsx` : MODIFY: accept any file; wording.
+- `src/App.tsx` : MODIFY: render `SignWorkspace`; header wording.
+- `src/styles.css` : MODIFY: add styles for the document list + status badges.
 
 ---
 
@@ -162,7 +162,7 @@ function triggerDownload(blob: Blob, filename: string): void {
 - [ ] **Step 4: Build (typecheck). It will FAIL until Task 2/3 update the components**
 
 Run: `cd /Users/mmaudet/work/eu-dss/eu-dss-ui && npx tsc -b`
-Expected: type errors ONLY in `SignPage.tsx` / `ValidatePage.tsx` (they still import `pdfUtils`/`downloadBase64Pdf` and use old fields). That's expected — those are replaced in Tasks 2-3. Do NOT fix them here.
+Expected: type errors ONLY in `SignPage.tsx` / `ValidatePage.tsx` (they still import `pdfUtils`/`downloadBase64Pdf` and use old fields). That's expected; those are replaced in Tasks 2-3. Do NOT fix them here.
 
 - [ ] **Step 5: Commit**
 
@@ -434,7 +434,7 @@ export function App() {
   return (
     <div className="app">
       <header>
-        <h1>eu-dss — Signature électronique</h1>
+        <h1>eu-dss : Signature électronique</h1>
         <p>Signer (PAdES / ASiC) et vérifier un ou plusieurs documents avec une clé USB cryptographique.</p>
       </header>
 
@@ -482,7 +482,7 @@ git commit -m "feat(ui): multi-document sign workspace (per-file status, multi-f
 
 **Files:** `src/components/ValidatePage.tsx`
 
-- [ ] **Step 1: Update `src/components/ValidatePage.tsx`** — accept any signed document and use the renamed util import:
+- [ ] **Step 1: Update `src/components/ValidatePage.tsx`** : accept any signed document and use the renamed util import:
 
 Change the import line `import { fileToBase64 } from '../services/pdfUtils';` to `import { fileToBase64 } from '../services/fileUtils';`.
 
@@ -490,12 +490,12 @@ Change the file input to accept any document: replace `accept="application/pdf"`
 
 Change the heading text `<h2>PDF signé à vérifier</h2>` to `<h2>Document signé à vérifier</h2>`.
 
-(The rest of `ValidatePage.tsx` already uses `backendApi.validate(...)` which now sends `documentBase64`, and renders `signatureFormat` per signature — no further change needed.)
+(The rest of `ValidatePage.tsx` already uses `backendApi.validate(...)` which now sends `documentBase64`, and renders `signatureFormat` per signature; no further change needed.)
 
 - [ ] **Step 2: Full typecheck + bundle must now be green**
 
 Run: `cd /Users/mmaudet/work/eu-dss/eu-dss-ui && npm run build`
-Expected: `tsc -b` passes (no type errors) and `vite build` writes `dist/` — `BUILD` succeeds with exit 0.
+Expected: `tsc -b` passes (no type errors) and `vite build` writes `dist/`. `BUILD` succeeds with exit 0.
 
 - [ ] **Step 3: Commit**
 
@@ -526,7 +526,7 @@ cd /Users/mmaudet/work/eu-dss/eu-dss-ui && npm run dev
 ```
 Expected: Vite serves on `http://localhost:5173`.
 
-- [ ] **Step 3: Browser smoke** — load `http://localhost:5173`, confirm: the app renders with the "Signer / Vérifier" tabs; the Sign tab shows the agent card (likely "introuvable" without the token — acceptable), the multi-file Documents input, and the disabled "Signer tout" / "Tout télécharger (ZIP)" buttons; the Validate tab accepts a file and, given a signed PDF/`.asice`, returns the signatures table. Capture a screenshot of each tab. Report any console errors.
+- [ ] **Step 3: Browser smoke** : load `http://localhost:5173`, confirm: the app renders with the "Signer / Vérifier" tabs; the Sign tab shows the agent card (likely "introuvable" without the token, acceptable), the multi-file Documents input, and the disabled "Signer tout" / "Tout télécharger (ZIP)" buttons; the Validate tab accepts a file and, given a signed PDF/`.asice`, returns the signatures table. Capture a screenshot of each tab. Report any console errors.
 
 - [ ] **Step 4: No code commit** (verification only). If the smoke surfaces a bug, fix it in the relevant task's files, rebuild, and commit with a `fix(ui): …` message.
 
@@ -536,8 +536,8 @@ Expected: Vite serves on `http://localhost:5173`.
 
 **Spec coverage (spec §7):** multi-document upload (Task 2 list) ✔; per-file status + detected existing signatures (Task 2 `detect`/badge) ✔; "Sign all" one token session + per-file sign (Task 2 `signAll`/`signSingle`) ✔; counter-signature = signing an already-signed doc, labelled "Contre-signer" (Task 2) ✔; per-file error isolation (Task 2 try/catch per doc, loop continues) ✔; download each + ZIP (Task 1 utils + Task 2 buttons) ✔; Validate view for any signed document with per-signature report (Task 3) ✔; multi-format (PDF native, others → `.asice` via the backend; UI just uses `signedFileName`/`mediaType`) ✔. New contract update ✔.
 
-**Placeholder scan:** none — complete code for every changed file; exact commands with expected outcomes.
+**Placeholder scan:** none. Complete code for every changed file; exact commands with expected outcomes.
 
 **Type consistency:** `backendApi.prepare(documentBase64, documentName, params)`, `assemble(documentBase64, documentName, params, signatureValueBase64)` returning `{signedDocumentBase64, signedFileName, mediaType}`, `validate(documentBase64)`; `SignatureLevel='BASELINE_T'`; `fileUtils.downloadBase64(base64, filename, mediaType)` + `downloadZip(entries, zipName)`; `SignDoc` status machine used consistently. `agentApi` unchanged.
 
-**Out of scope (flagged):** agent HTTPS / mixed-content / cross-OS install = increment **B**; multi-user/auth = **C**; visible signatures, mail, remote signing = dropped. Within-session re-signing of a just-signed doc is intentionally not supported (download then re-upload to add a further signature) — keeps the per-file model simple and correct.
+**Out of scope (flagged):** agent HTTPS / mixed-content / cross-OS install = increment **B**; multi-user/auth = **C**; visible signatures, mail, remote signing = dropped. Within-session re-signing of a just-signed doc is intentionally not supported (download then re-upload to add a further signature); this keeps the per-file model simple and correct.

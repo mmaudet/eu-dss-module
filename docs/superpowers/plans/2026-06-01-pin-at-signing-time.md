@@ -1,4 +1,4 @@
-# PIN at Signing Time — Implementation Plan
+# PIN at Signing Time : Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
@@ -15,25 +15,25 @@
 ## File Structure
 
 **Agent (`eu-dss-agent`):**
-- `config/AgentConfig.java` — MODIFY: `pin` optional (nullable), add `pinSessionTtlSeconds`, `headless()`, `mode()`; drop console prompt.
-- `dto/UnlockRequest.java` — CREATE.
-- `dto/StatusResponse.java` — CREATE.
-- `service/TokenService.java` — MODIFY: session state (`unlock`/`lock`/`isUnlocked`/`expiresInSeconds`/`touch`), idle scheduler, testable open/close seams, PIN zeroize.
-- `service/LockedException.java` — CREATE: thrown when an op needs an unlocked token.
-- `AgentMain.java` — MODIFY: new endpoints, 401 gating, error mapping, headless auto-unlock.
+- `config/AgentConfig.java` : MODIFY: `pin` optional (nullable), add `pinSessionTtlSeconds`, `headless()`, `mode()`; drop console prompt.
+- `dto/UnlockRequest.java` : CREATE.
+- `dto/StatusResponse.java` : CREATE.
+- `service/TokenService.java` : MODIFY: session state (`unlock`/`lock`/`isUnlocked`/`expiresInSeconds`/`touch`), idle scheduler, testable open/close seams, PIN zeroize.
+- `service/LockedException.java` : CREATE: thrown when an op needs an unlocked token.
+- `AgentMain.java` : MODIFY: new endpoints, 401 gating, error mapping, headless auto-unlock.
 - Tests: `config/AgentConfigDefaultsTest.java` (MODIFY), `service/TokenServiceSessionTest.java` (CREATE), `AgentHttpSmokeTest.java` (MODIFY).
 
 **Server (`eu-dss-server`):**
-- `FullStackE2ETest.java` — MODIFY: unlock the stubbed agent before signing.
+- `FullStackE2ETest.java` : MODIFY: unlock the stubbed agent before signing.
 
 **UI (`eu-dss-ui`):**
-- `services/agentApi.ts` — MODIFY: typed `AgentError`, `unlock`/`lock`/`getStatus`.
-- `components/PinModal.tsx` — CREATE.
-- `components/SignWorkspace.tsx` — MODIFY: status state, lock indicator + Lock button, PIN modal, unlock-before-sign + 401 handling.
+- `services/agentApi.ts` : MODIFY: typed `AgentError`, `unlock`/`lock`/`getStatus`.
+- `components/PinModal.tsx` : CREATE.
+- `components/SignWorkspace.tsx` : MODIFY: status state, lock indicator + Lock button, PIN modal, unlock-before-sign + 401 handling.
 
 ---
 
-## Task 1: AgentConfig — optional PIN, TTL, mode
+## Task 1: AgentConfig : optional PIN, TTL, mode
 
 **Files:**
 - Modify: `eu-dss-agent/src/main/java/com/linagora/eudss/agent/config/AgentConfig.java`
@@ -97,7 +97,7 @@ class AgentConfigDefaultsTest {
 - [ ] **Step 2: Run the test, verify it fails to compile**
 
 Run: `mvn -f eu-dss-agent/pom.xml -q test-compile`
-Expected: FAIL — `fromEnv(Map,String)` not found, `pinSessionTtlSeconds()`/`headless()`/`mode()` not found.
+Expected: FAIL (`fromEnv(Map,String)` not found, `pinSessionTtlSeconds()`/`headless()`/`mode()` not found).
 
 - [ ] **Step 3: Rewrite AgentConfig**
 
@@ -173,7 +173,7 @@ public record AgentConfig(
 - [ ] **Step 4: Run the test, verify it passes**
 
 Run: `mvn -f eu-dss-agent/pom.xml -q -Dtest=AgentConfigDefaultsTest test`
-Expected: PASS (4 tests). (Other modules won't compile yet — that's fine, fixed in later tasks; run only this test class.)
+Expected: PASS (4 tests). (Other modules won't compile yet; that's fine, fixed in later tasks; run only this test class.)
 
 - [ ] **Step 5: Commit**
 
@@ -215,7 +215,7 @@ git commit -m "feat(agent): add UnlockRequest + StatusResponse DTOs"
 
 ---
 
-## Task 3: TokenService — unlock/lock session + idle timer
+## Task 3: TokenService : unlock/lock session + idle timer
 
 **Files:**
 - Create: `eu-dss-agent/src/main/java/com/linagora/eudss/agent/service/LockedException.java`
@@ -320,7 +320,7 @@ class TokenServiceSessionTest {
 - [ ] **Step 3: Run the test, verify it fails**
 
 Run: `mvn -f eu-dss-agent/pom.xml -q -Dtest=TokenServiceSessionTest test`
-Expected: FAIL — `doOpenAndLogin`/`doClose`/`unlock`/`isUnlocked`/`expiresInSeconds` not defined.
+Expected: FAIL (`doOpenAndLogin`/`doClose`/`unlock`/`isUnlocked`/`expiresInSeconds` not defined).
 
 - [ ] **Step 4: Rewrite TokenService with the session machinery**
 
@@ -499,7 +499,7 @@ git commit -m "feat(agent): TokenService unlock/lock session with idle-TTL re-lo
 
 ---
 
-## Task 4: AgentMain — endpoints, gating, error mapping
+## Task 4: AgentMain : endpoints, gating, error mapping
 
 **Files:**
 - Modify: `eu-dss-agent/src/main/java/com/linagora/eudss/agent/AgentMain.java`
@@ -652,7 +652,7 @@ class AgentHttpSmokeTest {
 - [ ] **Step 2: Run the smoke test, verify it fails**
 
 Run: `mvn -f eu-dss-agent/pom.xml -q -Dtest=AgentHttpSmokeTest test`
-Expected: FAIL — `new AgentConfig(...)` arity, `/rest/status` 404, no `locked`/`pin_incorrect` mapping.
+Expected: FAIL (`new AgentConfig(...)` arity, `/rest/status` 404, no `locked`/`pin_incorrect` mapping).
 
 - [ ] **Step 3: Rewrite AgentMain**
 
@@ -830,7 +830,7 @@ Expected: PASS (6 tests).
 - [ ] **Step 5: Run the whole agent module test suite**
 
 Run: `mvn -f eu-dss-agent/pom.xml test`
-Expected: BUILD SUCCESS — `AgentConfigDefaultsTest` (4), `TokenServiceSessionTest` (5), `AgentHttpSmokeTest` (6), `AgentTlsTest` (1).
+Expected: BUILD SUCCESS. `AgentConfigDefaultsTest` (4), `TokenServiceSessionTest` (5), `AgentHttpSmokeTest` (6), `AgentTlsTest` (1).
 
 - [ ] **Step 6: Commit**
 
@@ -873,7 +873,7 @@ git commit -m "test(server): unlock the stubbed agent in FullStackE2ETest (PIN-a
 
 ---
 
-## Task 6: UI agentApi — typed errors + unlock/lock/status
+## Task 6: UI agentApi : typed errors + unlock/lock/status
 
 **Files:**
 - Modify: `eu-dss-ui/src/services/agentApi.ts`
@@ -1066,7 +1066,7 @@ git commit -m "feat(ui): PinModal component (masked PIN entry + card-lock warnin
 
 ---
 
-## Task 8: SignWorkspace — status, lock indicator, unlock-before-sign
+## Task 8: SignWorkspace : status, lock indicator, unlock-before-sign
 
 **Files:**
 - Modify: `eu-dss-ui/src/components/SignWorkspace.tsx`
@@ -1241,7 +1241,7 @@ Note: when locked, `certificates` may be empty → `selectedKeyId` empty. After 
   }
 ```
 
-(Use this second version — it unlocks before reading `certificates`.)
+(Use this second version; it unlocks before reading `certificates`.)
 
 - [ ] **Step 6: Render the lock indicator + the PinModal**
 
@@ -1283,7 +1283,7 @@ Expected: build succeeds, no TS errors.
 
 ```bash
 git add eu-dss-ui/src/components/SignWorkspace.tsx
-git commit -m "feat(ui): PIN-at-signing flow — status, lock indicator, unlock-before-sign, mid-batch re-prompt"
+git commit -m "feat(ui): PIN-at-signing flow, status, lock indicator, unlock-before-sign, mid-batch re-prompt"
 ```
 
 ---
@@ -1311,12 +1311,12 @@ Expected: success.
 
 - [ ] **Step 4: Update memory note (optional)**
 
-The roadmap memory's "Open UX item (PIN at signing time)" is now implemented — note it as done in `project_signing_roadmap.md` after merge.
+The roadmap memory's "Open UX item (PIN at signing time)" is now implemented; note it as done in `project_signing_roadmap.md` after merge.
 
 ---
 
 ## Self-Review (completed by plan author)
 
 - **Spec coverage:** decisions 1–5 → Tasks 1 (config/mode/TTL), 3 (session/idle/zeroize), 4 (endpoints/gating/error-map/headless), 6–8 (UI collect/modal/indicator). API table → Task 4. Error mapping → Task 4 `mapTokenError`. Tests → Tasks 1,3,4,5; UI build → 6,7,8. Acceptance #1–8 → covered by AgentHttpSmokeTest + manual smoke (Task 9). ✓
-- **Placeholder scan:** none — every code step has complete code; Task 5 is intentionally adaptive (it depends on the current FullStackE2ETest shape) but gives the exact rule + reference stub. ✓
+- **Placeholder scan:** none. Every code step has complete code; Task 5 is intentionally adaptive (it depends on the current FullStackE2ETest shape) but gives the exact rule + reference stub. ✓
 - **Type consistency:** `unlock/lock/isUnlocked/expiresInSeconds/touch` consistent across TokenService (Task 3), the smoke-test stub + endpoints (Task 4); `AgentError.code` values (`locked`, `pin_incorrect`, `pin_locked`) consistent between AgentMain (Task 4) and the UI (Tasks 6, 8); `AgentSessionStatus`/`StatusResponse` fields (`unlocked`, `expiresInSeconds`, `mode`) consistent agent↔UI. ✓

@@ -1,4 +1,4 @@
-# Design — Prerequisites wizard (SP1 of zero-friction onboarding)
+# Design : Prerequisites wizard (SP1 of zero-friction onboarding)
 
 Date : 2026-06-01 · Branche : `eu-dss` · Module : `eu-dss-ui` (pur front, zéro changement agent)
 
@@ -38,18 +38,18 @@ C'est **SP1** d'un onboarding zéro-friction en 2 sous-projets :
 
 - **CREATE `eu-dss-ui/src/services/prerequisites.ts`**
   - `export type AgentOs = 'windows' | 'macos' | 'linux' | 'other'`
-  - `export function detectOs(): AgentOs` — via `navigator.userAgentData?.platform` sinon `navigator.userAgent`
+  - `export function detectOs(): AgentOs` : via `navigator.userAgentData?.platform` sinon `navigator.userAgent`
     (`/win/i`→windows, `/mac/i`→macos, `/linux/i`→linux, sinon other).
   - `export interface PrereqLinks { agentInstaller: { url: string; label: string; isGuide?: boolean }, middleware: { url: string; label: string }, docUrl: string }`
-  - `export const PREREQ_MANIFEST: Record<AgentOs, PrereqLinks>` — config éditable :
+  - `export const PREREQ_MANIFEST: Record<AgentOs, PrereqLinks>` : config éditable :
     - `windows`: agentInstaller url = la GitHub Release du MSI (placeholder constant `WINDOWS_AGENT_MSI_URL` en tête de fichier, à pointer sur la release), label « Télécharger l'agent (MSI) » ; middleware url `https://support.chambersign.fr/pilotes/` ; docUrl `…`.
     - `macos`: agentInstaller `{ url: docUrl, label: 'Guide d’installation (macOS)', isGuide: true }` (pas de pkg) ; middleware `https://support.chambersign.fr/pilotes/` ; docUrl.
     - `linux`: idem macOS (guide) ; middleware ChamberSign.
     - `other`: tout en lien vers docUrl.
   - Le manifest est **la seule source à éditer** quand les assets bougent (URLs).
-- **CREATE `eu-dss-ui/src/components/PrerequisitesPanel.tsx`** — la checklist (voir « États » plus bas).
+- **CREATE `eu-dss-ui/src/components/PrerequisitesPanel.tsx`** : la checklist (voir « États » plus bas).
   Props : l'état agent/session courant + callbacks (`onRecheck`, `onUnlock`, `onLock`).
-- **MODIFY `eu-dss-ui/src/components/SignWorkspace.tsx`** — remplace le corps de la carte « Agent local »
+- **MODIFY `eu-dss-ui/src/components/SignWorkspace.tsx`** : remplace le corps de la carte « Agent local »
   par `<PrerequisitesPanel/>` ; ajoute le re-check `focus`/`visibilitychange` ; mappe `token_unavailable`
   dans `submitPin` vers la guidance middleware.
 - (Pas de changement à `agentApi.ts` : tout est déjà exposé.)
@@ -70,11 +70,11 @@ ignorer un re-check si un autre est en cours.
 | Prérequis | Détection | Rendu |
 |-----------|-----------|-------|
 | **1. Agent local** | `getStatus()` ok ? | ✓ « Agent connecté » · ✗ « Agent non détecté » → boutons **[Télécharger l'agent]** (manifest OS), **[Accepter le certificat]** (`https://localhost:9795/rest/health`, nouvel onglet), **[Revérifier]** |
-| **2. Carte / session** (si agent ok) | `status.unlocked` | ✓ « Carte déverrouillée » (+ minuteur `expiresInSeconds` libellé « re-verrou ~Ns » + bouton **Verrouiller**) · ○ « Verrouillée — clique Signer et saisis ton PIN » (état normal, pas une erreur) |
+| **2. Carte / session** (si agent ok) | `status.unlocked` | ✓ « Carte déverrouillée » (+ minuteur `expiresInSeconds` libellé « re-verrou ~Ns » + bouton **Verrouiller**) · ○ « Verrouillée : clique Signer et saisis ton PIN » (état normal, pas une erreur) |
 | **3. Middleware & token** | non vérifiable (Q1) | Ligne d'info passive : « Carte branchée + middleware ChamberSign requis » + **[Télécharger le middleware]** + **[Guide]**. **Révélé en erreur** si unlock → `token_unavailable` (voir ci-dessous). |
 
 Le panneau est non bloquant : le reste de l'UI (upload docs, Valider) reste utilisable. Le bouton
-« Signer » reste actif (déclenche la modale PIN si verrouillé — comportement déjà en place).
+« Signer » reste actif (déclenche la modale PIN si verrouillé, comportement déjà en place).
 
 ## Reveal `token_unavailable`
 
@@ -85,7 +85,7 @@ Dans `SignWorkspace.submitPin`, le mapping d'erreur passe de (pin_locked / pin_i
 - autre → message brut (inchangé)
 
 (L'agent renvoie 503 `token_unavailable` au `/rest/unlock` quand `doOpenAndLogin` échoue faute de
-driver/token — c'est là que le besoin middleware/token se révèle, conformément à Q1.)
+driver/token ; c'est là que le besoin middleware/token se révèle, conformément à Q1.)
 
 ## Détection d'OS
 

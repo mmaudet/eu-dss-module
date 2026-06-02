@@ -1,8 +1,8 @@
-# SP2 Windows — Trusted Cert + Auto-start Implementation Plan
+# SP2 Windows : Trusted Cert + Auto-start Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** On Windows, the MSI install provisions a machine-wide `localhost` cert, trusts it in `LocalMachine\Root` (so no browser cert warning), and registers `HKLM\Run` user-session auto-start (agent always running) — eliminating the "accept the cert" + manual-launch friction.
+**Goal:** On Windows, the MSI install provisions a machine-wide `localhost` cert, trusts it in `LocalMachine\Root` (so no browser cert warning), and registers `HKLM\Run` user-session auto-start (agent always running), eliminating the "accept the cert" + manual-launch friction.
 
 **Architecture:** The agent gains a machine-wide keystore path (Windows → `C:\ProgramData\eudss-agent`) and a `--provision-cert` mode (generate keystore + export the public `.cer`, then exit). The Windows installer runs, at install (elevated), a PowerShell action that calls `--provision-cert`, trusts the cert via `certutil -addstore -f Root`, and writes `HKLM\Run`; uninstall reverses it. The cert stays a directly-trusted self-signed `localhost` cert (no CA hierarchy). Auto-start is a user-session launch (HKLM\Run), never a Windows service (the agent needs the user's smart-card session).
 
@@ -10,23 +10,23 @@
 
 **Spec:** `docs/superpowers/specs/2026-06-01-sp2-windows-trusted-cert-autostart-design.md`
 
-> **STATUS — COMPLETE (2026-06-01).** All tasks done and verified on the Parallels Win11 ARM VM. The MSI (a `main.wxs` override fed to jpackage via `--resource-dir`) provisions a `localhost` cert trusted in `LocalMachine\Root` + an `HKLM\Run` user-session auto-start; uninstall reverses it; reinstall is idempotent. Trusted HTTPS confirmed (`Invoke-WebRequest` with no cert-skip -> 200, i.e. no browser warning). The Inno-wrapper fallback (Task 4 Step 5) was NOT needed. Provisioning MSI published to release `eu-dss-agent-v0.1.0` (asset `EU-DSS-Agent-0.1.0.msi`). Build gotcha: a literal `--` inside an XML comment makes candle.exe reject the override (exit 104) and jpackage hides the error unless run with `--verbose`. Auto-start caveat: the full reboot->logon e2e couldn't be driven headlessly (VM `AutoAdminLogon=0`); covered by the verified HKLM\Run entry + the proven-working launcher.
+> **STATUS : COMPLETE (2026-06-01).** All tasks done and verified on the Parallels Win11 ARM VM. The MSI (a `main.wxs` override fed to jpackage via `--resource-dir`) provisions a `localhost` cert trusted in `LocalMachine\Root` + an `HKLM\Run` user-session auto-start; uninstall reverses it; reinstall is idempotent. Trusted HTTPS confirmed (`Invoke-WebRequest` with no cert-skip -> 200, i.e. no browser warning). The Inno-wrapper fallback (Task 4 Step 5) was NOT needed. Provisioning MSI published to release `eu-dss-agent-v0.1.0` (asset `EU-DSS-Agent-0.1.0.msi`). Build gotcha: a literal `--` inside an XML comment makes candle.exe reject the override (exit 104) and jpackage hides the error unless run with `--verbose`. Auto-start caveat: the full reboot->logon e2e couldn't be driven headlessly (VM `AutoAdminLogon=0`); covered by the verified HKLM\Run entry + the proven-working launcher.
 
 ---
 
 ## File Structure
 
-- `eu-dss-agent/.../tls/AgentTls.java` — MODIFY: OS-aware `defaultKeystorePath`, add `exportCertificate`.
-- `eu-dss-agent/.../AgentMain.java` — MODIFY: handle `--provision-cert` arg (provision + exit).
-- `eu-dss-agent/src/test/.../tls/AgentTlsTest.java` — MODIFY/ADD: keystore-path + export-cert tests.
-- `packaging/windows/wix-resources/provision-install.ps1` — CREATE: trust cert + HKLM\Run.
-- `packaging/windows/wix-resources/provision-uninstall.ps1` — CREATE: untrust + cleanup.
-- `packaging/windows/wix-resources/main.wxs` — CREATE: jpackage WiX override (perMachine + custom actions).
-- `packaging/windows/build-agent-msi.ps1` — MODIFY: pass `--resource-dir` + `--win-per-user-install` removed.
+- `eu-dss-agent/.../tls/AgentTls.java` : MODIFY: OS-aware `defaultKeystorePath`, add `exportCertificate`.
+- `eu-dss-agent/.../AgentMain.java` : MODIFY: handle `--provision-cert` arg (provision + exit).
+- `eu-dss-agent/src/test/.../tls/AgentTlsTest.java` : MODIFY/ADD: keystore-path + export-cert tests.
+- `packaging/windows/wix-resources/provision-install.ps1` : CREATE: trust cert + HKLM\Run.
+- `packaging/windows/wix-resources/provision-uninstall.ps1` : CREATE: untrust + cleanup.
+- `packaging/windows/wix-resources/main.wxs` : CREATE: jpackage WiX override (perMachine + custom actions).
+- `packaging/windows/build-agent-msi.ps1` : MODIFY: pass `--resource-dir` + `--win-per-user-install` removed.
 
 ---
 
-## Task 1: Agent — machine-wide keystore path on Windows
+## Task 1: Agent : machine-wide keystore path on Windows
 
 **Files:**
 - Modify: `eu-dss-agent/src/main/java/com/linagora/eudss/agent/tls/AgentTls.java`
@@ -50,12 +50,12 @@ void keystorePath_is_machinewide_on_windows_else_home() {
 }
 ```
 
-- [ ] **Step 2: Run it — verify it fails to compile**
+- [ ] **Step 2: Run it, verify it fails to compile**
 
 Run: `mvn -f eu-dss-agent/pom.xml -q -Dtest=AgentTlsTest test`
-Expected: FAIL — `defaultKeystorePath(String,String,String,String)` not found.
+Expected: FAIL (`defaultKeystorePath(String,String,String,String)` not found).
 
-- [ ] **Step 3: Implement** — replace the existing `defaultKeystorePath()` in `AgentTls.java` with:
+- [ ] **Step 3: Implement** : replace the existing `defaultKeystorePath()` in `AgentTls.java` with:
 
 ```java
     public static Path defaultKeystorePath() {
@@ -80,7 +80,7 @@ Expected: FAIL — `defaultKeystorePath(String,String,String,String)` not found.
     }
 ```
 
-- [ ] **Step 4: Run the test — verify it passes**
+- [ ] **Step 4: Run the test, verify it passes**
 
 Run: `mvn -f eu-dss-agent/pom.xml -q -Dtest=AgentTlsTest test`
 Expected: PASS.
@@ -94,7 +94,7 @@ git commit -m "feat(agent): machine-wide keystore path on Windows (ProgramData) 
 
 ---
 
-## Task 2: Agent — export cert (.cer) + `--provision-cert` mode
+## Task 2: Agent : export cert (.cer) + `--provision-cert` mode
 
 **Files:**
 - Modify: `eu-dss-agent/src/main/java/com/linagora/eudss/agent/tls/AgentTls.java`
@@ -120,10 +120,10 @@ void exportCertificate_writes_a_localhost_der_cert() throws Exception {
 }
 ```
 
-- [ ] **Step 2: Run it — verify it fails**
+- [ ] **Step 2: Run it, verify it fails**
 
 Run: `mvn -f eu-dss-agent/pom.xml -q -Dtest=AgentTlsTest test`
-Expected: FAIL — `exportCertificate` not found.
+Expected: FAIL (`exportCertificate` not found).
 
 - [ ] **Step 3: Implement `exportCertificate` in `AgentTls.java`** (add before the private constructor)
 
@@ -142,7 +142,7 @@ Expected: FAIL — `exportCertificate` not found.
     }
 ```
 
-- [ ] **Step 4: Wire `--provision-cert` in `AgentMain.main`** — at the very start of `main(String[] args)`, before `AgentConfig config = AgentConfig.load();`, add:
+- [ ] **Step 4: Wire `--provision-cert` in `AgentMain.main`** : at the very start of `main(String[] args)`, before `AgentConfig config = AgentConfig.load();`, add:
 
 ```java
         if (java.util.Arrays.asList(args).contains("--provision-cert")) {
@@ -161,10 +161,10 @@ Expected: FAIL — `exportCertificate` not found.
         }
 ```
 
-- [ ] **Step 5: Run the test + build — verify green**
+- [ ] **Step 5: Run the test + build, verify green**
 
 Run: `mvn -f eu-dss-agent/pom.xml test`
-Expected: BUILD SUCCESS (AgentTlsTest now has the export test green; existing tests unaffected — `--provision-cert` is only exercised manually).
+Expected: BUILD SUCCESS (AgentTlsTest now has the export test green; existing tests unaffected; `--provision-cert` is only exercised manually).
 
 - [ ] **Step 6: Manual local check of `--provision-cert`** (optional, on the Mac)
 
@@ -250,7 +250,7 @@ Run jpackage once with `--temp` to keep the generated sources:
 `jpackage --type msi --name "EU-DSS Agent" --app-version 0.1.0 --vendor LINAGORA --input <staging> --main-jar <jar> --main-class com.linagora.eudss.agent.AgentMain --win-console --temp C:\eudss-jp-temp --dest C:\eudss-jp-out`
 Then copy `C:\eudss-jp-temp\config\main.wxs` to `packaging/windows/wix-resources/main.wxs` as the editable base.
 
-- [ ] **Step 2: Edit `main.wxs`** — make it perMachine + add the install/uninstall custom actions. In the `<Package>` element set `InstallScope="perMachine"` (or `<Property Id="ALLUSERS" Value="1"/>`), and inside the `<Product>` add (the two PS scripts are laid down as app payload under the install dir's `wix-resources\`):
+- [ ] **Step 2: Edit `main.wxs`** : make it perMachine + add the install/uninstall custom actions. In the `<Package>` element set `InstallScope="perMachine"` (or `<Property Id="ALLUSERS" Value="1"/>`), and inside the `<Product>` add (the two PS scripts are laid down as app payload under the install dir's `wix-resources\`):
 
 ```xml
     <CustomAction Id="EudssProvision" Directory="INSTALLDIR" Impersonate="no" Execute="deferred" Return="check"
@@ -265,7 +265,7 @@ Then copy `C:\eudss-jp-temp\config\main.wxs` to `packaging/windows/wix-resources
 
 Ensure the two `.ps1` are part of the installed payload (add them to the jpackage `--input` staging so they land under `INSTALLDIR\wix-resources\`, or reference them via a WiX `<Component>` in the override).
 
-- [ ] **Step 3: Update `build-agent-msi.ps1`** — copy the scripts into staging + pass the resource dir; drop per-user:
+- [ ] **Step 3: Update `build-agent-msi.ps1`** : copy the scripts into staging + pass the resource dir; drop per-user:
 
 Replace the `& jpackage` block with one that adds:
 ```powershell
@@ -324,5 +324,5 @@ Re-run `gh release upload eu-dss-agent-v0.1.0 <new-msi> --clobber` (or a new tag
 ## Self-Review (completed by plan author)
 
 - **Spec coverage:** machine-wide keystore (spec A1) → Task 1. `--provision-cert` (spec A2) → Task 2. Trust in LocalMachine\Root + HKLM\Run (spec B) → Task 3 scripts + Task 4 custom action. jpackage `--resource-dir` + CI (spec C) → Task 4 + build-script change; wrapper fallback (spec) → Task 4 Step 5. Acceptance #1–6 → Task 5 (+ agent unit tests for the path/export). ✓
-- **Placeholder scan:** none — agent code + PS scripts are complete; Task 4's WiX is concrete (the only "finalized on Windows" part is grafting the custom-action XML onto jpackage's captured template, with exact XML provided + a fully-specified wrapper fallback). Not hand-waving.
+- **Placeholder scan:** none. Agent code + PS scripts are complete; Task 4's WiX is concrete (the only "finalized on Windows" part is grafting the custom-action XML onto jpackage's captured template, with exact XML provided + a fully-specified wrapper fallback). Not hand-waving.
 - **Type consistency:** `defaultKeystorePath(String,String,String,String)` signature consistent (Task 1 def ↔ Task 2 `--provision-cert` no-arg call). `exportCertificate(Path,char[],Path)` consistent (Task 2 def ↔ test ↔ provision-install.ps1 expecting `agent.cer` beside the keystore). Keystore password `eudss-agent` (TLS_KEYSTORE_PASSWORD) consistent agent↔scripts. `EUDSS_AGENT_KEYSTORE` override consistent. ✓

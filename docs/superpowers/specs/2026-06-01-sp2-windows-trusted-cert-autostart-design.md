@@ -1,4 +1,4 @@
-# Design — SP2 Windows : cert de confiance + auto-start (piloté par le MSI)
+# Design : SP2 Windows : cert de confiance + auto-start (piloté par le MSI)
 
 Date : 2026-06-01 · Branche : `eu-dss` · Modules : `eu-dss-agent` (petits changements) + le build MSI (`.github/workflows/windows-installer.yml` + ressources WiX)
 
@@ -21,15 +21,15 @@ lancer l'agent manuellement. Ce spec couvre **SP2 pour Windows** (le MSI jpackag
 
 1. **Cert de confiance = CA/cert local trusté dans le magasin OS** (mkcert-style), pas de cert public sur domaine, pas de HTTP.
 2. **Windows d'abord** ; macOS = SP2b.
-3. **Piloté par l'installeur MSI** (admin à l'install, machine-wide) — pas d'auto-bootstrap agent runtime.
+3. **Piloté par l'installeur MSI** (admin à l'install, machine-wide), pas d'auto-bootstrap agent runtime.
 4. **Cert généré par-machine, jamais embarqué** (clé privée shippée = MITM si fuite).
 5. **Auto-start = lancement en session UTILISATEUR via `HKLM\…\Run`, PAS un service Windows.** Un service tourne
    en session 0 et ne verrait pas la carte (bug PC/SC débuggé 2026-06-01 : l'agent doit être dans la session de l'utilisateur).
-6. On **trustе directement le cert auto-signé `localhost`** (pas de hiérarchie CA séparée) — un seul host, plus simple, suffisant.
+6. On **trustе directement le cert auto-signé `localhost`** (pas de hiérarchie CA séparée) : un seul host, plus simple, suffisant.
 
 ## Composants
 
-### A. Agent (`eu-dss-agent`) — petits changements
+### A. Agent (`eu-dss-agent`) : petits changements
 
 1. **Chemin keystore machine-wide sur Windows.** `AgentTls.defaultKeystorePath()` : si OS Windows →
    `C:\ProgramData\eudss-agent\agent-keystore.p12` ; sinon `~/.eudss-agent/agent-keystore.p12` (inchangé). Override possible via
@@ -41,7 +41,7 @@ lancer l'agent manuellement. Ce spec couvre **SP2 pour Windows** (le MSI jpackag
    (En run normal, l'agent réutilise le keystore existant comme aujourd'hui.)
 3. Aucune autre logique TLS ne change (le cert reste auto-signé localhost ; on ne fait que (1) le ranger machine-wide et (2) permettre à l'install de le générer/exporter).
 
-### B. Installeur MSI — custom action (install + uninstall)
+### B. Installeur MSI : custom action (install + uninstall)
 
 jpackage rend les custom actions pénibles → on customise via **`--resource-dir <dir>`** :
 - Override du `main.wxs` généré par jpackage (jpackage lit les overrides nommés dans le resource-dir) pour déclarer :
@@ -57,7 +57,7 @@ jpackage rend les custom actions pénibles → on customise via **`--resource-di
     1. `certutil -delstore Root <thumbprint>` (lu depuis trusted-thumbprint.txt).
     2. `reg delete "HKLM\…\Run" /v "EU-DSS Agent" /f`.
     3. Supprime `C:\ProgramData\eudss-agent\`.
-- **Fallback si l'injection WiX dans le MSI jpackage est trop tordue** : un mini-wrapper (`.exe` Inno/bootstrapper) qui lance le MSI jpackage normal puis exécute `provision-install.ps1` en élévé — façon `chambersign_smartcard.exe`. Décision à l'implémentation selon la faisabilité du `--resource-dir`.
+- **Fallback si l'injection WiX dans le MSI jpackage est trop tordue** : un mini-wrapper (`.exe` Inno/bootstrapper) qui lance le MSI jpackage normal puis exécute `provision-install.ps1` en élévé, à la façon de `chambersign_smartcard.exe`. Décision à l'implémentation selon la faisabilité du `--resource-dir`.
 
 ### C. CI (`.github/workflows/windows-installer.yml`)
 
@@ -96,4 +96,4 @@ Au login suivant : l'agent démarre tout seul, sert https://localhost:9795 avec 
 
 ## Hors scope (follow-ups / SP2b)
 
-Firefox (magasin NSS séparé — l'auto-trust Root ne le couvre pas) ; **macOS = SP2b** (pkg + `security add-trusted-cert` System keychain + LaunchAgent `~/Library/LaunchAgents`) ; Linux ; hiérarchie CA séparée + rotation ; code-signing du MSI lui-même.
+Firefox (magasin NSS séparé, l'auto-trust Root ne le couvre pas) ; **macOS = SP2b** (pkg + `security add-trusted-cert` System keychain + LaunchAgent `~/Library/LaunchAgents`) ; Linux ; hiérarchie CA séparée + rotation ; code-signing du MSI lui-même.

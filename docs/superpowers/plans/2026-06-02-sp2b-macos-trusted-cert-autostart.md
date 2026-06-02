@@ -1,10 +1,10 @@
-# SP2b macOS — Trusted Cert + Auto-start (.pkg) Implementation Plan
+# SP2b macOS : Trusted Cert + Auto-start (.pkg) Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Ship the macOS agent as an unsigned `.pkg` whose postinstall provisions the `localhost` cert into the System keychain (trusted machine-wide → Safari + Chrome) and installs a user-session LaunchAgent — eliminating the "accept the certificate" + manual-launch friction, exactly as the Windows MSI does.
+**Goal:** Ship the macOS agent as an unsigned `.pkg` whose postinstall provisions the `localhost` cert into the System keychain (trusted machine-wide → Safari + Chrome) and installs a user-session LaunchAgent, eliminating the "accept the certificate" + manual-launch friction, exactly as the Windows MSI does.
 
-**Architecture:** `jpackage --type app-image` builds `EU-DSS Agent.app` (bundled arm64 JRE); `pkgbuild`/`productbuild` wrap it into a `.pkg` carrying a `postinstall` script. At install (root), postinstall runs the agent's existing `--provision-cert` (keystore + `agent.cer` at a machine-wide path via `EUDSS_AGENT_KEYSTORE`), trusts the cert with `security add-trusted-cert` in `/Library/Keychains/System.keychain`, and installs `/Library/LaunchAgents/com.linagora.eudss.agent.plist` (user-session launch, **not** a LaunchDaemon — the agent must see the user's smart card). No Java code changes.
+**Architecture:** `jpackage --type app-image` builds `EU-DSS Agent.app` (bundled arm64 JRE); `pkgbuild`/`productbuild` wrap it into a `.pkg` carrying a `postinstall` script. At install (root), postinstall runs the agent's existing `--provision-cert` (keystore + `agent.cer` at a machine-wide path via `EUDSS_AGENT_KEYSTORE`), trusts the cert with `security add-trusted-cert` in `/Library/Keychains/System.keychain`, and installs `/Library/LaunchAgents/com.linagora.eudss.agent.plist` (user-session launch, **not** a LaunchDaemon; the agent must see the user's smart card). No Java code changes.
 
 **Tech Stack:** JDK 21 `jpackage` + `pkgbuild`/`productbuild` + bash + `launchd` plist ; `security`/`openssl` for cert trust ; GitHub Actions on `macos-latest` (arm64). Tested locally on the arm64 dev Mac (middleware already present).
 
@@ -14,12 +14,12 @@
 
 ## File Structure
 
-- `packaging/macos/scripts/postinstall` — CREATE: pkg postinstall (root): provision cert, trust in System keychain, save SHA, install + bootstrap LaunchAgent, drop uninstall.sh.
-- `packaging/macos/scripts/com.linagora.eudss.agent.plist` — CREATE: the LaunchAgent plist (static; fixed paths). Bundled in the pkg Scripts dir; copied to `/Library/LaunchAgents` by postinstall.
-- `packaging/macos/scripts/uninstall.sh` — CREATE: reverse everything (bootout + untrust by SHA + remove). Copied into the data dir at install; run with `sudo`.
-- `packaging/macos/build-agent-pkg.sh` — CREATE: jpackage app-image → pkgbuild → productbuild → `dist/EU-DSS-Agent-0.1.0.pkg`.
-- `.github/workflows/macos-installer.yml` — CREATE: CI build on `macos-latest`.
-- `docs/INSTALL.md` — MODIFY: refresh the macOS section to describe the `.pkg` (Task 7, after local verification).
+- `packaging/macos/scripts/postinstall` : CREATE: pkg postinstall (root): provision cert, trust in System keychain, save SHA, install + bootstrap LaunchAgent, drop uninstall.sh.
+- `packaging/macos/scripts/com.linagora.eudss.agent.plist` : CREATE: the LaunchAgent plist (static; fixed paths). Bundled in the pkg Scripts dir; copied to `/Library/LaunchAgents` by postinstall.
+- `packaging/macos/scripts/uninstall.sh` : CREATE: reverse everything (bootout + untrust by SHA + remove). Copied into the data dir at install; run with `sudo`.
+- `packaging/macos/build-agent-pkg.sh` : CREATE: jpackage app-image → pkgbuild → productbuild → `dist/EU-DSS-Agent-0.1.0.pkg`.
+- `.github/workflows/macos-installer.yml` : CREATE: CI build on `macos-latest`.
+- `docs/INSTALL.md` : MODIFY: refresh the macOS section to describe the `.pkg` (Task 7, after local verification).
 
 > The three files under `packaging/macos/scripts/` are all bundled by `pkgbuild --scripts` into the installer's Scripts archive, so at install time `postinstall` finds its siblings (`com.linagora.eudss.agent.plist`, `uninstall.sh`) next to itself via `"$(dirname "$0")"`.
 
@@ -140,7 +140,7 @@ exit 0
 chmod +x packaging/macos/scripts/postinstall
 bash -n packaging/macos/scripts/postinstall && echo "syntax OK"
 ```
-Expected: `syntax OK`. (If `shellcheck` is installed: `shellcheck packaging/macos/scripts/postinstall` — warnings acceptable, no errors.)
+Expected: `syntax OK`. (If `shellcheck` is installed: `shellcheck packaging/macos/scripts/postinstall`; warnings acceptable, no errors.)
 
 - [ ] **Step 3: Commit**
 
@@ -443,7 +443,7 @@ In `docs/INSTALL.md`, under `## 3. macOS`, add the `.pkg` path as the recommende
 4. Ouvrez l'application de signature : « Agent connecté » doit apparaître.
 
 > **Désinstaller** : `sudo "/Library/Application Support/eudss-agent/uninstall.sh"` (macOS n'a pas de désinstalleur .pkg natif).
-> **Firefox** garde son propre magasin de certificats (NSS) — non couvert par le trousseau Système (suivi séparé).
+> **Firefox** garde son propre magasin de certificats (NSS), non couvert par le trousseau Système (suivi séparé).
 
 ### Alternative développeur (exécuter le jar)
 
@@ -467,5 +467,5 @@ git commit -m "docs(install): document the macOS .pkg (System-keychain trust + a
 ## Self-Review (completed by plan author)
 
 - **Spec coverage:** ① build jpackage app-image + pkgbuild/productbuild → Task 4 + Task 5 (CI). ② no Java change, `EUDSS_AGENT_KEYSTORE` machine-wide → used in the plist (Task 1) + postinstall (Task 2), no agent task. ③ postinstall provision + `security add-trusted-cert` System keychain + SHA + LaunchAgent + bootstrap → Task 2. ④ uninstall.sh → Task 3 (+ dropped by Task 2 step 5). ⑤ CI macos-latest arm64 → Task 5. ⑥ local acceptance (keychain, no browser warning, auto-start, sign, uninstall) → Task 6. Doc → Task 7. Acceptance criteria 1–5 of the spec ↔ Task 6 steps 2–6. ✓
-- **Placeholder scan:** none — every script is shown in full; commands have expected output; no "TBD"/"handle errors". ✓
+- **Placeholder scan:** none. Every script is shown in full; commands have expected output; no "TBD"/"handle errors". ✓
 - **Type/Name consistency:** `com.linagora.eudss.agent` Label/identifier consistent (plist ↔ pkgbuild `--identifier` ↔ `launchctl …/com.linagora.eudss.agent` ↔ plist filename). Paths consistent across tasks: app `/Applications/EU-DSS Agent.app/Contents/MacOS/EU-DSS Agent`; data `/Library/Application Support/eudss-agent/{agent-keystore.p12,agent.cer,trusted-sha.txt,uninstall.sh}`; plist `/Library/LaunchAgents/com.linagora.eudss.agent.plist`; keychain `/Library/Keychains/System.keychain`. `EUDSS_AGENT_KEYSTORE` value identical in plist (Task 1) and postinstall provision call (Task 2). SHA stored colon-stripped (postinstall) and consumed by `security delete-certificate -Z` (uninstall). Version `0.1.0` consistent (build script ↔ pkg name ↔ doc). ✓

@@ -1,11 +1,11 @@
-# eu-dss — Installation et premiers pas (Windows & macOS)
+# eu-dss : Installation et premiers pas (Windows & macOS)
 
 L'application **eu-dss** signe et vérifie des documents (PAdES / ASiC) avec votre **clé USB
 cryptographique** (carte à puce / token PKCS#11). La signature se fait dans votre navigateur, mais
 la clé privée ne quitte **jamais** votre carte : un petit programme local, l'**agent**, fait le pont
 entre le site web et votre token.
 
-> **L'agent en bref** — il tourne sur votre poste et expose **`https://localhost:9795`**. Il ne reçoit
+> **L'agent en bref** : il tourne sur votre poste et expose **`https://localhost:9795`**. Il ne reçoit
 > jamais votre clé : le site lui envoie une empreinte (un condensat) à signer, et l'agent renvoie la
 > signature calculée *par la carte*. Votre **code PIN** est demandé **au moment de signer**, dans
 > l'application (et non au démarrage de l'agent).
@@ -22,7 +22,7 @@ entre le site web et votre token.
 
 ---
 
-## 2. Windows (installeur MSI — recommandé)
+## 2. Windows (installeur MSI, recommandé)
 
 C'est le chemin le plus simple : l'installeur fait **tout** automatiquement (certificat de confiance +
 démarrage automatique). Aucune étape « accepter le certificat ».
@@ -38,31 +38,31 @@ démarrage automatique). Aucune étape « accepter le certificat ».
 
 > Rien d'autre à faire : pas de PIN à saisir au démarrage, pas de certificat à accepter manuellement.
 
-### À quoi ça ressemble — le parcours de signature
+### À quoi ça ressemble : le parcours de signature
 
 > L'interface **EU-DSS Sign** est identique sur Windows et macOS.
 
 **Avant l'installation** (ou si l'agent est arrêté), l'application affiche un bandeau d'aide avec les
 liens de téléchargement :
 
-![Agent non détecté — l'application propose de télécharger l'agent et le middleware](images/app/01-agent-non-detecte.png)
+![Agent non détecté : l'application propose de télécharger l'agent et le middleware](images/app/01-agent-non-detecte.png)
 
 **Une fois l'agent installé et la carte reconnue** : « Agent connecté », l'état de la carte et le
 **certificat de signature qualifié** s'affichent.
 
-![Agent connecté — carte reconnue, certificat de signature qualifié](images/app/02-signer-connecte.png)
+![Agent connecté : carte reconnue, certificat de signature qualifié](images/app/02-signer-connecte.png)
 
 **Au moment de signer**, saisissez votre **code PIN** sur le pavé numérique (jamais stocké ni transmis) :
 
 ![Saisie du code PIN de la carte](images/app/03-pin.png)
 
-**Documents signés** — récapitulatif, métadonnées scellées, téléchargement individuel ou ZIP :
+**Documents signés** : récapitulatif, métadonnées scellées, téléchargement individuel ou ZIP :
 
-![Documents signés — récapitulatif et téléchargements](images/app/04-succes.png)
+![Documents signés : récapitulatif et téléchargements](images/app/04-succes.png)
 
-**Vérifier** une signature — verdict eIDAS (TOTAL_PASSED) et rapport DSS détaillé :
+**Vérifier** une signature : verdict eIDAS (TOTAL_PASSED) et rapport DSS détaillé :
 
-![Vérification — verdict TOTAL_PASSED et rapport DSS](images/app/05-verifier.png)
+![Vérification : verdict TOTAL_PASSED et rapport DSS](images/app/05-verifier.png)
 
 ---
 
@@ -78,7 +78,7 @@ liens de téléchargement :
 4. Ouvrez l'application de signature : « Agent connecté » doit apparaître.
 
 > **Désinstaller** : `sudo "/Library/Application Support/eudss-agent/uninstall.sh"` (macOS n'a pas de désinstalleur .pkg natif).
-> **Firefox** garde son propre magasin de certificats (NSS) — non couvert par le trousseau Système (suivi séparé).
+> **Firefox** garde son propre magasin de certificats (NSS), non couvert par le trousseau Système (suivi séparé).
 
 ### Alternative développeur (exécuter le jar)
 
@@ -99,7 +99,7 @@ liens de téléchargement :
 3. Cliquez sur **Signer** : l'application vous demande alors votre **code PIN de carte**.
 4. La signature est calculée par la carte et appliquée au document.
 
-> **Session PIN** — après une signature, la carte reste déverrouillée pendant **~5 minutes**
+> **Session PIN** : après une signature, la carte reste déverrouillée pendant **~5 minutes**
 > (compte à rebours affiché), puis se re-verrouille automatiquement. Vous pouvez aussi cliquer
 > **« Verrouiller »** à tout moment. Le PIN n'est jamais stocké sur le disque.
 
@@ -113,7 +113,7 @@ liens de téléchargement :
 | **Bouton « Signer » indisponible / « token indisponible »** | Une autre application monopolise la carte (p. ex. *LOCAL TRUST FORCE*), ou le token n'est pas branché, ou le middleware est absent. | Fermez l'autre application de carte à puce, vérifiez que le token est inséré et que le middleware ChamberSign est installé. |
 | **« PIN incorrect »** | Mauvais code PIN. | Ressaisissez. ⚠️ **Après ~3 essais erronés, la carte se bloque** (déblocage auprès de l'émetteur). |
 | **Avertissement de certificat** (macOS) | Le certificat local de l'agent n'a pas été accepté. | Ouvrez `https://localhost:9795/rest/health` et acceptez-le. (Sous Windows, le MSI le fait pour vous.) |
-| **Vérifier que l'agent répond** | — | Ouvrez `https://localhost:9795/rest/health` : vous devez voir `{"status":"ok"}`. |
+| **Vérifier que l'agent répond** | | Ouvrez `https://localhost:9795/rest/health` : vous devez voir `{"status":"ok"}`. |
 
 ---
 
@@ -138,7 +138,7 @@ msiexec /x "EU-DSS-Agent-0.1.0.msi" /qn
 | Démarrage automatique (session utilisateur) | `HKLM\Software\Microsoft\Windows\CurrentVersion\Run` → `EU-DSS Agent` |
 
 > Le démarrage auto est un lancement **en session utilisateur** (clé `Run`), et **non** un service
-> Windows : un service tournerait en session 0 et ne verrait pas la carte à puce de l'utilisateur.
+> Windows ; un service tournerait en session 0 et ne verrait pas la carte à puce de l'utilisateur.
 
 ### Variables d'environnement de l'agent
 
@@ -152,7 +152,7 @@ L'agent se configure entièrement par variables d'environnement (utile pour un d
 | `EUDSS_AGENT_TLS` | `true` | HTTPS activé. `false` → HTTP en clair (dev local uniquement). |
 | `EUDSS_CORS_HOSTS` | `http://localhost:5173,http://localhost:8080,http://localhost:4173` | Origines web autorisées (CORS). |
 | `EUDSS_PIN_SESSION_TTL` | `300` | Durée (secondes) de la session déverrouillée avant re-verrouillage automatique. |
-| `EUDSS_AGENT_PIN` | *(vide)* | Si défini, mode **headless** : déverrouillage automatique au démarrage, sans re-verrou. À réserver aux scénarios non interactifs. |
+| `EUDSS_AGENT_PIN` | *(vide)* | Si défini, mode **headless** : déverrouillage automatique au démarrage, sans re-verrou. Réservé aux scénarios non interactifs. |
 | `EUDSS_AGENT_KEYSTORE` | *selon l'OS* ² | Chemin du keystore TLS (surcharge). |
 | `EUDSS_AGENT_TLS_PASSWORD` | `eudss-agent` | Mot de passe du keystore TLS. |
 
