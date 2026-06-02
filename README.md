@@ -16,7 +16,7 @@ Public visé : utilisateurs disposant d'un token de signature qualifiée (ex. **
 Le **modèle de sécurité** repose sur trois principes :
 
 1. **La clé privée reste sur le token.** L'agent ne reçoit jamais la clé ni ne l'exporte. Le serveur lui transmet une **empreinte (digest)** à signer, et l'agent renvoie la **valeur de signature calculée par la carte**.
-2. **Agent local en HTTPS sur `https://localhost:9795`**, avec un certificat auto-signé `CN=localhost` (SAN `localhost` / `127.0.0.1`) généré **par poste**. Sous Windows, l'installeur MSI rend ce certificat de confiance automatiquement ; sous macOS/Linux, il est accepté une fois.
+2. **Agent local en HTTPS sur `https://localhost:9795`**, avec un certificat auto-signé `CN=localhost` (SAN `localhost` / `127.0.0.1`) généré **par poste**. Les installeurs **Windows MSI** et **macOS `.pkg`** rendent ce certificat de confiance automatiquement ; par la voie « jar » (développement) il est accepté une fois dans le navigateur.
 3. **PIN au moment de signer.** L'agent démarre **verrouillé**. Le PIN est saisi dans l'application au moment de signer (`/rest/unlock`), n'est jamais mis en cache, et la session se reverrouille après un délai d'inactivité (5 min par défaut).
 
 ### Flux de signature (3 allers-retours)
@@ -78,7 +78,17 @@ L'installeur fait tout automatiquement (certificat de confiance + démarrage à 
 
 Détails et captures d'écran : [`docs/INSTALL.md`](docs/INSTALL.md).
 
-### macOS / Linux (exécuter le jar)
+### macOS (recommandé — installeur .pkg)
+
+Comme le MSI Windows, le `.pkg` fait tout automatiquement (certificat de confiance dans le trousseau Système + démarrage à l'ouverture de session, aucun certificat à accepter) :
+
+1. Installer le middleware ChamberSign et brancher le token.
+2. Télécharger **`EU-DSS-Agent-0.1.0.pkg`** ([Releases](https://github.com/mmaudet/twake-eu-dss-module/releases/tag/eu-dss-agent-v0.1.0)) ; non signé → premier lancement par **clic droit → Ouvrir**.
+3. Installer (mot de passe administrateur), puis ouvrir l'application de signature.
+
+Détails + désinstallation : [`docs/INSTALL.md`](docs/INSTALL.md). (Firefox garde son propre magasin NSS — suivi séparé.)
+
+### macOS / Linux (exécuter le jar — développement)
 
 Compiler l'agent et le serveur, puis lancer l'agent avec le script adapté à votre OS :
 
@@ -93,7 +103,7 @@ mvn -DskipTests package
 
 L'agent démarre **verrouillé** et écoute sur `https://localhost:9795`. Le PIN est saisi dans l'application au moment de signer. Les scripts positionnent des valeurs par défaut (pilote PKCS#11, slot, port, hôtes CORS) que vous pouvez surcharger via les variables `EUDSS_*` (voir [Développement](#développement)).
 
-Sous macOS, vous acceptez le certificat `localhost` **une fois** dans le navigateur (l'approbation automatique est pour l'instant réservée à Windows). Un installeur `.pkg` macOS est en cours de conception.
+Par cette voie « jar » sous macOS/Linux, vous acceptez le certificat `localhost` **une fois** dans le navigateur (l'auto-confiance est gérée par les installeurs MSI / `.pkg`).
 
 ### Stack de développement (serveur + UI)
 
@@ -181,17 +191,17 @@ eu-dss/
 
 | Release | Contenu |
 |---|---|
-| [`eu-dss-agent-v0.1.0`](https://github.com/mmaudet/twake-eu-dss-module/releases/tag/eu-dss-agent-v0.1.0) | Installeur **Windows MSI** — [`EU-DSS-Agent-0.1.0.msi`](https://github.com/mmaudet/twake-eu-dss-module/releases/download/eu-dss-agent-v0.1.0/EU-DSS-Agent-0.1.0.msi) (runtime Java embarqué, certificat de confiance + démarrage automatique) |
+| [`eu-dss-agent-v0.1.0`](https://github.com/mmaudet/twake-eu-dss-module/releases/tag/eu-dss-agent-v0.1.0) | Installeurs de l'agent (runtime Java embarqué, certificat de confiance + démarrage automatique) : **Windows MSI** [`EU-DSS-Agent-0.1.0.msi`](https://github.com/mmaudet/twake-eu-dss-module/releases/download/eu-dss-agent-v0.1.0/EU-DSS-Agent-0.1.0.msi) · **macOS pkg** [`EU-DSS-Agent-0.1.0.pkg`](https://github.com/mmaudet/twake-eu-dss-module/releases/download/eu-dss-agent-v0.1.0/EU-DSS-Agent-0.1.0.pkg) (non signé) |
 | [`eu-dss-docs-v0.1.0`](https://github.com/mmaudet/twake-eu-dss-module/releases/tag/eu-dss-docs-v0.1.0) | Guide d'installation — [PDF](https://github.com/mmaudet/twake-eu-dss-module/releases/download/eu-dss-docs-v0.1.0/Guide-installation-eu-dss.pdf) · [HTML](https://github.com/mmaudet/twake-eu-dss-module/releases/download/eu-dss-docs-v0.1.0/Guide-installation-eu-dss.html) |
 
-L'installeur MSI est construit par GitHub Actions ([`.github/workflows/windows-installer.yml`](.github/workflows/windows-installer.yml)) via `jpackage` + WiX, sur tag `v*` ou déclenchement manuel.
+Les installeurs sont construits par GitHub Actions via `jpackage` : Windows ([`windows-installer.yml`](.github/workflows/windows-installer.yml), + WiX) et macOS ([`macos-installer.yml`](.github/workflows/macos-installer.yml), + `pkgbuild`/`productbuild`), sur tag `v*` ou déclenchement manuel.
 
 ---
 
 ## Documentation
 
 - **[`docs/INSTALL.md`](docs/INSTALL.md)** — guide d'installation et de premiers pas (Windows MSI, macOS), avec captures d'écran.
-- **[`docs/superpowers/`](docs/superpowers)** — specs et plans d'implémentation des incréments (signature multi-format, accès navigateur multiplateforme, PIN au moment de signer, assistant de prérequis, provisionnement Windows).
+- **[`docs/superpowers/`](docs/superpowers)** — specs et plans d'implémentation des incréments (signature multi-format, accès navigateur multiplateforme, PIN au moment de signer, assistant de prérequis, provisionnement Windows + macOS).
 
 ---
 
@@ -203,9 +213,9 @@ Disponible et vérifié :
 - **Vérification** de documents signés (avec trust list FR via LOTL).
 - **PIN saisi au moment de signer** (l'agent démarre verrouillé, reverrouillage après inactivité).
 - **Assistant de prérequis** dans l'UI (détecte l'agent / la carte / le middleware et propose les téléchargements adaptés à l'OS).
-- **Installeur Windows MSI** auto-provisionnant le certificat de confiance et le démarrage automatique.
+- **Installeurs auto-provisionnants** (certificat de confiance + démarrage automatique, sans étape « accepter le certificat ») : **Windows MSI** et **macOS `.pkg`** — ce dernier vérifié de bout en bout (signature + vérification avec une clé ChamberSign qualifiée).
 
-En cours / conception : installeur **macOS `.pkg`** (certificat de confiance + démarrage automatique), support **Firefox/NSS**, étude de faisabilité **Linux**.
+En cours / conception : confiance **Firefox/NSS**, **signature/notarisation** du `.pkg` macOS, étude de faisabilité **Linux/Ubuntu** (`.deb`).
 
 ---
 
