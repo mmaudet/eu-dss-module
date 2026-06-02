@@ -19,11 +19,12 @@ export EUDSS_PKCS11_DRIVER EUDSS_PKCS11_SLOT EUDSS_AGENT_PORT EUDSS_CORS_HOSTS
 
 echo "eu-dss agent (macOS)"
 echo "  PKCS#11 driver : $EUDSS_PKCS11_DRIVER"
-echo "  slot index     : $EUDSS_PKCS11_SLOT   (slot 0 = ChamberSign qualified signing cert, 4-digit PIN)"
-echo "  port           : $EUDSS_AGENT_PORT"
+echo "  slot index     : $EUDSS_PKCS11_SLOT   (slot 0 = ChamberSign qualified signing cert)"
+echo "  port           : $EUDSS_AGENT_PORT (HTTPS)"
 echo "  CORS allowed   : $EUDSS_CORS_HOSTS"
 echo
-echo "Enter your 4-digit Card PIN when prompted (unlocks the slot-0 qualified signing cert)."
+echo "The agent starts LOCKED and serves https://localhost:$EUDSS_AGENT_PORT."
+echo "Enter your Card PIN in the web app when you sign (not here) - see docs/INSTALL.md."
 echo
 
 exec java -jar "$JAR" "$@"
