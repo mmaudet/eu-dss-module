@@ -61,6 +61,16 @@ public final class AgentMain {
             LOG.info("eu-dss agent listening on http://localhost:{} (no TLS) mode={} CORS {}",
                     config.port(), config.mode(), config.corsHosts());
         }
+
+        // Linux desktop: on first run, trust our localhost cert in ~/.pki/nssdb so Chrome/Chromium
+        // accept it without a warning (the system store, set by the .deb, is ignored by browsers).
+        // Best-effort and never blocks startup; skipped in headless mode (no user browser there).
+        String osName = System.getProperty("os.name", "").toLowerCase();
+        if (osName.contains("nux") && !config.headless()) {
+            com.linagora.eudss.agent.tls.LinuxNssTrust.trustOnFirstRun(
+                    System.getProperty("user.home", ""),
+                    com.linagora.eudss.agent.tls.AgentTls.defaultKeystorePath());
+        }
     }
 
     public static Javalin buildApp(AgentConfig config, TokenService tokenService) {
