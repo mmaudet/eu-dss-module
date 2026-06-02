@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.linagora.eudss.agent</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Applications/EU-DSS Agent.app/Contents/MacOS/EU-DSS Agent</string>
+  </array>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>EUDSS_AGENT_KEYSTORE</key>
+    <string>/Library/Application Support/eudss-agent/agent-keystore.p12</string>
+    <key>EUDSS_PKCS11_DRIVER</key>
+    <string>/Library/SCMiddleware/libidop11.dylib</string>
+  </dict>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <false/>
+  <key>ProcessType</key>
+  <string>Interactive</string>
+</dict>
+</plist>
