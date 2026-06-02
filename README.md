@@ -159,15 +159,19 @@ Résolues dans [`eu-dss-agent/.../config/AgentConfig.java`](eu-dss-agent/src/mai
 
 | Variable | Défaut | Rôle |
 |---|---|---|
-| `EUDSS_PKCS11_DRIVER` | macOS `/Library/SCMiddleware/libidop11.dylib` · Linux `/usr/lib/libidop11.so` · Windows `C:\Program Files\Smart Card Middleware\bin\idoPKCS.dll` | Chemin de la bibliothèque PKCS#11 du middleware |
+| `EUDSS_PKCS11_DRIVER` | *selon l'OS* ¹ | Chemin de la bibliothèque PKCS#11 du middleware |
 | `EUDSS_PKCS11_SLOT` | `0` | Index du slot (`slotListIndex`) du certificat de signature |
-| `EUDSS_AGENT_PORT` | `9795` | Port d'écoute |
-| `EUDSS_CORS_HOSTS` | `http://localhost:5173,http://localhost:8080,http://localhost:4173` | Origines CORS autorisées (origine complète, avec le schéma) |
-| `EUDSS_AGENT_TLS` | `true` | HTTPS activé (`false` = HTTP en clair, pour les tests) |
+| `EUDSS_AGENT_PORT` | `9795` | Port d'écoute HTTPS |
+| `EUDSS_CORS_HOSTS` | *origines `localhost`* ² | Origines web autorisées (CORS, origine complète avec schéma) |
+| `EUDSS_AGENT_TLS` | `true` | HTTPS activé (`false` = HTTP en clair, pour le dev) |
 | `EUDSS_AGENT_TLS_PASSWORD` | `eudss-agent` | Mot de passe du keystore TLS auto-signé |
-| `EUDSS_AGENT_KEYSTORE` | Windows `%ProgramData%\…` (machine) · sinon `~/.eudss-agent/agent-keystore.p12` | Chemin du keystore TLS |
-| `EUDSS_PIN_SESSION_TTL` | `300` (secondes) | Délai d'inactivité avant reverrouillage de la session PIN |
-| `EUDSS_AGENT_PIN` | *(absent)* | Si défini → mode **headless** : déverrouillage automatique au démarrage, pas de reverrouillage (non recommandé hors automatisation). Sans cette variable, l'agent est en mode **interactif** (verrouillé jusqu'à `/rest/unlock`). |
+| `EUDSS_AGENT_KEYSTORE` | *selon l'OS* ³ | Chemin du keystore TLS |
+| `EUDSS_PIN_SESSION_TTL` | `300` | Délai (s) d'inactivité avant reverrouillage de la session PIN |
+| `EUDSS_AGENT_PIN` | *(absent)* | Si défini → mode **headless** (déverrouillage auto au démarrage) ; sinon mode **interactif** (verrouillé jusqu'à `/rest/unlock`) |
+
+¹ macOS `/Library/SCMiddleware/libidop11.dylib` · Linux `/usr/lib/libidop11.so` · Windows `C:\Program Files\Smart Card Middleware\bin\idoPKCS.dll`
+² `http://localhost:5173,http://localhost:8080,http://localhost:4173`
+³ Windows `%ProgramData%\eudss-agent\agent-keystore.p12` (machine) · sinon `~/.eudss-agent/agent-keystore.p12`
 
 ### Variables d'environnement du serveur
 
@@ -235,6 +239,6 @@ En cours / conception : confiance **Firefox/NSS**, **signature/notarisation** du
 
 ## Éditeur / licence
 
-Développé par **LINAGORA** (`groupId` Maven `com.linagora.eudss`). Construit sur la bibliothèque open source [EU DSS](https://ec.europa.eu/digital-building-blocks/sites/display/DIGITAL/Digital+Signature+Service+-++DSS) de la Commission européenne.
+Développé par **LINAGORA**. Construit sur la bibliothèque open source [EU DSS](https://ec.europa.eu/digital-building-blocks/sites/display/DIGITAL/Digital+Signature+Service+-++DSS) de la Commission européenne.
 
 > **Licence** : aucun fichier `LICENSE` n'est présent dans le dépôt à ce jour. Le contenu n'est donc pas (encore) couvert par une licence open source explicite — à ajouter par l'éditeur si la diffusion publique est prévue.
