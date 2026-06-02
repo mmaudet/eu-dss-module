@@ -1,0 +1,28 @@
+name: Linux installer (deb)
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+
+jobs:
+  build-deb:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Install packaging tools
+        run: sudo apt-get update && sudo apt-get install -y fakeroot dpkg-dev binutils
+      - name: Build agent jar
+        run: mvn -B -f pom.xml -pl eu-dss-agent -am -DskipTests package
+      - name: Build .deb (jpackage + dpkg-deb)
+        run: ./packaging/linux/build-agent-deb.sh
+      - name: Upload deb
+        uses: actions/upload-artifact@v4
+        with:
+          name: eu-dss-agent-deb
+          path: dist/*.deb
+          if-no-files-found: error
