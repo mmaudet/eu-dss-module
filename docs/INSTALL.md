@@ -104,12 +104,12 @@ liens de téléchargement :
    sudo apt install ./eu-dss-agent_0.1.0_amd64.deb
    ```
    À la fin, l'agent :
-   - fait confiance à son certificat `localhost` dans le **magasin système** (`update-ca-certificates`, lu par curl/Java) **et**, au premier lancement, dans le magasin **NSS** de Chrome/Chromium (`~/.pki/nssdb`) : aucun avertissement dans Chrome/Chromium ;
+   - fait confiance à son certificat `localhost` dans le **magasin système** (`update-ca-certificates`, lu par curl/Java) **et**, au premier lancement, dans le magasin **NSS** `~/.pki/nssdb` lu par **Chrome/Chromium installés en `.deb`** (p. ex. Google Chrome) ;
    - démarre automatiquement à l'ouverture de session graphique (autostart XDG `/etc/xdg/autostart/eu-dss-agent.desktop`).
 4. Ouvrez l'application de signature : « Agent connecté » doit apparaître.
 
 > **Désinstaller** : `sudo apt remove eu-dss-agent` (retire le certificat système et les données machine `/var/lib/eudss-agent` ; le certificat NSS par-utilisateur, inoffensif, subsiste).
-> **Firefox** conserve son propre magasin NSS par profil, non couvert (suivi séparé).
+> **Navigateurs non couverts** : le **Chromium snap** (le `chromium` par défaut d'Ubuntu, confiné, ne lit pas `~/.pki/nssdb`) et **Firefox** (magasin NSS par profil) gardent leur propre magasin. Pour eux : acceptez le certificat une fois, ou utilisez **Chrome/Chromium installés en `.deb`**. Suivi séparé.
 
 ### Alternative développeur (exécuter le jar)
 
@@ -185,7 +185,7 @@ sudo apt remove eu-dss-agent
 |---|---|
 | Keystore TLS (auto-signé, généré **par machine**) | `/var/lib/eudss-agent/agent-keystore.p12` |
 | Certificat de confiance (système, **PEM**) | `/usr/local/share/ca-certificates/eudss-agent.crt` → `update-ca-certificates` |
-| Certificat de confiance (Chrome/Chromium) | magasin **NSS** par-utilisateur `~/.pki/nssdb` (au premier lancement de l'agent) |
+| Certificat de confiance (Chrome/Chromium `.deb`) | magasin **NSS** par-utilisateur `~/.pki/nssdb` (au premier lancement ; Chromium snap + Firefox non couverts) |
 | Démarrage automatique (session graphique) | `/etc/xdg/autostart/eu-dss-agent.desktop` |
 
 > Comme sous Windows, le démarrage auto est un lancement **en session utilisateur** (autostart XDG),
