@@ -54,6 +54,12 @@ sed -e "s/@VERSION@/$VERSION/" -e "s/@ARCH@/$ARCH/" -e "s/@INSTALLED_SIZE@/$ISIZ
   "$ROOT/packaging/linux/deb/DEBIAN/control" > "$PKGROOT/DEBIAN/control"
 chmod 755 "$PKGROOT/DEBIAN/postinst" "$PKGROOT/DEBIAN/prerm" "$PKGROOT/DEBIAN/postrm"
 
+# The agent runs as a non-root user (started via XDG autostart in the GUI session), so the
+# installed payload MUST be world-readable. Enforce it here rather than trusting the building
+# user's umask (a restrictive umask would otherwise ship a root-only jar -> ClassNotFoundException
+# at launch). u+rwX,go+rX keeps the launcher + JRE binaries executable and jars/.desktop readable.
+chmod -R u+rwX,go+rX "$PKGROOT/opt" "$PKGROOT/etc"
+
 # 4. Build the package.
 OUT="$ROOT/dist"; mkdir -p "$OUT"
 DEB="$OUT/eu-dss-agent_${VERSION}_${ARCH}.deb"
