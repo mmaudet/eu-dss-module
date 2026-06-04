@@ -107,13 +107,13 @@ Détails + désinstallation : [`docs/INSTALL.md`](docs/INSTALL.md). (Firefox gar
 
 ### Linux (paquet .deb)
 
-Le `.deb` (amd64) fait tout automatiquement, comme le MSI / le `.pkg` (certificat de confiance **système** + magasin **NSS** `~/.pki/nssdb` pour Chrome/Chromium installés en `.deb` + démarrage à l'ouverture de session graphique). Construit par l'intégration continue ([`linux-installer.yml`](.github/workflows/linux-installer.yml)) ; confiance système + autostart au login vérifiés sur un bureau Ubuntu 24.04. Publication en Release et validation de la signature réelle sur amd64 : en cours.
+Le `.deb` (amd64) fait tout automatiquement, comme le MSI / le `.pkg` (certificat de confiance **système** + magasin **NSS** de Chrome/Chromium, `.deb` **et** snap + démarrage à l'ouverture de session graphique). Construit par l'intégration continue ([`linux-installer.yml`](.github/workflows/linux-installer.yml)) ; confiance système + navigateur + autostart au login vérifiés sur un bureau Ubuntu 24.04. Publication en Release et validation de la signature réelle sur amd64 : en cours.
 
 1. Installer le middleware ChamberSign (amd64) et brancher le token.
 2. Récupérer **`eu-dss-agent_0.1.0_amd64.deb`** (artefact de CI, ou le construire avec `packaging/linux/build-agent-deb.sh`), puis l'installer : `sudo apt install ./eu-dss-agent_0.1.0_amd64.deb`.
 3. Ouvrir l'application de signature dans le navigateur.
 
-Détails + désinstallation (`apt remove`) : [`docs/INSTALL.md`](docs/INSTALL.md). **amd64 uniquement** pour la signature (middleware ChamberSign). La confiance navigateur couvre **Chrome/Chromium lisant `~/.pki/nssdb`** (p. ex. Google Chrome `.deb`) ; le **Chromium snap** (chromium par défaut d'Ubuntu, confiné) et **Firefox** gardent leur propre magasin (acceptation manuelle, suivi séparé).
+Détails + désinstallation (`apt remove`) : [`docs/INSTALL.md`](docs/INSTALL.md). **amd64 uniquement** pour la signature (middleware ChamberSign). La confiance navigateur couvre **Chrome/Chromium en `.deb`** (`~/.pki/nssdb`) **et le Chromium snap** d'Ubuntu (sa base NSS confinée) ; **Firefox** garde son propre magasin par profil (acceptation manuelle, suivi séparé).
 
 ### macOS / Linux (exécuter le jar, pour le développement)
 
@@ -244,7 +244,7 @@ Disponible et vérifié :
 - **Vérification** de documents signés (avec trust list FR via LOTL).
 - **PIN saisi au moment de signer** (l'agent démarre verrouillé, reverrouillage après inactivité).
 - **Assistant de prérequis** dans l'UI (détecte l'agent / la carte / le middleware et propose les téléchargements adaptés à l'OS).
-- **Installeurs auto-provisionnants** (certificat de confiance + démarrage automatique, sans étape « accepter le certificat ») : **Windows MSI** et **macOS `.pkg`** (tous deux vérifiés de bout en bout, signature + vérification avec une clé ChamberSign qualifiée). **Linux `.deb`** (amd64) : confiance système (PEM) + autostart XDG au login vérifiés sur un bureau Ubuntu 24.04 ; confiance navigateur OK pour Chrome/Chromium `.deb` (Chromium snap + Firefox non couverts) ; signature réelle sur amd64 à valider.
+- **Installeurs auto-provisionnants** (certificat de confiance + démarrage automatique, sans étape « accepter le certificat ») : **Windows MSI** et **macOS `.pkg`** (tous deux vérifiés de bout en bout, signature + vérification avec une clé ChamberSign qualifiée). **Linux `.deb`** (amd64) : confiance système (PEM) + confiance navigateur (**Chrome/Chromium `.deb` et Chromium snap**) + autostart XDG au login, tous vérifiés sur un bureau Ubuntu 24.04 ; Firefox non couvert ; signature réelle sur amd64 à valider.
 
 En cours / conception : **validation de la signature réelle sur Linux amd64** + publication du `.deb` en Release, confiance **Firefox/NSS**, **signature/notarisation** du `.pkg` macOS, **multi-utilisateur / hébergement**.
 

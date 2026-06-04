@@ -104,12 +104,12 @@ liens de téléchargement :
    sudo apt install ./eu-dss-agent_0.1.0_amd64.deb
    ```
    À la fin, l'agent :
-   - fait confiance à son certificat `localhost` dans le **magasin système** (`update-ca-certificates`, lu par curl/Java) **et**, au premier lancement, dans le magasin **NSS** `~/.pki/nssdb` lu par **Chrome/Chromium installés en `.deb`** (p. ex. Google Chrome) ;
+   - fait confiance à son certificat `localhost` dans le **magasin système** (`update-ca-certificates`, lu par curl/Java) **et**, au premier lancement, dans les magasins **NSS** de **Chrome/Chromium** : `~/.pki/nssdb` (installés en `.deb`) **et** la base confinée du **Chromium snap** d'Ubuntu (`~/snap/chromium/current/.local/share/pki/nssdb`) ;
    - démarre automatiquement à l'ouverture de session graphique (autostart XDG `/etc/xdg/autostart/eu-dss-agent.desktop`).
 4. Ouvrez l'application de signature : « Agent connecté » doit apparaître.
 
 > **Désinstaller** : `sudo apt remove eu-dss-agent` (retire le certificat système et les données machine `/var/lib/eudss-agent` ; le certificat NSS par-utilisateur, inoffensif, subsiste).
-> **Navigateurs non couverts** : le **Chromium snap** (le `chromium` par défaut d'Ubuntu, confiné, ne lit pas `~/.pki/nssdb`) et **Firefox** (magasin NSS par profil) gardent leur propre magasin. Pour eux : acceptez le certificat une fois, ou utilisez **Chrome/Chromium installés en `.deb`**. Suivi séparé.
+> **Navigateur non couvert** : **Firefox** (magasin NSS par profil) garde son propre magasin ; pour lui, acceptez le certificat une fois. Chrome/Chromium en `.deb` **et** le Chromium snap d'Ubuntu sont, eux, approuvés automatiquement. Suivi séparé pour Firefox.
 
 ### Alternative développeur (exécuter le jar)
 
@@ -185,7 +185,7 @@ sudo apt remove eu-dss-agent
 |---|---|
 | Keystore TLS (auto-signé, généré **par machine**) | `/var/lib/eudss-agent/agent-keystore.p12` |
 | Certificat de confiance (système, **PEM**) | `/usr/local/share/ca-certificates/eudss-agent.crt` → `update-ca-certificates` |
-| Certificat de confiance (Chrome/Chromium `.deb`) | magasin **NSS** par-utilisateur `~/.pki/nssdb` (au premier lancement ; Chromium snap + Firefox non couverts) |
+| Certificat de confiance (Chrome/Chromium) | **NSS** par-utilisateur (au premier lancement) : `~/.pki/nssdb` (`.deb`) + base du Chromium snap `~/snap/chromium/current/.local/share/pki/nssdb` ; Firefox non couvert |
 | Démarrage automatique (session graphique) | `/etc/xdg/autostart/eu-dss-agent.desktop` |
 
 > Comme sous Windows, le démarrage auto est un lancement **en session utilisateur** (autostart XDG),
