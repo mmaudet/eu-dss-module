@@ -3,6 +3,15 @@
 use crate::error::SignerError;
 use x509_parser::prelude::*;
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct CertInfo {
+    pub subject_dn: String,
+    pub issuer_dn: String,
+    pub serial_number: String,
+    pub not_before: String,
+    pub not_after: String,
+}
+
 pub fn parse(der: &[u8]) -> Result<CertInfo, SignerError> {
     let (_, cert) =
         X509Certificate::from_der(der).map_err(|e| SignerError::CertParse(e.to_string()))?;
@@ -13,15 +22,6 @@ pub fn parse(der: &[u8]) -> Result<CertInfo, SignerError> {
         not_before: cert.validity().not_before.to_string(),
         not_after: cert.validity().not_after.to_string(),
     })
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct CertInfo {
-    pub subject_dn: String,
-    pub issuer_dn: String,
-    pub serial_number: String,
-    pub not_before: String,
-    pub not_after: String,
 }
 
 #[cfg(test)]

@@ -16,6 +16,7 @@ impl SessionState {
         }
     }
 
+    /// Unlock the session. Re-unlocking while already unlocked resets the idle TTL (intended).
     pub fn unlock(&mut self, now: Instant) {
         self.unlocked_since_activity = Some(now);
     }
@@ -40,10 +41,15 @@ impl SessionState {
 
     pub fn expires_in_seconds(&self, now: Instant) -> Option<u64> {
         match self.unlocked_since_activity {
-            Some(last) if now.duration_since(last) <= self.ttl => {
-                Some((self.ttl - now.duration_since(last)).as_secs())
+            Some(last) => {
+                let elapsed = now.duration_since(last);
+                if elapsed <= self.ttl {
+                    Some((self.ttl - elapsed).as_secs())
+                } else {
+                    None
+                }
             }
-            _ => None,
+            None => None,
         }
     }
 }

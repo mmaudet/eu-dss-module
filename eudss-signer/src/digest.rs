@@ -48,7 +48,7 @@ impl DigestAlgorithm {
 
     /// Build the DigestInfo (prefix || digest) signed by CKM_RSA_PKCS.
     pub fn digest_info(self, digest: &[u8]) -> Vec<u8> {
-        let mut out = Vec::with_capacity(19 + digest.len());
+        let mut out = Vec::with_capacity(self.der_prefix().len() + digest.len());
         out.extend_from_slice(self.der_prefix());
         out.extend_from_slice(digest);
         out
@@ -100,6 +100,18 @@ mod tests {
         ];
         assert_eq!(&di[..19], &expected_prefix);
         assert_eq!(di.len(), 19 + 64);
+    }
+
+    #[test]
+    fn digest_info_sha384_prefix() {
+        let digest = [0u8; 48];
+        let di = DigestAlgorithm::Sha384.digest_info(&digest);
+        let expected_prefix: [u8; 19] = [
+            0x30, 0x41, 0x30, 0x0d, 0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02,
+            0x02, 0x05, 0x00, 0x04, 0x30,
+        ];
+        assert_eq!(&di[..19], &expected_prefix);
+        assert_eq!(di.len(), 19 + 48);
     }
 
     #[test]

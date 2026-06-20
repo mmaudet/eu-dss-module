@@ -66,7 +66,6 @@ impl SignerError {
 mod tests {
     use super::*;
     use cryptoki::context::Function;
-    use cryptoki::error::{Error as CkError, RvError};
 
     #[test]
     fn codes_match_agent_contract() {
