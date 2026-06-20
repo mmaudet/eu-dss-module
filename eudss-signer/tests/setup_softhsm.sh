@@ -33,7 +33,7 @@ softhsm2-util --init-token --free --label eudss-test --pin "$PIN" --so-pin "$SOP
 # Build a key + self-signed cert, then import via pkcs11-tool (works with OpenSSL 3+).
 TMP="$(mktemp -d)"
 openssl req -x509 -newkey rsa:2048 -keyout "$TMP/key.pem" -nodes \
-  -out "$TMP/cert.pem" -days 3650 -subj "/CN=EUDSS SoftHSM/O=Linagora" 1>&2 2>&1
+  -out "$TMP/cert.pem" -days 3650 -subj "/CN=EUDSS SoftHSM/O=Linagora" >/dev/null 2>&1
 # Convert key to PKCS#8 DER (compatible with pkcs11-tool --write-object --type privkey)
 openssl pkcs8 -topk8 -inform PEM -outform DER -in "$TMP/key.pem" -nocrypt -out "$TMP/key.p8"
 openssl x509 -in "$TMP/cert.pem" -outform DER -out "$TMP/cert.der"

@@ -52,6 +52,7 @@ impl Signer {
     }
 
     pub fn unlock(&mut self, pin: &str) -> Result<SessionStatus, SignerError> {
+        self.live = None; // explicitly close/logout any prior session before a new login
         let live = self.token.login(pin)?; // one attempt, no retry
         self.live = Some(live);
         self.session.unlock(Instant::now());

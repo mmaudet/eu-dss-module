@@ -13,7 +13,6 @@ use cryptoki::object::{Attribute, AttributeType, KeyType, ObjectClass};
 use cryptoki::session::{Session, UserType};
 use cryptoki::slot::Slot;
 use cryptoki::types::AuthPin;
-use zeroize::Zeroize;
 
 pub struct Token {
     pkcs11: Pkcs11,
@@ -83,11 +82,10 @@ impl Token {
             .pkcs11
             .open_rw_session(self.slot)
             .map_err(SignerError::from_pkcs11)?;
-        let mut secret = pin.to_owned();
-        let auth_pin = AuthPin::new(secret.clone());
-        secret.zeroize();
+        // One login attempt, never retried (card-lock safety). AuthPin is a SecretString:
+        // the PIN copy is zeroized when this temporary drops after login returns.
         session
-            .login(UserType::User, Some(&auth_pin))
+            .login(UserType::User, Some(&AuthPin::new(pin.to_owned())))
             .map_err(SignerError::from_pkcs11)?;
         Ok(session)
     }

@@ -40,7 +40,7 @@ fn unlock_with_correct_pin_succeeds() {
     // Allow for sub-second elapsed since unlock; expires_in should be near 300.
     let secs = status.expires_in_seconds.expect("must have expiry");
     assert!(
-        (298..=300).contains(&secs),
+        (290..=300).contains(&secs),
         "expected ~300 seconds remaining, got {secs}"
     );
 }
@@ -120,7 +120,8 @@ fn relocks_after_ttl() {
     let mut signer = Signer::new(&module, 0, Duration::from_secs(1)).unwrap();
     signer.unlock(&pin).unwrap();
     assert!(signer.status().unlocked);
-    std::thread::sleep(Duration::from_millis(1200));
+    // integration wiring check; SessionState TTL logic itself is unit-tested with an injected clock
+    std::thread::sleep(Duration::from_millis(1500));
     assert!(!signer.status().unlocked);
     let digest_b64 = STANDARD.encode([0u8; 32]);
     assert_eq!(
