@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { AgentProvider, useAgent } from './agent/AgentContext';
+import { FirstRunWizard } from './components/FirstRunWizard';
 import { PinModal } from './components/PinModal';
 import { SignWorkspace } from './components/SignWorkspace';
 import { TitleBar } from './components/TitleBar';
 import { ValidatePage } from './components/ValidatePage';
+import { store } from './services/store';
 
 type Tab = 'sign' | 'verify';
 
@@ -254,9 +256,18 @@ function Shell() {
 // ── App root ────────────────────────────────────────────────────────────────
 
 export function App() {
+  const [onboarded, setOnboarded] = useState(() => store.getOnboarding().passed);
+
   return (
     <AgentProvider>
-      <Shell />
+      {onboarded ? (
+        <Shell />
+      ) : (
+        <div className="shell">
+          <TitleBar />
+          <FirstRunWizard onComplete={() => setOnboarded(true)} />
+        </div>
+      )}
     </AgentProvider>
   );
 }
