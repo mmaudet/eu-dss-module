@@ -25,16 +25,23 @@ public class DocumentSigningService {
 
     private final DocumentSigner padesSigner;
     private final DocumentSigner asicSigner;
+    private final DocumentSigner xadesEnvelopingSigner;
+    private final DocumentSigner xadesDetachedSigner;
 
     public DocumentSigningService(@Qualifier("padesSigningService") DocumentSigner padesSigner,
-                                  @Qualifier("asicSigningService") DocumentSigner asicSigner) {
+                                  @Qualifier("asicSigningService") DocumentSigner asicSigner,
+                                  @Qualifier("xadesEnvelopingSigningService") DocumentSigner xadesEnvelopingSigner,
+                                  @Qualifier("xadesDetachedSigningService") DocumentSigner xadesDetachedSigner) {
         this.padesSigner = padesSigner;
         this.asicSigner = asicSigner;
+        this.xadesEnvelopingSigner = xadesEnvelopingSigner;
+        this.xadesDetachedSigner = xadesDetachedSigner;
     }
 
     public PrepareSignatureResponse prepare(PrepareSignatureRequest req) {
         DSSDocument document = toDocument(req.documentBase64(), req.documentName());
-        ToBeSigned dataToSign = signerFor(req.documentName()).dataToSign(document, req.params());
+        SigningFormat format = formatFor(req.params(), req.documentName());
+        ToBeSigned dataToSign = signerFor(format).dataToSign(document, req.params());
         byte[] digest = DSSUtils.digest(SignatureMapper.toDssDigest(req.params().digestAlgorithm()), dataToSign.getBytes());
         return new PrepareSignatureResponse(
                 Base64.getEncoder().encodeToString(dataToSign.getBytes()),
@@ -43,18 +50,34 @@ public class DocumentSigningService {
 
     public AssembleSignatureResponse assemble(AssembleSignatureRequest req) {
         DSSDocument document = toDocument(req.documentBase64(), req.documentName());
+        SigningFormat format = formatFor(req.params(), req.documentName());
         SignatureValue signatureValue = signatureValue(req.params(), Base64.getDecoder().decode(req.signatureValueBase64()));
-        DSSDocument signed = signerFor(req.documentName()).sign(document, req.params(), signatureValue);
+        DSSDocument signed = signerFor(format).sign(document, req.params(), signatureValue);
         byte[] bytes = toBytes(signed);
         String mediaType = signed.getMimeType() != null ? signed.getMimeType().getMimeTypeString() : "application/octet-stream";
         return new AssembleSignatureResponse(
                 Base64.getEncoder().encodeToString(bytes),
-                signedFileName(req.documentName()),
+                signedFileName(req.documentName(), format),
                 mediaType);
     }
 
-    private DocumentSigner signerFor(String fileName) {
-        return SigningFormat.forFileName(fileName) == SigningFormat.PADES ? padesSigner : asicSigner;
+    /**
+     * Resolves the signature format identically for prepare and assemble: the client's explicit
+     * {@code signatureForm} wins; otherwise it falls back to file-name auto-detection. Keeping this
+     * single resolution point guarantees the data-to-sign and the incorporated signature use the
+     * same DSS parameters across the two round-trips.
+     */
+    private static SigningFormat formatFor(SignatureParamsDto params, String fileName) {
+        return SigningFormat.resolve(params.signatureForm(), fileName);
+    }
+
+    private DocumentSigner signerFor(SigningFormat format) {
+        return switch (format) {
+            case PADES -> padesSigner;
+            case ASIC -> asicSigner;
+            case XADES_ENVELOPING -> xadesEnvelopingSigner;
+            case XADES_DETACHED -> xadesDetachedSigner;
+        };
     }
 
     private static DSSDocument toDocument(String base64, String fileName) {
@@ -70,17 +93,31 @@ public class DocumentSigningService {
         return value;
     }
 
-    /** PDFs keep their name; everything else becomes an .asice container. */
-    private static String signedFileName(String fileName) {
-        if (SigningFormat.forFileName(fileName) == SigningFormat.PADES) {
+    /**
+     * Names the produced artifact per format: PDFs keep their name (PAdES, in place); ASiC-E
+     * becomes an {@code .asice} container; standalone XAdES (enveloping or detached) becomes an
+     * {@code .xml} signature file (for detached, this is the signature only — the client keeps the
+     * original document).
+     */
+    private static String signedFileName(String fileName, SigningFormat format) {
+        if (format == SigningFormat.PADES) {
             return fileName;
         }
+        String base = baseName(fileName);
+        return switch (format) {
+            case ASIC -> base + ".asice";
+            case XADES_ENVELOPING, XADES_DETACHED -> base + ".xml";
+            case PADES -> fileName; // unreachable, handled above
+        };
+    }
+
+    private static String baseName(String fileName) {
         String base = fileName == null || fileName.isBlank() ? "document" : fileName;
         int dot = base.lastIndexOf('.');
         if (dot > 0) {
             base = base.substring(0, dot);
         }
-        return base + ".asice";
+        return base;
     }
 
     private static byte[] toBytes(DSSDocument document) {

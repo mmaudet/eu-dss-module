@@ -1,7 +1,11 @@
 package com.linagora.eudss.server.config;
 
+import com.linagora.eudss.server.service.DocumentSigner;
+import com.linagora.eudss.server.service.XadesSigningService;
 import eu.europa.esig.dss.asic.xades.signature.ASiCWithXAdESService;
+import eu.europa.esig.dss.enumerations.SignaturePackaging;
 import eu.europa.esig.dss.pades.signature.PAdESService;
+import eu.europa.esig.dss.xades.signature.XAdESService;
 import eu.europa.esig.dss.service.crl.OnlineCRLSource;
 import eu.europa.esig.dss.service.http.commons.CommonsDataLoader;
 import eu.europa.esig.dss.service.http.commons.FileCacheDataLoader;
@@ -123,5 +127,23 @@ public class DssConfig {
         ASiCWithXAdESService service = new ASiCWithXAdESService(verifier);
         service.setTspSource(tspSource);
         return service;
+    }
+
+    /** Standalone (non-ASiC) XAdES service, used for ENVELOPING and DETACHED XAdES signatures. */
+    @Bean
+    public XAdESService xadesService(CommonCertificateVerifier verifier, TSPSource tspSource) {
+        XAdESService service = new XAdESService(verifier);
+        service.setTspSource(tspSource);
+        return service;
+    }
+
+    @Bean
+    public DocumentSigner xadesEnvelopingSigningService(XAdESService xadesService) {
+        return new XadesSigningService(xadesService, SignaturePackaging.ENVELOPING);
+    }
+
+    @Bean
+    public DocumentSigner xadesDetachedSigningService(XAdESService xadesService) {
+        return new XadesSigningService(xadesService, SignaturePackaging.DETACHED);
     }
 }

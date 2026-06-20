@@ -5,8 +5,10 @@ import eu.europa.esig.dss.asic.xades.ASiCWithXAdESSignatureParameters;
 import eu.europa.esig.dss.enumerations.ASiCContainerType;
 import eu.europa.esig.dss.enumerations.DigestAlgorithm;
 import eu.europa.esig.dss.enumerations.SignatureLevel;
+import eu.europa.esig.dss.enumerations.SignaturePackaging;
 import eu.europa.esig.dss.model.x509.CertificateToken;
 import eu.europa.esig.dss.pades.PAdESSignatureParameters;
+import eu.europa.esig.dss.xades.XAdESSignatureParameters;
 
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
@@ -51,6 +53,25 @@ public final class SignatureMapper {
     public static ASiCWithXAdESSignatureParameters toAsicParams(SignatureParamsDto dto) {
         ASiCWithXAdESSignatureParameters params = new ASiCWithXAdESSignatureParameters();
         params.aSiC().setContainerType(ASiCContainerType.ASiC_E);
+        params.setSignatureLevel(toXadesLevel(dto.signatureLevelOrDefault()));
+        params.setDigestAlgorithm(toDssDigest(dto.digestAlgorithm()));
+        params.bLevel().setSigningDate(new Date(dto.signingTimeEpochMs()));
+
+        List<CertificateToken> chain = decodeChain(dto.certificateChainBase64());
+        params.setSigningCertificate(chain.get(0));
+        params.setCertificateChain(chain);
+        return params;
+    }
+
+    /**
+     * Standalone XAdES parameters (not wrapped in an ASiC container). The packaging selects how the
+     * signed data relates to the signature XML: {@link SignaturePackaging#ENVELOPING} embeds the file
+     * (base64) inside the signature; {@link SignaturePackaging#DETACHED} references it externally and
+     * the original document is not part of the produced signature.
+     */
+    public static XAdESSignatureParameters toXadesParams(SignatureParamsDto dto, SignaturePackaging packaging) {
+        XAdESSignatureParameters params = new XAdESSignatureParameters();
+        params.setSignaturePackaging(packaging);
         params.setSignatureLevel(toXadesLevel(dto.signatureLevelOrDefault()));
         params.setDigestAlgorithm(toDssDigest(dto.digestAlgorithm()));
         params.bLevel().setSigningDate(new Date(dto.signingTimeEpochMs()));
