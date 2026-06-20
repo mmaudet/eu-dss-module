@@ -55,7 +55,7 @@ async function agentPost<T>(path: string, body: unknown): Promise<T> {
   return res.json() as Promise<T>;
 }
 
-export const agentApi = {
+const httpAgentApi = {
   async isAvailable(): Promise<boolean> {
     try {
       const res = await fetch(`${AGENT_BASE}/health`, { credentials: 'omit' });
@@ -76,3 +76,32 @@ export const agentApi = {
   signDigest: (keyId: string, digestBase64: string, digestAlgorithm: 'SHA256' | 'SHA384' | 'SHA512') =>
     agentPost<{ signatureValueBase64: string }>('/sign', { keyId, digestBase64, digestAlgorithm }),
 };
+
+// Tauri 2 injects this global; use it to pick the transport.
+const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
+
+async function invokeAgent<T>(cmd: string, args?: Record<string, unknown>): Promise<T> {
+  const { invoke } = await import('@tauri-apps/api/core');
+  try {
+    return await invoke<T>(cmd, args);
+  } catch (e) {
+    // Rust commands reject with ErrorBody { error, message }.
+    const body = e as { error?: string; message?: string };
+    throw new AgentError(0, body?.error ?? 'ipc_error', body?.message ?? String(e));
+  }
+}
+
+const tauriAgentApi = {
+  isAvailable: () => invokeAgent<boolean>('is_available'),
+  getStatus: () => invokeAgent<AgentSessionStatus>('status'),
+  unlock: (pin: string) => invokeAgent<AgentSessionStatus>('unlock', { pin }),
+  lock: () => invokeAgent<{ status: string }>('lock').then(() => ({ status: 'locked' })),
+  listCertificates: () =>
+    invokeAgent<AgentCertificate[]>('list_certificates').then((certificates) => ({ certificates })),
+  signDigest: (keyId: string, digestBase64: string, digestAlgorithm: 'SHA256' | 'SHA384' | 'SHA512') =>
+    invokeAgent<string>('sign', { keyId, digestBase64, digestAlgorithm }).then(
+      (signatureValueBase64) => ({ signatureValueBase64 }),
+    ),
+};
+
+export const agentApi = isTauri ? tauriAgentApi : httpAgentApi;
