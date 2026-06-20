@@ -9,5 +9,5 @@ pub(crate) mod session;
 pub(crate) mod signer;
 pub(crate) mod token;
 
-pub use error::SignerError;
+pub use error::{ErrorBody, SignerError};
 pub use signer::{CertEntry, SessionStatus, Signer};

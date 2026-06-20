@@ -83,7 +83,7 @@ fn sign_rsa_digest_verifies_against_cert_public_key() {
 
     // Extract the public key from the cert the token returned.
     let certs = signer.list_certificates().unwrap();
-    let der = STANDARD.decode(&certs[0].certificate_b64).unwrap();
+    let der = STANDARD.decode(&certs[0].certificate_base64).unwrap();
     let (_, cert) = X509Certificate::from_der(&der).unwrap();
     let spki_der = cert.public_key().raw;
     let rsa_pub = RsaPublicKey::from_public_key_der(spki_der).unwrap();

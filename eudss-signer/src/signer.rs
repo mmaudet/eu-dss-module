@@ -5,20 +5,23 @@ use crate::error::SignerError;
 use crate::session::SessionState;
 use crate::token::Token;
 use base64::{engine::general_purpose::STANDARD, Engine};
+use serde::Serialize;
 use std::time::{Duration, Instant};
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct SessionStatus {
     pub unlocked: bool,
     pub expires_in_seconds: Option<u64>,
-    pub mode: &'static str,
+    pub mode: &'static str, // Plan 1: only "interactive" exists; "headless" is a future variant
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct CertEntry {
     pub key_id: String,
-    pub certificate_b64: String,
-    pub certificate_chain_b64: Vec<String>,
+    pub certificate_base64: String,
+    pub certificate_chain_base64: Vec<String>,
     pub subject_dn: String,
     pub issuer_dn: String,
     pub serial_number: String,
@@ -96,5 +99,50 @@ impl Signer {
         let sig = self.token.sign(live, key_id, &digest, algo)?;
         self.session.touch(now);
         Ok(STANDARD.encode(sig))
+    }
+}
+
+#[cfg(test)]
+mod serde_tests {
+    use super::*;
+
+    #[test]
+    fn session_status_serializes_camelcase() {
+        let s = SessionStatus {
+            unlocked: true,
+            expires_in_seconds: Some(300),
+            mode: "interactive",
+        };
+        let j = serde_json::to_string(&s).unwrap();
+        assert!(j.contains("\"unlocked\":true"));
+        assert!(j.contains("\"expiresInSeconds\":300"));
+        assert!(j.contains("\"mode\":\"interactive\""));
+    }
+
+    #[test]
+    fn cert_entry_serializes_agent_keys() {
+        let c = CertEntry {
+            key_id: "AB".into(),
+            certificate_base64: "Zm9v".into(),
+            certificate_chain_base64: vec!["Zm9v".into()],
+            subject_dn: "CN=x".into(),
+            issuer_dn: "CN=y".into(),
+            serial_number: "01".into(),
+            not_before: "a".into(),
+            not_after: "b".into(),
+        };
+        let j = serde_json::to_string(&c).unwrap();
+        for k in [
+            "keyId",
+            "certificateBase64",
+            "certificateChainBase64",
+            "subjectDn",
+            "issuerDn",
+            "serialNumber",
+            "notBefore",
+            "notAfter",
+        ] {
+            assert!(j.contains(&format!("\"{k}\"")), "missing key {k} in {j}");
+        }
     }
 }

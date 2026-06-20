@@ -64,8 +64,8 @@ impl Token {
             let b64 = STANDARD.encode(&der);
             out.push(CertEntry {
                 key_id: key_id_from_cka_id(&id),
-                certificate_b64: b64.clone(),
-                certificate_chain_b64: vec![b64], // leaf-only in Plan 1; chain refined in Plan 2
+                certificate_base64: b64.clone(),
+                certificate_chain_base64: vec![b64], // leaf-only in Plan 1; chain refined in Plan 2
                 subject_dn: info.subject_dn,
                 issuer_dn: info.issuer_dn,
                 serial_number: info.serial_number,

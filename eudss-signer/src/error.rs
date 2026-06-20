@@ -1,6 +1,7 @@
 //! Structured signer errors, with agent-compatible string codes.
 
 use cryptoki::error::{Error as CkError, RvError};
+use serde::Serialize;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -58,6 +59,22 @@ impl SignerError {
                 SignerError::MechanismUnavailable(ctx.to_string())
             }
             other => SignerError::Pkcs11(other.to_string()),
+        }
+    }
+}
+
+/// Wire-form of an error for the IPC boundary: the agent-compatible code + a message.
+#[derive(Debug, Clone, Serialize)]
+pub struct ErrorBody {
+    pub error: String,
+    pub message: String,
+}
+
+impl From<&SignerError> for ErrorBody {
+    fn from(e: &SignerError) -> Self {
+        ErrorBody {
+            error: e.code().to_string(),
+            message: e.to_string(),
         }
     }
 }
