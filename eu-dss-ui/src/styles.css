@@ -1234,6 +1234,11 @@ body{
 }
 .vd-footer-note b{font-weight:700;color:var(--ink-2);}
 
+/* Report action buttons (download / copy XML) */
+.vd-report-actions{
+  display:flex;gap:8px;flex-wrap:wrap;
+}
+
 /* ════════════════════════════════════════════════════════════════════════
    First-launch onboarding wizard (FirstRunWizard.tsx)
    ════════════════════════════════════════════════════════════════════════ */

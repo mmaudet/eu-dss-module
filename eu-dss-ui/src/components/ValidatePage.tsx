@@ -4,6 +4,71 @@ import { fileToBase64 } from '../services/fileUtils';
 import { history } from '../services/history';
 import { Icon, Btn, Banner, fileKind } from './ui';
 
+/* ---- Report action buttons ---- */
+
+function ReportActions({ xml }: { xml: string | null }) {
+  const [copied, setCopied] = useState(false);
+
+  if (!xml) return null;
+
+  function handleDownload() {
+    const blob = new Blob([xml as string], { type: 'application/xml' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'rapport-validation-dss.xml';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function handleCopy() {
+    navigator.clipboard.writeText(xml as string).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
+
+  return (
+    <div className="vd-report-actions">
+      <button
+        type="button"
+        className="btn btn-ghost btn-sm"
+        onClick={handleDownload}
+        aria-label="Télécharger le rapport XML DSS"
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M12 3v13M7 12l5 5 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M5 20h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+        </svg>
+        Télécharger le rapport XML
+      </button>
+      <button
+        type="button"
+        className="btn btn-ghost btn-sm"
+        onClick={handleCopy}
+        aria-label={copied ? 'Rapport XML copié dans le presse-papiers' : 'Copier le rapport XML dans le presse-papiers'}
+      >
+        {copied ? (
+          <>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="m5 13 4 4L19 7" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            Copié ✓
+          </>
+        ) : (
+          <>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <rect x="9" y="9" width="13" height="13" rx="2" stroke="currentColor" strokeWidth="1.8" />
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" stroke="currentColor" strokeWidth="1.8" />
+            </svg>
+            Copier
+          </>
+        )}
+      </button>
+    </div>
+  );
+}
+
 /* ---- helpers ---- */
 
 function formatBytes(bytes: number): string {
@@ -441,6 +506,9 @@ export function ValidatePage() {
               <b>{result.signatureCount}</b> signature(s) · contrôle eIDAS effectué le {todayFR()}
             </span>
           </div>
+
+          {/* Download / copy report XML */}
+          <ReportActions xml={result.simpleReportXml} />
 
           {/* DSS XML disclosure */}
           <details className="disclosure">
