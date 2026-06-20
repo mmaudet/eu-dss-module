@@ -231,13 +231,11 @@ function Sidebar({ tab, setTab, theme, setTheme }: SidebarProps) {
             type="button"
             className={'sb-toggle-opt' + (theme === 'light' ? ' sb-toggle-opt--active' : '')}
             onClick={() => handleTheme('light')}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', font: 'inherit', padding: '3px 9px', borderRadius: '6px' }}
           >Clair</button>
           <button
             type="button"
             className={'sb-toggle-opt' + (theme === 'dark' ? ' sb-toggle-opt--active' : '')}
             onClick={() => handleTheme('dark')}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', font: 'inherit', padding: '3px 9px', borderRadius: '6px' }}
           >Sombre</button>
         </div>
       </div>
