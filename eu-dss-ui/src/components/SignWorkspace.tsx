@@ -6,6 +6,7 @@ import { detectOs, PREREQ_MANIFEST } from '../services/prerequisites';
 import { downloadBase64, downloadZip, fileToBase64 } from '../services/fileUtils';
 import { history } from '../services/history';
 import { Banner, Btn, Card, CertGrid, fileKind, Icon, Tag } from './ui';
+import { useLang, useT, type TFunction, type TKey } from '../i18n';
 
 type DocStatus = 'pending' | 'signing' | 'signed' | 'error';
 
@@ -21,12 +22,12 @@ interface SignDoc {
 }
 
 /** Selectable signature-form options for the per-document picker. */
-const FORM_OPTIONS: { value: SignatureForm | ''; label: string; pdfOnly?: boolean }[] = [
-  { value: '', label: 'Automatique (selon le type)' },
-  { value: 'PADES', label: 'PAdES (PDF)', pdfOnly: true },
-  { value: 'ASIC_E', label: 'ASiC‑E' },
-  { value: 'XADES_ENVELOPING', label: 'XAdES (enveloppant)' },
-  { value: 'XADES_DETACHED', label: 'XAdES détaché' },
+const FORM_OPTIONS: { value: SignatureForm | ''; labelKey: TKey; pdfOnly?: boolean }[] = [
+  { value: '', labelKey: 'sign.form.auto' },
+  { value: 'PADES', labelKey: 'sign.form.pades', pdfOnly: true },
+  { value: 'ASIC_E', labelKey: 'sign.form.asice' },
+  { value: 'XADES_ENVELOPING', labelKey: 'sign.form.xadesEnv' },
+  { value: 'XADES_DETACHED', labelKey: 'sign.form.xadesDet' },
 ];
 
 let counter = 0;
@@ -44,8 +45,9 @@ function effectiveForm(doc: SignDoc): SignatureForm {
   return fileKind(doc.file.name).asic ? 'ASIC_E' : 'PADES'; // auto-detect mirror
 }
 
-/** Short label for the resolved output format (used on the signed-state pill). */
-function formLabel(form: SignatureForm): string {
+/** Short label for the resolved output format (used on the signed-state pill).
+ *  Format names are standard identifiers; only "XAdES détaché" is localised. */
+function formLabel(form: SignatureForm, t: TFunction): string {
   switch (form) {
     case 'PADES':
       return 'PAdES‑B‑T';
@@ -54,7 +56,7 @@ function formLabel(form: SignatureForm): string {
     case 'XADES_ENVELOPING':
       return 'XAdES';
     case 'XADES_DETACHED':
-      return 'XAdES détaché';
+      return t('sign.form.xadesDet');
   }
 }
 
@@ -91,11 +93,12 @@ interface SignWorkspaceProps {
 
 export function SignWorkspace({ onGoVerify }: SignWorkspaceProps) {
   const agent = useAgent();
+  const t = useT();
   const { status, selectedKeyId, selectedCert } = agent;
 
   const [docs, setDocs] = useState<SignDoc[]>([]);
   // reason/location are sealed into each signature via signOne; setters available for future UI
-  const [reason, _setReason] = useState('Signature électronique');
+  const [reason, _setReason] = useState(() => t('sign.reasonDefault'));
   const [location, _setLocation] = useState('');
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false); // success view
@@ -177,7 +180,7 @@ export function SignWorkspace({ onGoVerify }: SignWorkspaceProps) {
           await signOne(doc, cert, true); // retry this doc once
           return;
         } catch {
-          patch(doc.id, { status: 'error', error: 'Signature annulée (PIN requis)' });
+          patch(doc.id, { status: 'error', error: t('sign.cancelledPin') });
           return;
         }
       }
@@ -246,15 +249,15 @@ export function SignWorkspace({ onGoVerify }: SignWorkspaceProps) {
       {/* Page header */}
       <div className="signer-header">
         <div>
-          <h2 className="signer-title">Signer</h2>
-          <p className="signer-subtitle">Vos documents, signés avec votre clé USB qualifiée.</p>
+          <h2 className="signer-title">{t('sign.title')}</h2>
+          <p className="signer-subtitle">{t('sign.subtitle')}</p>
         </div>
         <div className="eidas-pill">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
             <path d="M12 3.5 5.5 6v5c0 4 2.7 7.3 6.5 8.5 3.8-1.2 6.5-4.5 6.5-8.5V6L12 3.5Z" stroke="#2D63E8" strokeWidth="1.6" strokeLinejoin="round"/>
             <path d="m9.5 11.8 1.7 1.7 3.4-3.5" stroke="#2D63E8" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
-          Signature avancée · eIDAS
+          {t('sign.eidasPill')}
         </div>
       </div>
 
@@ -269,18 +272,18 @@ export function SignWorkspace({ onGoVerify }: SignWorkspaceProps) {
         <div className="signer-right">
           {/* Paramètres de signature */}
           <div className="sig-params-card">
-            <div className="sig-params-title">Paramètres de signature</div>
+            <div className="sig-params-title">{t('sign.params.title')}</div>
             <div className="sig-param-row sig-param-row--border">
-              <span className="sig-param-label">Niveau eIDAS</span>
+              <span className="sig-param-label">{t('sign.params.level')}</span>
               <span className="sig-param-value mono">B‑T</span>
             </div>
             <div className="sig-param-row sig-param-row--border">
-              <span className="sig-param-label">Empreinte</span>
+              <span className="sig-param-label">{t('sign.params.digest')}</span>
               <span className="sig-param-value mono">SHA‑256</span>
             </div>
             <div className="sig-param-row">
-              <span className="sig-param-label">Horodatage (TSA)</span>
-              <span className="sig-toggle on" role="img" aria-label="Activé">
+              <span className="sig-param-label">{t('sign.params.tsa')}</span>
+              <span className="sig-toggle on" role="img" aria-label={t('sign.params.enabled')}>
                 <span className="sig-toggle-knob" />
               </span>
             </div>
@@ -301,19 +304,19 @@ export function SignWorkspace({ onGoVerify }: SignWorkspaceProps) {
                   {available ? (
                     <div className="cert-hero-status-pill">
                       <span className="cert-hero-dot" />
-                      Clé connectée
+                      {t('sign.cert.connected')}
                     </div>
                   ) : (
                     <div className="cert-hero-status-pill cert-hero-status-pill--off">
                       <span className="cert-hero-dot cert-hero-dot--off" />
-                      {status === 'checking' ? 'Détection…' : 'Non connectée'}
+                      {status === 'checking' ? t('sign.cert.detecting') : t('sign.cert.notConnected')}
                     </div>
                   )}
                   <div className="cert-hero-name">
-                    {signerName || 'En attente de connexion'}
+                    {signerName || t('sign.cert.awaiting')}
                   </div>
                   <div className="cert-hero-ca">
-                    {caName || 'Insérez votre clé USB'}
+                    {caName || t('sign.cert.insertKey')}
                   </div>
                 </div>
               </div>
@@ -324,12 +327,13 @@ export function SignWorkspace({ onGoVerify }: SignWorkspaceProps) {
                   <path d="M8 11V8a4 4 0 0 1 8 0v3" stroke="#F0C46B" strokeWidth="1.7"/>
                 </svg>
                 <div className="cert-hero-lock-text">
-                  {!available
-                    ? "Connectez l’agent pour signer."
-                    : locked
-                    ? <>Carte verrouillée · votre <strong>code PIN</strong> sera demandé au moment de signer.</>
-                    : <>Carte déverrouillée · session active ({fmtClock(agent.secondsLeft)}).</>
-                  }
+                  {!available ? (
+                    t('sign.cert.connectAgent')
+                  ) : locked ? (
+                    <span dangerouslySetInnerHTML={{ __html: t('sign.cert.lockedPinPrompt') }} />
+                  ) : (
+                    t('sign.cert.unlockedSession', { clock: fmtClock(agent.secondsLeft) })
+                  )}
                 </div>
               </div>
             </div>
@@ -348,8 +352,8 @@ export function SignWorkspace({ onGoVerify }: SignWorkspaceProps) {
               <path d="M3 17c3-1 4-7 7-7s2 4 5 3 4-6 6-6" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
             {pendingCount > 0
-              ? `Signer ${pendingCount} document${pendingCount > 1 ? 's' : ''}`
-              : 'Signer'}
+              ? t('sign.btn.signN', { n: pendingCount, s: pendingCount > 1 ? 's' : '' })
+              : t('sign.btn.sign')}
           </button>
 
           {/* Bulk ZIP download — shown when some docs are signed but not all (partial batch) */}
@@ -364,7 +368,7 @@ export function SignWorkspace({ onGoVerify }: SignWorkspaceProps) {
                 )
               }
             >
-              Tout télécharger (ZIP)
+              {t('common.downloadAllZip')}
             </Btn>
           )}
 
@@ -382,6 +386,7 @@ export function SignWorkspace({ onGoVerify }: SignWorkspaceProps) {
 
 /* -------------------- Agent panel (all states) -------------------- */
 function AgentPanel() {
+  const t = useT();
   const {
     status,
     session,
@@ -399,19 +404,19 @@ function AgentPanel() {
   return (
     <Card
       no="1"
-      title="Agent local (clé USB)"
-      desc="Pont sécurisé entre le navigateur et votre carte cryptographique."
+      title={t('sign.agent.cardTitle')}
+      desc={t('sign.agent.cardDesc')}
     >
       {status === 'unavailable' && (
         <>
           <Banner
             kind="warn"
             icon={<Icon.alert size={20} />}
-            title="Agent local non détecté"
+            title={t('sign.agent.notDetectedTitle')}
             links={
               <>
                 <a className="linkbtn" href={prereq.docUrl} target="_blank" rel="noreferrer">
-                  Guide d'installation (macOS / Windows)
+                  {t('sign.agent.installGuide')}
                 </a>
                 <span className="dot-sep">·</span>
                 <a className="linkbtn" href={prereq.agentInstaller.url} target="_blank" rel="noreferrer">
@@ -419,13 +424,12 @@ function AgentPanel() {
                 </a>
                 <span className="dot-sep">·</span>
                 <Btn variant="ghost" size="sm" onClick={() => void recheck()} icon={<Icon.refresh size={14} />}>
-                  Revérifier
+                  {t('sign.agent.recheck')}
                 </Btn>
               </>
             }
           >
-            L'agent n'est pas lancé, pas installé, ou son certificat n'a pas encore été accepté. Il
-            expose{' '}
+            {t('sign.agent.notDetectedBody')}{' '}
             <span className="mono" style={{ fontSize: 12 }}>
               https://localhost:9795
             </span>
@@ -437,13 +441,13 @@ function AgentPanel() {
               <Icon.usb size={19} />
             </span>
             <div style={{ flex: 1 }}>
-              Carte branchée + middleware <b>PKCS#11</b> requis.{' '}
+              <span dangerouslySetInnerHTML={{ __html: t('sign.agent.cardMiddleware') }} />{' '}
               <a className="linkbtn" href={prereq.middleware.url} target="_blank" rel="noreferrer">
                 {prereq.middleware.label}
               </a>{' '}
               <span className="dot-sep">·</span>{' '}
               <a className="linkbtn" href={prereq.docUrl} target="_blank" rel="noreferrer">
-                Pilotes / PKCS#11
+                {t('sign.agent.drivers')}
               </a>
             </div>
           </div>
@@ -456,9 +460,9 @@ function AgentPanel() {
             <span className="spinner" />
           </span>
           <div style={{ flex: 1 }}>
-            <b>Détection en cours…</b>
+            <b>{t('sign.agent.detectingTitle')}</b>
             <div style={{ marginTop: 3 }}>
-              Contrôle de l'agent, de la carte et du middleware PKCS#11.
+              {t('sign.agent.detectingBody')}
             </div>
           </div>
         </div>
@@ -468,18 +472,14 @@ function AgentPanel() {
         <Banner
           kind="danger"
           icon={<Icon.alert size={20} />}
-          title="Carte indisponible — token occupé"
+          title={t('sign.agent.busyTitle')}
           links={
             <Btn variant="ghost" size="sm" onClick={() => void recheck()} icon={<Icon.refresh size={14} />}>
-              Réessayer
+              {t('common.retry')}
             </Btn>
           }
         >
-          Une autre application monopolise la carte (par ex.{' '}
-          <span className="mono" style={{ fontSize: 12 }}>
-            LOCAL TRUST FORCE
-          </span>
-          ), ou le token n'est pas inséré. Fermez l'autre application puis réessayez.
+          {t('sign.agent.busyBody', { app: 'LOCAL TRUST FORCE' })}
         </Banner>
       )}
 
@@ -490,17 +490,17 @@ function AgentPanel() {
               <Icon.checkCircle size={22} />
             </div>
             <div className="tt">
-              <b>Agent connecté · carte reconnue</b>
-              <span>middleware PKCS#11 actif · mode {session?.mode}</span>
+              <b>{t('sign.agent.okHead')}</b>
+              <span>{t('sign.agent.okSub', { mode: session?.mode ?? '' })}</span>
             </div>
             <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
               {locked ? (
                 <Tag kind="warn">
-                  <Icon.lock size={12} /> Verrouillée
+                  <Icon.lock size={12} /> {t('sign.agent.locked')}
                 </Tag>
               ) : (
                 <Tag kind="ok">
-                  <Icon.unlock size={12} /> Déverrouillée
+                  <Icon.unlock size={12} /> {t('sign.agent.unlocked')}
                 </Tag>
               )}
             </div>
@@ -508,7 +508,7 @@ function AgentPanel() {
 
           {certificates.length > 1 && (
             <div className="field" style={{ marginTop: 16 }}>
-              <label htmlFor="cert-select">Certificat</label>
+              <label htmlFor="cert-select">{t('sign.agent.certLabel')}</label>
               <select
                 id="cert-select"
                 className="input"
@@ -517,7 +517,7 @@ function AgentPanel() {
               >
                 {certificates.map((c) => (
                   <option key={c.keyId} value={c.keyId}>
-                    {cnOf(c.subjectDn)} (exp. {c.notAfter.slice(0, 10)})
+                    {cnOf(c.subjectDn)} ({t('sign.agent.certExp')} {c.notAfter.slice(0, 10)})
                   </option>
                 ))}
               </select>
@@ -535,19 +535,19 @@ function AgentPanel() {
                   letterSpacing: '.02em',
                 }}
               >
-                CERTIFICAT DE SIGNATURE QUALIFIÉ
+                {t('sign.agent.certHeading')}
               </div>
               <CertGrid
                 items={[
-                  { k: 'Titulaire', v: cnOf(selectedCert.subjectDn) },
-                  { k: 'Organisation', v: orgOf(selectedCert.subjectDn) || '—' },
-                  { k: 'Émetteur', v: issuerOf(selectedCert.issuerDn), mono: true },
+                  { k: t('cert.holder'), v: cnOf(selectedCert.subjectDn) },
+                  { k: t('cert.org'), v: orgOf(selectedCert.subjectDn) || '—' },
+                  { k: t('cert.issuer'), v: issuerOf(selectedCert.issuerDn), mono: true },
                   {
-                    k: 'Validité',
+                    k: t('cert.validity'),
                     v: `${selectedCert.notBefore.slice(0, 7)} → ${selectedCert.notAfter.slice(0, 7)}`,
                   },
-                  { k: 'Usage', v: 'Signature, non-répudiation' },
-                  { k: 'N° série', v: selectedCert.serialNumber, mono: true },
+                  { k: t('cert.usage'), v: t('cert.usageValue') },
+                  { k: t('cert.serial'), v: selectedCert.serialNumber, mono: true },
                 ]}
               />
             </div>
@@ -555,19 +555,18 @@ function AgentPanel() {
 
           {locked && secondsLeft === 0 && (
             <div className="help" style={{ marginTop: 12, display: 'flex', gap: 7, alignItems: 'center' }}>
-              <Icon.lock size={14} /> La carte est verrouillée. Votre code PIN sera demandé au moment
-              de signer.
+              <Icon.lock size={14} /> {t('sign.agent.lockedHint')}
             </div>
           )}
 
           {!locked && secondsLeft > 0 && (
             <div className="unlock-bar">
               <Icon.unlock size={18} />
-              <div className="ut">Carte déverrouillée — session active</div>
+              <div className="ut">{t('sign.agent.sessionActive')}</div>
               <span className="clock">{fmtClock(secondsLeft)}</span>
               <div style={{ flex: 1 }} />
               <Btn variant="ghost" size="sm" onClick={() => void lock()} icon={<Icon.lock size={14} />}>
-                Verrouiller
+                {t('sign.agent.lockNow')}
               </Btn>
             </div>
           )}
@@ -586,6 +585,7 @@ interface DocumentsPanelProps {
 }
 
 function DocumentsPanel({ docs, addFiles, setDocs, busy }: DocumentsPanelProps) {
+  const t = useT();
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
 
@@ -612,8 +612,8 @@ function DocumentsPanel({ docs, addFiles, setDocs, busy }: DocumentsPanelProps) 
             <path d="M5 15v3a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-3" stroke="#2D63E8" strokeWidth="1.9" strokeLinecap="round"/>
           </svg>
         </span>
-        <div className="dz-title">Déposer vos documents</div>
-        <div className="dz-hint">PDF → PAdES · bureautique &amp; images → conteneur ASiC‑E</div>
+        <div className="dz-title">{t('sign.dropzone.title')}</div>
+        <div className="dz-hint">{t('sign.dropzone.hint')}</div>
         <button
           className="dz-choose-btn"
           onClick={(e) => { e.stopPropagation(); inputRef.current?.click(); }}
@@ -622,7 +622,7 @@ function DocumentsPanel({ docs, addFiles, setDocs, busy }: DocumentsPanelProps) 
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
             <path d="M4 7a2 2 0 0 1 2-2h3l2 2h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7Z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round"/>
           </svg>
-          Choisir des fichiers
+          {t('sign.dropzone.choose')}
         </button>
         <input
           ref={inputRef}
@@ -641,9 +641,9 @@ function DocumentsPanel({ docs, addFiles, setDocs, busy }: DocumentsPanelProps) 
       {docs.length > 0 && (
         <div className="doc-count-row">
           <span className="doc-count-label">
-            {docs.length} document{docs.length > 1 ? 's' : ''} prêt{docs.length > 1 ? 's' : ''}
+            {t('sign.docs.readyCount', { n: docs.length, s: docs.length > 1 ? 's' : '' })}
           </span>
-          <span className="doc-count-hint">Format de signature réglable par document</span>
+          <span className="doc-count-hint">{t('sign.docs.formatHint')}</span>
         </div>
       )}
 
@@ -656,7 +656,7 @@ function DocumentsPanel({ docs, addFiles, setDocs, busy }: DocumentsPanelProps) 
             const sizeFmt = doc.file.size >= 1024 * 1024
               ? `${(doc.file.size / (1024 * 1024)).toFixed(1)} Mo`
               : `${(doc.file.size / 1024).toFixed(0)} Ko`;
-            const typeLabel = isPdf ? 'document PDF' : `document ${k.ext}`;
+            const typeLabel = isPdf ? t('sign.docs.typePdf') : t('sign.docs.typeOther', { ext: k.ext });
             return (
               <div className="doc-row" key={doc.id}>
                 {/* Type icon tile */}
@@ -679,7 +679,7 @@ function DocumentsPanel({ docs, addFiles, setDocs, busy }: DocumentsPanelProps) 
                   <div className="doc-row-name">{doc.file.name}</div>
                   <div className="doc-row-sub">
                     {doc.status === 'signed' && doc.signed
-                      ? <Tag kind="ok"><Icon.check size={11} /> signé</Tag>
+                      ? <Tag kind="ok"><Icon.check size={11} /> {t('sign.docs.signed')}</Tag>
                       : doc.status === 'signing'
                       ? <span className="spinner" style={{ width: 13, height: 13 }} />
                       : doc.status === 'error'
@@ -690,13 +690,13 @@ function DocumentsPanel({ docs, addFiles, setDocs, busy }: DocumentsPanelProps) 
                       <span>{sizeFmt} · {typeLabel}</span>
                     )}
                     {doc.existingSignatures != null && doc.existingSignatures > 0 && (
-                      <Tag kind="warn">déjà signé : {doc.existingSignatures}</Tag>
+                      <Tag kind="warn">{t('sign.docs.alreadySigned', { n: doc.existingSignatures })}</Tag>
                     )}
                   </div>
                   {doc.signatureForm === 'XADES_DETACHED' && (
                     <div className="doc-detached-note">
                       <Icon.alert size={12} />
-                      Produit un fichier de signature séparé (.xml). Le document d’origine reste inchangé et doit être conservé.
+                      {t('sign.docs.detachedNote')}
                     </div>
                   )}
                 </div>
@@ -704,12 +704,12 @@ function DocumentsPanel({ docs, addFiles, setDocs, busy }: DocumentsPanelProps) 
                 {/* Signature-format selector (per document); read-only pill once signed */}
                 {doc.status === 'signed' && doc.signed ? (
                   <div className="doc-format-pill">
-                    <span className="mono">{formLabel(effectiveForm(doc))}</span>
+                    <span className="mono">{formLabel(effectiveForm(doc), t)}</span>
                   </div>
                 ) : (
                   <select
                     className="doc-format-select"
-                    aria-label={`Format de signature pour ${doc.file.name}`}
+                    aria-label={t('sign.docs.formatAria', { name: doc.file.name })}
                     value={doc.signatureForm ?? ''}
                     disabled={busy || doc.status === 'signing'}
                     onChange={(e) => {
@@ -720,7 +720,7 @@ function DocumentsPanel({ docs, addFiles, setDocs, busy }: DocumentsPanelProps) 
                   >
                     {FORM_OPTIONS.filter((o) => !o.pdfOnly || isPdf).map((o) => (
                       <option key={o.value || 'auto'} value={o.value}>
-                        {o.label}
+                        {t(o.labelKey)}
                       </option>
                     ))}
                   </select>
@@ -736,14 +736,14 @@ function DocumentsPanel({ docs, addFiles, setDocs, busy }: DocumentsPanelProps) 
                       downloadBase64(doc.signed!.base64, doc.signed!.fileName, doc.signed!.mediaType)
                     }
                   >
-                    Télécharger
+                    {t('common.download')}
                   </Btn>
                 )}
 
                 {/* Remove button */}
                 <button
                   className="doc-remove-btn"
-                  title="Retirer"
+                  title={t('sign.docs.remove')}
                   disabled={busy}
                   onClick={() => setDocs((x) => x.filter((y) => y.id !== doc.id))}
                 >
@@ -767,6 +767,7 @@ interface SigningProgressProps {
 }
 
 function SigningProgress({ docs, liveDocs }: SigningProgressProps) {
+  const t = useT();
   const statusOf = (id: string): DocStatus => liveDocs.find((d) => d.id === id)?.status ?? 'pending';
 
   const doneCount = docs.filter((d) => {
@@ -795,10 +796,10 @@ function SigningProgress({ docs, liveDocs }: SigningProgressProps) {
           </div>
         </div>
 
-        <h3 className="sign-modal-title">Signature en cours…</h3>
+        <h3 className="sign-modal-title">{t('sign.progress.title')}</h3>
         {activeDoc && (
           <p className="sign-modal-sub">
-            Document <strong>{activeIdx}</strong> sur {docs.length} · {activeDoc.file.name}
+            {t('sign.progress.docOf', { i: activeIdx, total: docs.length, name: activeDoc.file.name })}
           </p>
         )}
 
@@ -807,7 +808,7 @@ function SigningProgress({ docs, liveDocs }: SigningProgressProps) {
           <div className="sign-prog-bar-fill" style={{ width: `${progressPct}%` }} />
         </div>
         <div className="sign-prog-bar-labels">
-          <span>Empreinte signée par la carte</span>
+          <span>{t('sign.progress.hashSigned')}</span>
           <span>{progressPct}&nbsp;%</span>
         </div>
 
@@ -838,9 +839,9 @@ function SigningProgress({ docs, liveDocs }: SigningProgressProps) {
                     {d.file.name}
                   </span>
                   <span style={{ flexShrink: 0 }}>
-                    {st === 'signed' && <Tag kind="ok">signé</Tag>}
+                    {st === 'signed' && <Tag kind="ok">{t('sign.progress.signedTag')}</Tag>}
                     {st === 'error' && (
-                      <span style={{ color: 'var(--danger)', fontSize: 11, fontWeight: 700 }}>échec</span>
+                      <span style={{ color: 'var(--danger)', fontSize: 11, fontWeight: 700 }}>{t('sign.progress.failTag')}</span>
                     )}
                   </span>
                 </div>
@@ -854,7 +855,7 @@ function SigningProgress({ docs, liveDocs }: SigningProgressProps) {
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
             <path d="M12 9v4m0 3h.01M10.3 4.3 2.6 18a1.5 1.5 0 0 0 1.3 2.2h16.2a1.5 1.5 0 0 0 1.3-2.2L13.7 4.3a1.5 1.5 0 0 0-2.6 0Z" stroke="#E2A53A" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
-          Ne retirez pas votre clé USB
+          {t('sign.progress.dontRemove')}
         </div>
       </div>
     </div>
@@ -873,13 +874,15 @@ interface SuccessViewProps {
 }
 
 function SuccessView({ signedDocs, cert, reason, location, signedAtIso, onReset, onGoVerify }: SuccessViewProps) {
+  const t = useT();
+  const { lang } = useLang();
   const signer = cnOf(cert?.subjectDn);
   const issuer = issuerOf(cert?.issuerDn);
   const localStamp = signedAtIso
-    ? new Date(signedAtIso).toLocaleString('fr-FR', { dateStyle: 'long', timeStyle: 'short' })
+    ? new Date(signedAtIso).toLocaleString(lang === 'en' ? 'en-GB' : 'fr-FR', { dateStyle: 'long', timeStyle: 'short' })
     : '';
   // Distinct resolved formats across the batch (e.g. "PAdES‑B‑T" or "ASiC‑E + XAdES détaché").
-  const distinctForms = Array.from(new Set(signedDocs.map((d) => formLabel(effectiveForm(d)))));
+  const distinctForms = Array.from(new Set(signedDocs.map((d) => formLabel(effectiveForm(d), t))));
   const formatSummary = distinctForms.length ? distinctForms.join(' + ') : '—';
 
   return (
@@ -893,12 +896,16 @@ function SuccessView({ signedDocs, cert, reason, location, signedAtIso, onReset,
             </svg>
           </div>
           <h2>
-            {signedDocs.length} document{signedDocs.length > 1 ? 's' : ''} signé{signedDocs.length > 1 ? 's' : ''}
+            {t('sign.success.titleN', { n: signedDocs.length, s: signedDocs.length > 1 ? 's' : '' })}
           </h2>
-          <p className="sv-hero-sub">
-            Signés avec votre certificat
-            {signer && <> <strong>{signer}</strong></>} · horodatés le {localStamp}.
-          </p>
+          <p
+            className="sv-hero-sub"
+            dangerouslySetInnerHTML={{
+              __html: signer
+                ? t('sign.success.subWithSigner', { signer, stamp: localStamp })
+                : t('sign.success.subNoSigner', { stamp: localStamp }),
+            }}
+          />
         </div>
 
         {/* Signed files list */}
@@ -932,7 +939,7 @@ function SuccessView({ signedDocs, cert, reason, location, signedAtIso, onReset,
                         <path d="m8.5 12.2 2.3 2.3 4.6-4.8" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
                     </span>
-                    <span>Signé · {formLabel(effectiveForm(d))} · {sizeFmt}</span>
+                    <span>{t('sign.success.fileSigned', { format: formLabel(effectiveForm(d), t), size: sizeFmt })}</span>
                   </div>
                 </div>
                 <Btn
@@ -941,7 +948,7 @@ function SuccessView({ signedDocs, cert, reason, location, signedAtIso, onReset,
                   icon={<Icon.download size={14} />}
                   onClick={() => downloadBase64(d.signed!.base64, d.signed!.fileName, d.signed!.mediaType)}
                 >
-                  Télécharger
+                  {t('common.download')}
                 </Btn>
               </div>
             );
@@ -961,13 +968,13 @@ function SuccessView({ signedDocs, cert, reason, location, signedAtIso, onReset,
               )
             }
           >
-            Tout télécharger (ZIP)
+            {t('common.downloadAllZip')}
           </Btn>
           <Btn variant="ghost" size="lg" icon={<Icon.shieldCheck size={16} />} onClick={onGoVerify}>
-            Vérifier
+            {t('common.verify')}
           </Btn>
           <Btn variant="ghost" size="lg" onClick={onReset}>
-            Nouvelle signature
+            {t('sign.success.newSignature')}
           </Btn>
         </div>
 
@@ -975,15 +982,15 @@ function SuccessView({ signedDocs, cert, reason, location, signedAtIso, onReset,
         <div className="sv-details-card">
           <div className="sv-details-header">
             <Icon.doc2 size={15} />
-            Détails de la signature
+            {t('sign.success.detailsHeader')}
           </div>
           {[
-            { k: 'Signataire', v: signer || '—' },
-            { k: 'Format', v: formatSummary, mono: true },
-            { k: 'Horodatage TSA', v: signedAtIso || '—', mono: true },
-            { k: 'Autorité', v: issuer || '—' },
-            { k: 'Motif', v: reason || '—' },
-            { k: 'Lieu', v: location || '—' },
+            { k: t('sign.success.signer'), v: signer || '—' },
+            { k: t('sign.success.format'), v: formatSummary, mono: true },
+            { k: t('sign.success.tsa'), v: signedAtIso || '—', mono: true },
+            { k: t('sign.success.authority'), v: issuer || '—' },
+            { k: t('sign.success.reason'), v: reason || '—' },
+            { k: t('sign.success.place'), v: location || '—' },
           ].map(({ k, v, mono }) => (
             <div className="sv-detail-row" key={k}>
               <span className="sv-detail-key">{k}</span>
@@ -994,7 +1001,7 @@ function SuccessView({ signedDocs, cert, reason, location, signedAtIso, onReset,
 
         <div style={{ textAlign: 'center' }}>
           <button className="linkbtn muted" onClick={onGoVerify}>
-            Vérifier une signature →
+            {t('sign.success.goVerify')}
           </button>
         </div>
       </div>

@@ -10,6 +10,7 @@ import { TitleBar } from './components/TitleBar';
 import { ValidatePage } from './components/ValidatePage';
 import { store } from './services/store';
 import type { ThemePref } from './services/store';
+import { useLang, useT } from './i18n';
 
 export type Tab = 'accueil' | 'sign' | 'verify' | 'cle' | 'prerequis';
 
@@ -17,6 +18,7 @@ export type Tab = 'accueil' | 'sign' | 'verify' | 'cle' | 'prerequis';
 
 function AgentChip() {
   const { status, locked } = useAgent();
+  const t = useT();
 
   let dotCls: string;
   let title: string;
@@ -24,20 +26,20 @@ function AgentChip() {
 
   if (status === 'available') {
     dotCls = 'on';
-    title = 'Agent connecté';
-    sub = locked ? 'Carte verrouillée' : 'Session active';
+    title = t('agent.chip.connected');
+    sub = locked ? t('agent.chip.cardLocked') : t('agent.chip.sessionActive');
   } else if (status === 'checking') {
     dotCls = 'busy';
-    title = 'Détection…';
-    sub = 'Vérification';
+    title = t('agent.chip.detecting');
+    sub = t('agent.chip.checking');
   } else if (status === 'error') {
     dotCls = 'off';
-    title = 'Carte indisponible';
-    sub = 'Token occupé';
+    title = t('agent.chip.cardUnavailable');
+    sub = t('agent.chip.tokenBusy');
   } else {
     dotCls = 'off';
-    title = 'Agent non détecté';
-    sub = 'Vérifiez la clé et le middleware';
+    title = t('agent.chip.notDetected');
+    sub = t('agent.chip.checkKey');
   }
 
   return (
@@ -61,14 +63,17 @@ interface SidebarProps {
 }
 
 function Sidebar({ tab, setTab, theme, setTheme }: SidebarProps) {
-  function handleTheme(t: ThemePref) {
-    store.setTheme(t);
-    if (t === 'dark') {
+  const t = useT();
+  const { lang, setLang } = useLang();
+
+  function handleTheme(next: ThemePref) {
+    store.setTheme(next);
+    if (next === 'dark') {
       document.documentElement.setAttribute('data-theme', 'dark');
     } else {
       document.documentElement.setAttribute('data-theme', 'light');
     }
-    setTheme(t);
+    setTheme(next);
   }
 
   return (
@@ -93,12 +98,12 @@ function Sidebar({ tab, setTab, theme, setTheme }: SidebarProps) {
         </span>
         <div className="sb-logo-text">
           <div className="sb-logo-name">EU-DSS Sign</div>
-          <div className="sb-logo-sub">Signature électronique</div>
+          <div className="sb-logo-sub">{t('nav.brandSub')}</div>
         </div>
       </div>
 
       {/* SIGNATURE group */}
-      <div className="sb-group-label">SIGNATURE</div>
+      <div className="sb-group-label">{t('nav.groupSignature')}</div>
 
       {/* Accueil — active nav target */}
       <button
@@ -117,7 +122,7 @@ function Sidebar({ tab, setTab, theme, setTheme }: SidebarProps) {
             />
           </svg>
         </span>
-        <span className="sb-item-label">Accueil</span>
+        <span className="sb-item-label">{t('nav.home')}</span>
       </button>
 
       {/* Signer — active nav target */}
@@ -137,7 +142,7 @@ function Sidebar({ tab, setTab, theme, setTheme }: SidebarProps) {
             />
           </svg>
         </span>
-        <span className="sb-item-label">Signer</span>
+        <span className="sb-item-label">{t('nav.sign')}</span>
       </button>
 
       {/* Vérifier — active nav target */}
@@ -163,11 +168,11 @@ function Sidebar({ tab, setTab, theme, setTheme }: SidebarProps) {
             />
           </svg>
         </span>
-        <span className="sb-item-label">Vérifier</span>
+        <span className="sb-item-label">{t('nav.verify')}</span>
       </button>
 
       {/* GÉRER group */}
-      <div className="sb-group-label sb-group-label--spaced">GÉRER</div>
+      <div className="sb-group-label sb-group-label--spaced">{t('nav.groupManage')}</div>
 
       {/* Clé & certificat — active nav target */}
       <button
@@ -187,7 +192,7 @@ function Sidebar({ tab, setTab, theme, setTheme }: SidebarProps) {
             />
           </svg>
         </span>
-        <span className="sb-item-label">Clé &amp; certificat</span>
+        <span className="sb-item-label">{t('nav.key')}</span>
       </button>
 
       {/* Prérequis — active nav target */}
@@ -206,7 +211,7 @@ function Sidebar({ tab, setTab, theme, setTheme }: SidebarProps) {
             />
           </svg>
         </span>
-        <span className="sb-item-label">Prérequis</span>
+        <span className="sb-item-label">{t('nav.prereq')}</span>
       </button>
 
       {/* Spacer */}
@@ -224,23 +229,23 @@ function Sidebar({ tab, setTab, theme, setTheme }: SidebarProps) {
               strokeLinecap="round"
             />
           </svg>
-          Thème
+          {t('nav.theme')}
         </div>
         <div className="sb-toggle-group">
           <button
             type="button"
             className={'sb-toggle-opt' + (theme === 'light' ? ' sb-toggle-opt--active' : '')}
             onClick={() => handleTheme('light')}
-          >Clair</button>
+          >{t('nav.themeLight')}</button>
           <button
             type="button"
             className={'sb-toggle-opt' + (theme === 'dark' ? ' sb-toggle-opt--active' : '')}
             onClick={() => handleTheme('dark')}
-          >Sombre</button>
+          >{t('nav.themeDark')}</button>
         </div>
       </div>
 
-      {/* Langue toggle — visual only, FR active */}
+      {/* Langue toggle — switches the whole UI language */}
       <div className="sb-toggle-row">
         <div className="sb-toggle-label">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
@@ -251,11 +256,19 @@ function Sidebar({ tab, setTab, theme, setTheme }: SidebarProps) {
               strokeWidth="1.3"
             />
           </svg>
-          Langue
+          {t('nav.language')}
         </div>
         <div className="sb-toggle-group">
-          <span className="sb-toggle-opt sb-toggle-opt--active">FR</span>
-          <span className="sb-toggle-opt">EN</span>
+          <button
+            type="button"
+            className={'sb-toggle-opt' + (lang === 'fr' ? ' sb-toggle-opt--active' : '')}
+            onClick={() => setLang('fr')}
+          >FR</button>
+          <button
+            type="button"
+            className={'sb-toggle-opt' + (lang === 'en' ? ' sb-toggle-opt--active' : '')}
+            onClick={() => setLang('en')}
+          >EN</button>
         </div>
       </div>
 

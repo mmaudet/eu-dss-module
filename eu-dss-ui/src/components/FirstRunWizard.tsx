@@ -24,6 +24,7 @@ import { backendApi } from '../services/backendApi';
 import { detectOs, PREREQ_MANIFEST } from '../services/prerequisites';
 import { runSelfTest, SelfTestResult } from '../services/selfTest';
 import { store } from '../services/store';
+import { useT, type TKey } from '../i18n';
 
 /* ── helpers ──────────────────────────────────────────────────────────────── */
 
@@ -70,7 +71,8 @@ function CheckGlyph({ size = 14, color = '#fff', sw = 2.4 }: { size?: number; co
 
 /** Stepper: 1 Prérequis · 2 Test du PIN · 3 Terminé. */
 function Stepper({ active }: { active: 1 | 2 | 3 }) {
-  const labels = ['Prérequis', 'Test du PIN', 'Terminé'];
+  const t = useT();
+  const labels = [t('wizard.step.prereq'), t('wizard.step.pin'), t('wizard.step.done')];
   return (
     <div className="frw-stepper">
       {labels.map((label, i) => {
@@ -103,6 +105,7 @@ interface PrereqRowProps {
 }
 
 function PrereqRow({ icon, title, sub, state, okLabel, helpHref }: PrereqRowProps) {
+  const t = useT();
   return (
     <div className={'frw-prrow frw-prow--' + state}>
       <span className="frw-prow-icon">{icon}</span>
@@ -115,14 +118,14 @@ function PrereqRow({ icon, title, sub, state, okLabel, helpHref }: PrereqRowProp
       ) : state === 'checking' ? (
         <span className="frw-prow-status frw-prow-status--checking">
           <span className="spinner" style={{ width: 14, height: 14 }} />
-          Détection…
+          {t('common.detecting')}
         </span>
       ) : (
         <span className="frw-prow-wait">
-          <span className="frw-prow-status frw-prow-status--wait">En attente</span>
+          <span className="frw-prow-status frw-prow-status--wait">{t('common.waiting')}</span>
           {helpHref && (
             <a className="frw-prow-help" href={helpHref} target="_blank" rel="noreferrer">
-              Besoin d'aide
+              {t('wizard.needHelp')}
             </a>
           )}
         </span>
@@ -138,6 +141,7 @@ interface FirstRunWizardProps {
 }
 
 export function FirstRunWizard({ onComplete }: FirstRunWizardProps) {
+  const t = useT();
   const [step, setStep] = useState<Step>('prereq');
   const [prereq, setPrereq] = useState<PrereqState>({ module: 'checking', token: 'checking', backend: 'checking' });
   const [result, setResult] = useState<SelfTestResult | null>(null);
@@ -249,7 +253,7 @@ export function FirstRunWizard({ onComplete }: FirstRunWizardProps) {
         certificates[0];
       if (!cert) {
         setUnlocked(false);
-        setPinError('Aucun certificat lisible sur la carte.');
+        setPinError(t('pinerr.noCert'));
         setBusy(false);
         return;
       }
@@ -270,24 +274,22 @@ export function FirstRunWizard({ onComplete }: FirstRunWizardProps) {
       if (e instanceof AgentError) {
         if (e.code === 'pin_locked') {
           setLocked(true);
-          setPinError(
-            "Carte bloquée (trop d'essais). Déblocage par PUK via le middleware PKCS#11 de votre clé nécessaire.",
-          );
+          setPinError(t('pinerr.lockedPukMiddleware'));
         } else if (e.code === 'pin_incorrect') {
-          setPinError('Code PIN incorrect.');
+          setPinError(t('pinerr.incorrectFull'));
         } else if (e.code === 'token_unavailable') {
-          setPinError('Carte indisponible : vérifiez la clé et le middleware.');
+          setPinError(t('pinerr.tokenUnavailableShort'));
         } else {
-          setPinError(e.message || 'Échec du déverrouillage.');
+          setPinError(e.message || t('pinerr.unlockFailed'));
         }
       } else {
-        setPinError((e as Error).message || 'Échec du déverrouillage.');
+        setPinError((e as Error).message || t('pinerr.unlockFailed'));
       }
       // Stay on the PIN step for re-entry (except pin_locked, which disables it).
     } finally {
       setBusy(false);
     }
-  }, [busy, locked, pin]);
+  }, [busy, locked, pin, t]);
 
   // Keep the latest test() reachable from the keydown handler.
   useEffect(() => {
@@ -321,13 +323,13 @@ export function FirstRunWizard({ onComplete }: FirstRunWizardProps) {
 
   return (
     <div className="frw-scrim">
-      <div className="frw-card rise" role="dialog" aria-modal="true" aria-label="Configuration initiale">
+      <div className="frw-card rise" role="dialog" aria-modal="true" aria-label={t('wizard.dialogLabel')}>
         {/* Window-style header bar */}
         <div className="frw-head">
           <span className="frw-head-mark">
             <CheckGlyph size={11} sw={2.4} />
           </span>
-          <span className="frw-head-title">EU-DSS Sign · Configuration initiale</span>
+          <span className="frw-head-title">{t('wizard.headTitle')}</span>
         </div>
 
         <div className="frw-body">
@@ -385,14 +387,15 @@ interface PrereqViewProps {
 }
 
 function PrereqView({ prereq, certCn, tokenReady, docUrl, middlewareUrl, onContinue, onRetry, onSkip }: PrereqViewProps) {
+  const t = useT();
   const checking = prereq.module === 'checking' || prereq.token === 'checking' || prereq.backend === 'checking';
   const anyMissing = !checking && (prereq.module !== 'ok' || prereq.token !== 'ok' || prereq.backend !== 'ok');
 
   return (
     <div key="prereq" className="frw-pane">
-      <h3 className="frw-h3">Bienvenue · configurons votre signature</h3>
+      <h3 className="frw-h3">{t('wizard.prereq.welcome')}</h3>
       <p className="frw-lead">
-        Cette configuration est nécessaire au premier lancement. EU-DSS vérifie automatiquement les trois prérequis.
+        {t('wizard.prereq.lead')}
       </p>
 
       <PrereqRow
@@ -402,10 +405,10 @@ function PrereqView({ prereq, certCn, tokenReady, docUrl, middlewareUrl, onConti
             <path d="M7 10v4M11 10v4M15 10h2M15 14h2" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
           </svg>
         }
-        title="Middleware PKCS#11 de votre clé"
-        sub={prereq.module === 'ok' ? 'Pilote PKCS#11 détecté' : 'Pilote cryptographique requis'}
+        title={t('prereq.row.middlewareTitle')}
+        sub={prereq.module === 'ok' ? t('prereq.row.middlewareOk') : t('prereq.row.middlewareWait')}
         state={prereq.module}
-        okLabel="OK"
+        okLabel={t('common.ok')}
         helpHref={middlewareUrl}
       />
 
@@ -417,10 +420,10 @@ function PrereqView({ prereq, certCn, tokenReady, docUrl, middlewareUrl, onConti
             <rect x="10" y="9" width="4" height="4" rx="1" stroke="currentColor" strokeWidth="1.7" />
           </svg>
         }
-        title="Clé USB de signature"
-        sub={prereq.token === 'ok' ? (certCn ? certCn : 'Token cryptographique présent') : 'Insérez votre clé de signature'}
+        title={t('prereq.row.tokenTitle')}
+        sub={prereq.token === 'ok' ? (certCn ? certCn : t('prereq.row.tokenOk')) : t('prereq.row.tokenWait')}
         state={prereq.token}
-        okLabel="Détectée"
+        okLabel={t('prereq.row.tokenDetected')}
         helpHref={docUrl}
       />
 
@@ -431,10 +434,10 @@ function PrereqView({ prereq, certCn, tokenReady, docUrl, middlewareUrl, onConti
             <path d="M3.5 12h17M12 3c2.6 2.7 2.6 15.3 0 18M12 3c-2.6 2.7-2.6 15.3 0 18" stroke="currentColor" strokeWidth="1.4" />
           </svg>
         }
-        title="Service de signature (EU-DSS)"
-        sub={prereq.backend === 'ok' ? 'Service de signature joignable' : 'Connexion au service requise'}
+        title={t('prereq.row.backendTitle')}
+        sub={prereq.backend === 'ok' ? t('prereq.row.backendOk') : t('prereq.row.backendWait')}
         state={prereq.backend}
-        okLabel="OK"
+        okLabel={t('common.ok')}
         helpHref={docUrl}
       />
 
@@ -445,20 +448,20 @@ function PrereqView({ prereq, certCn, tokenReady, docUrl, middlewareUrl, onConti
               <path d="M20 11a8 8 0 10-2 5.3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
               <path d="M20 5v5h-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
-            Réessayer la détection
+            {t('wizard.prereq.retry')}
           </button>
         </div>
       )}
 
       <button type="button" className="frw-primary-btn" disabled={!tokenReady} onClick={onContinue}>
-        Continuer vers le test du PIN
+        {t('wizard.prereq.continue')}
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
           <path d="M5 12h14m0 0-5-5m5 5-5 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </button>
 
       <button type="button" className="frw-skip-link" onClick={onSkip}>
-        Configurer plus tard
+        {t('wizard.skip')}
       </button>
     </div>
   );
@@ -479,6 +482,7 @@ interface PinViewProps {
 }
 
 function PinView({ pin, shake, busy, locked, pinError, canSubmit, onPress, onSubmit, onSkip }: PinViewProps) {
+  const t = useT();
   const err = !!pinError;
   // How many dots to render: at least 6, grow with the entered PIN (max 12).
   const dotCount = Math.max(6, Math.min(PIN_MAX, pin.length || 0));
@@ -492,11 +496,8 @@ function PinView({ pin, shake, busy, locked, pinError, canSubmit, onPress, onSub
         </svg>
       </span>
 
-      <h3 className="frw-h3">Testons la boucle de signature</h3>
-      <p className="frw-lead frw-lead--narrow">
-        Pour valider que tout fonctionne de bout en bout, EU-DSS va signer un{' '}
-        <strong>document de test interne</strong>. Saisissez votre code PIN.
-      </p>
+      <h3 className="frw-h3">{t('wizard.pin.title')}</h3>
+      <p className="frw-lead frw-lead--narrow" dangerouslySetInnerHTML={{ __html: t('wizard.pin.lead') }} />
 
       {locked ? (
         <div className="frw-fail-box" role="alert" style={{ marginTop: 18 }}>
@@ -535,7 +536,7 @@ function PinView({ pin, shake, busy, locked, pinError, canSubmit, onPress, onSub
                   className="frw-key"
                   disabled={busy}
                   onClick={() => onPress(k)}
-                  aria-label={k === 'del' ? 'Effacer' : k}
+                  aria-label={k === 'del' ? t('wizard.pin.clearAria') : k}
                 >
                   {k === 'del' ? (
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
@@ -554,10 +555,10 @@ function PinView({ pin, shake, busy, locked, pinError, canSubmit, onPress, onSub
             {busy ? (
               <>
                 <span className="spinner" style={{ width: 16, height: 16 }} />
-                Test en cours…
+                {t('wizard.pin.testing')}
               </>
             ) : (
-              'Tester la signature'
+              t('wizard.pin.testSign')
             )}
           </button>
         </>
@@ -568,11 +569,11 @@ function PinView({ pin, shake, busy, locked, pinError, canSubmit, onPress, onSub
           <rect x="5" y="11" width="14" height="9" rx="2" stroke="currentColor" strokeWidth="1.5" />
           <path d="M8 11V8a4 4 0 0 1 8 0v3" stroke="currentColor" strokeWidth="1.5" />
         </svg>
-        Aucun document conservé · test interne, PIN jamais enregistré
+        {t('wizard.pin.footer')}
       </div>
 
       <button type="button" className="frw-skip-link" onClick={onSkip}>
-        Configurer plus tard
+        {t('wizard.skip')}
       </button>
     </div>
   );
@@ -616,16 +617,17 @@ function ChecklistRow({ label, mark }: { label: React.ReactNode; mark: RowMark }
 }
 
 function VerifyingView({ result, unlocked, certCn, onRetry, onSkip }: VerifyingViewProps) {
+  const t = useT();
   const failed = result != null && !result.ok;
 
   if (failed) {
-    const stepFr: Record<string, string> = {
-      prepare: 'préparation côté service',
-      sign: 'signature par la carte',
-      assemble: 'assemblage de la signature',
-      validate: 'validation eIDAS',
+    const stepKey: Record<string, TKey> = {
+      prepare: 'wizard.verify.step.prepare',
+      sign: 'wizard.verify.step.sign',
+      assemble: 'wizard.verify.step.assemble',
+      validate: 'wizard.verify.step.validate',
     };
-    const where = result?.failedStep ? stepFr[result.failedStep] : 'la boucle de signature';
+    const where = result?.failedStep ? t(stepKey[result.failedStep]) : t('wizard.verify.step.loop');
     return (
       <div key="verify-fail" className="frw-pane frw-pane--center">
         <span className="frw-fail-tile">
@@ -633,20 +635,21 @@ function VerifyingView({ result, unlocked, certCn, onRetry, onSkip }: VerifyingV
             <path d="M9 9l6 6m0-6-6 6" stroke="var(--danger)" strokeWidth="2.2" strokeLinecap="round" />
           </svg>
         </span>
-        <h3 className="frw-h3">Le test n'a pas abouti</h3>
-        <p className="frw-lead frw-lead--narrow">
-          La signature de test a échoué à l'étape <strong>{where}</strong>.
-        </p>
+        <h3 className="frw-h3">{t('wizard.verify.failTitle')}</h3>
+        <p
+          className="frw-lead frw-lead--narrow"
+          dangerouslySetInnerHTML={{ __html: t('wizard.verify.failLead', { step: where }) }}
+        />
         {result?.error && (
           <div className="frw-fail-box" role="alert">
             <div className="frw-fail-text mono">{result.error}</div>
           </div>
         )}
         <button type="button" className="frw-primary-btn" onClick={onRetry}>
-          Réessayer
+          {t('common.retry')}
         </button>
         <button type="button" className="frw-skip-link" onClick={onSkip}>
-          Configurer plus tard
+          {t('wizard.skip')}
         </button>
       </div>
     );
@@ -663,16 +666,16 @@ function VerifyingView({ result, unlocked, certCn, onRetry, onSkip }: VerifyingV
         <div className="ring-spinner-track" />
         <div className="ring-spinner-arc" />
       </div>
-      <h3 className="frw-h3">Vérification de la boucle…</h3>
-      <p className="frw-lead">Quelques secondes · ne retirez pas votre clé.</p>
+      <h3 className="frw-h3">{t('wizard.verify.title')}</h3>
+      <p className="frw-lead">{t('wizard.verify.lead')}</p>
 
       <div className="frw-checklist">
         <ChecklistRow
-          label={<>Carte déverrouillée (PIN correct){certCn ? <span className="frw-check-cn"> · {certCn}</span> : null}</>}
+          label={<>{t('wizard.verify.rowUnlock')}{certCn ? <span className="frw-check-cn"> · {certCn}</span> : null}</>}
           mark={unlockMark}
         />
-        <ChecklistRow label="Empreinte signée par la carte" mark={signMark} />
-        <ChecklistRow label="Validation eIDAS du test" mark={validateMark} />
+        <ChecklistRow label={t('wizard.verify.rowSign')} mark={signMark} />
+        <ChecklistRow label={t('wizard.verify.rowValidate')} mark={validateMark} />
       </div>
     </div>
   );
@@ -681,26 +684,23 @@ function VerifyingView({ result, unlocked, certCn, onRetry, onSkip }: VerifyingV
 /* ── Frame 4 · Terminé ────────────────────────────────────────────────────── */
 
 function DoneView({ result, certCn, onEnter }: { result: SelfTestResult | null; certCn: string; onEnter: () => void }) {
+  const t = useT();
   return (
     <div key="done" className="frw-pane frw-pane--center">
       <span className="frw-done-tile">
         <CheckGlyph size={34} color="var(--ok-ink)" sw={2.4} />
       </span>
-      <h3 className="frw-h3 frw-h3--lg">Tout fonctionne</h3>
-      <p className="frw-lead frw-lead--narrow">
-        Votre clé, le middleware et la signature ont été testés avec succès
-        {certCn ? (
-          <>
-            {' '}
-            (<strong>{certCn}</strong>)
-          </>
-        ) : null}
-        . Vous êtes prêt à signer.
-      </p>
+      <h3 className="frw-h3 frw-h3--lg">{t('wizard.done.title')}</h3>
+      <p
+        className="frw-lead frw-lead--narrow"
+        dangerouslySetInnerHTML={{
+          __html: certCn ? t('wizard.done.leadWithCn', { cn: certCn }) : t('wizard.done.leadNoCn'),
+        }}
+      />
 
       {result?.indication && (
         <div className="frw-verdict">
-          <span className="frw-verdict-k">Verdict du test</span>
+          <span className="frw-verdict-k">{t('wizard.done.verdict')}</span>
           <span className="frw-verdict-v mono">{result.indication}</span>
         </div>
       )}
@@ -711,14 +711,11 @@ function DoneView({ result, certCn, onEnter }: { result: SelfTestResult | null; 
           <path d="M12 11.5v5" stroke="var(--brand)" strokeWidth="1.8" strokeLinecap="round" />
           <circle cx="12" cy="8" r="1.1" fill="var(--brand)" />
         </svg>
-        <div className="frw-info-text">
-          Aux <strong>prochains lancements</strong>, vous arriverez directement sur l'écran principal. Ce wizard ne
-          réapparaîtra qu'en cas de problème détecté.
-        </div>
+        <div className="frw-info-text" dangerouslySetInnerHTML={{ __html: t('wizard.done.info') }} />
       </div>
 
       <button type="button" className="frw-primary-btn frw-primary-btn--strong" onClick={onEnter}>
-        Entrer dans EU-DSS Sign
+        {t('wizard.done.enter')}
       </button>
     </div>
   );

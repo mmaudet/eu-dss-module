@@ -18,6 +18,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { agentApi } from '../services/agentApi';
 import { backendApi } from '../services/backendApi';
 import { detectOs, PREREQ_MANIFEST } from '../services/prerequisites';
+import { useT } from '../i18n';
 
 type RowState = 'checking' | 'ok' | 'waiting';
 
@@ -101,6 +102,7 @@ interface PrereqRowProps {
 }
 
 function PrereqRow({ icon, title, sub, state, okLabel, helpHref, onRetry }: PrereqRowProps) {
+  const t = useT();
   const isWaiting = state === 'waiting';
 
   return (
@@ -114,12 +116,12 @@ function PrereqRow({ icon, title, sub, state, okLabel, helpHref, onRetry }: Prer
             {onRetry && (
               <button type="button" className="frw-link-action" onClick={onRetry}>
                 <RetryIcon />
-                Réessayer la détection
+                {t('prereq.retry')}
               </button>
             )}
             {helpHref && (
               <a className="frw-prow-help" href={helpHref} target="_blank" rel="noreferrer">
-                Besoin d'aide ?
+                {t('prereq.needHelp')}
               </a>
             )}
           </div>
@@ -130,10 +132,10 @@ function PrereqRow({ icon, title, sub, state, okLabel, helpHref, onRetry }: Prer
       ) : state === 'checking' ? (
         <span className="prq-row-status prq-row-status--checking">
           <span className="spinner" style={{ width: 14, height: 14 }} />
-          Détection…
+          {t('common.detecting')}
         </span>
       ) : (
-        <span className="prq-row-status prq-row-status--wait">En attente</span>
+        <span className="prq-row-status prq-row-status--wait">{t('common.waiting')}</span>
       )}
     </div>
   );
@@ -142,6 +144,7 @@ function PrereqRow({ icon, title, sub, state, okLabel, helpHref, onRetry }: Prer
 /* ── component ────────────────────────────────────────────────────────────── */
 
 export function PrerequisitesScreen({ onGoToSign }: PrerequisitesScreenProps) {
+  const t = useT();
   const [prereq, setPrereq] = useState<PrereqState>({
     module: 'checking',
     token: 'checking',
@@ -193,16 +196,13 @@ export function PrerequisitesScreen({ onGoToSign }: PrerequisitesScreenProps) {
         {/* Info banner */}
         <div className="prq-info-banner">
           <InfoIcon />
-          <span>
-            S'ouvre <strong>automatiquement au premier lancement</strong>. Vous pouvez le rouvrir ici
-            à tout moment.
-          </span>
+          <span dangerouslySetInnerHTML={{ __html: t('prereq.infoBanner') }} />
         </div>
 
         {/* Heading */}
-        <h2 className="prq-heading">Préparons votre signature</h2>
+        <h2 className="prq-heading">{t('prereq.heading')}</h2>
         <p className="prq-lead">
-          Trois éléments sont nécessaires pour signer. EU‑DSS les détecte automatiquement.
+          {t('prereq.lead')}
         </p>
 
         {/* Progress bar */}
@@ -210,16 +210,16 @@ export function PrerequisitesScreen({ onGoToSign }: PrerequisitesScreenProps) {
           <div className="prq-progress-fill" style={{ width: checking ? '0%' : `${progressPct}%` }} />
         </div>
         <div className="prq-progress-labels">
-          <span>{checking ? 'Détection en cours…' : `${readyCount} / 3 prérequis prêts`}</span>
+          <span>{checking ? t('prereq.detecting') : t('prereq.readyCount', { n: readyCount })}</span>
         </div>
 
         {/* Row 1 — Middleware PKCS#11 */}
         <PrereqRow
           icon={<MiddlewareIcon />}
-          title="Middleware PKCS#11 de votre clé"
-          sub={prereq.module === 'ok' ? 'Pilote PKCS#11 détecté' : 'Pilote cryptographique requis'}
+          title={t('prereq.row.middlewareTitle')}
+          sub={prereq.module === 'ok' ? t('prereq.row.middlewareOk') : t('prereq.row.middlewareWait')}
           state={prereq.module}
-          okLabel="OK"
+          okLabel={t('common.ok')}
           helpHref={prereqDoc.middleware.url}
           onRetry={() => void detect()}
         />
@@ -227,10 +227,10 @@ export function PrerequisitesScreen({ onGoToSign }: PrerequisitesScreenProps) {
         {/* Row 2 — Clé USB de signature */}
         <PrereqRow
           icon={<TokenIcon />}
-          title="Clé USB de signature"
-          sub={prereq.token === 'ok' ? 'Token cryptographique présent' : 'Insérez votre clé de signature'}
+          title={t('prereq.row.tokenTitle')}
+          sub={prereq.token === 'ok' ? t('prereq.row.tokenOk') : t('prereq.row.tokenWait')}
           state={prereq.token}
-          okLabel="Détectée"
+          okLabel={t('prereq.row.tokenDetected')}
           helpHref={prereqDoc.docUrl}
           onRetry={() => void detect()}
         />
@@ -238,10 +238,10 @@ export function PrerequisitesScreen({ onGoToSign }: PrerequisitesScreenProps) {
         {/* Row 3 — Service de signature (EU-DSS) */}
         <PrereqRow
           icon={<BackendIcon />}
-          title="Service de signature (EU-DSS)"
-          sub={prereq.backend === 'ok' ? 'Service de signature joignable' : 'Connexion au service requise'}
+          title={t('prereq.row.backendTitle')}
+          sub={prereq.backend === 'ok' ? t('prereq.row.backendOk') : t('prereq.row.backendWait')}
           state={prereq.backend}
-          okLabel="OK"
+          okLabel={t('common.ok')}
           helpHref={prereqDoc.docUrl}
           onRetry={() => void detect()}
         />
@@ -253,7 +253,7 @@ export function PrerequisitesScreen({ onGoToSign }: PrerequisitesScreenProps) {
           disabled={!allReady}
           onClick={onGoToSign}
         >
-          Continuer vers Signer
+          {t('prereq.continue')}
           <ArrowRightIcon />
         </button>
       </div>

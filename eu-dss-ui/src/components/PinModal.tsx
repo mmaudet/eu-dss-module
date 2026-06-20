@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useAgent } from '../agent/AgentContext';
 import { Icon } from './ui';
+import { useT } from '../i18n';
 
 const KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', 'del'] as const;
 
 export function PinModal() {
+  const t = useT();
   const { pinOpen, pinBusy, pinError, submitPin, cancelPin } = useAgent();
   const [pin, setPin] = useState('');
   const [shake, setShake] = useState(false);
@@ -62,7 +64,7 @@ export function PinModal() {
         if (e.target === e.currentTarget && !pinBusy) cancelPin();
       }}
     >
-      <div className="pm-card" role="dialog" aria-modal="true" aria-label="Code PIN de la carte">
+      <div className="pm-card" role="dialog" aria-modal="true" aria-label={t('pin.dialogLabel')}>
 
         {/* Lock icon */}
         <span className={'pm-icon-tile' + (pinError ? ' pm-icon-tile--err' : '')}>
@@ -78,15 +80,12 @@ export function PinModal() {
 
         {/* Title + subtitle */}
         <h3 className="pm-title">
-          {pinError ? 'Code PIN incorrect' : 'Déverrouiller la carte'}
+          {pinError ? t('pin.incorrectTitle') : t('pin.unlockTitle')}
         </h3>
         {pinError ? (
           <p className="pm-sub pm-sub--err">{pinError}</p>
         ) : (
-          <p className="pm-sub">
-            Saisissez le code PIN de votre clé.<br />
-            Il n'est jamais enregistré ni transmis.
-          </p>
+          <p className="pm-sub" dangerouslySetInnerHTML={{ __html: t('pin.sub') }} />
         )}
 
         {/* PIN dots */}
@@ -118,7 +117,7 @@ export function PinModal() {
                 className="pm-key"
                 disabled={pinBusy}
                 onClick={() => press(k)}
-                aria-label={k === 'del' ? 'Effacer' : k}
+                aria-label={k === 'del' ? t('pin.clearAria') : k}
               >
                 {k === 'del' ? (
                   /* Backspace / erase icon matching the design canvas */
@@ -150,12 +149,12 @@ export function PinModal() {
           {pinBusy ? (
             <>
               <span className="spinner" style={{ width: 16, height: 16 }} />
-              Déverrouillage…
+              {t('pin.unlocking')}
             </>
           ) : (
             <>
               <Icon.lock size={17} />
-              Déverrouiller &amp; signer
+              {t('pin.unlockAndSign')}
             </>
           )}
         </button>
@@ -167,13 +166,13 @@ export function PinModal() {
           disabled={pinBusy}
           onClick={cancelPin}
         >
-          Annuler
+          {t('common.cancel')}
         </button>
 
         {/* Footer note */}
         <div className="pm-footer-note">
           <Icon.clock size={13} />
-          Session active 5 min, puis re‑verrouillage automatique
+          {t('pin.footer')}
         </div>
       </div>
     </div>

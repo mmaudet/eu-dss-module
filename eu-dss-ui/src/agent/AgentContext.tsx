@@ -13,6 +13,7 @@ import {
   AgentError,
   AgentSessionStatus,
 } from '../services/agentApi';
+import { useT } from '../i18n';
 
 /**
  * `error` is a distinct status for the case where a token error (e.g. token_unavailable)
@@ -53,6 +54,7 @@ export interface AgentContextValue {
 const AgentContext = createContext<AgentContextValue | null>(null);
 
 export function AgentProvider({ children }: { children: ReactNode }) {
+  const t = useT();
   const [status, setStatus] = useState<AgentStatus>('checking');
   const [session, setSession] = useState<AgentSessionStatus | null>(null);
   const [secondsLeft, setSecondsLeft] = useState(0);
@@ -175,28 +177,28 @@ export function AgentProvider({ children }: { children: ReactNode }) {
           if (e.code === 'token_unavailable') setStatus('error');
           setPinError(
             e.code === 'pin_locked'
-              ? 'Carte bloquée (trop d\'essais). Déblocage par PUK nécessaire.'
+              ? t('pinerr.lockedPuk')
               : e.code === 'pin_incorrect'
-                ? 'PIN incorrect.'
+                ? t('pinerr.incorrect')
                 : e.code === 'token_unavailable'
-                  ? 'Token indisponible : carte non détectée, middleware PKCS#11 manquant, ou une autre appli utilise déjà la carte (ferme-la). Voir la checklist Prérequis ci-dessous.'
-                  : (e.message || 'Échec du déverrouillage.'),
+                  ? t('pinerr.tokenUnavailable')
+                  : (e.message || t('pinerr.unlockFailed')),
           );
         } else {
-          setPinError((e as Error).message || 'Échec du déverrouillage.');
+          setPinError((e as Error).message || t('pinerr.unlockFailed'));
         }
       } finally {
         setPinBusy(false);
       }
     },
-    [loadCertificates, pinResolver],
+    [loadCertificates, pinResolver, t],
   );
 
   const cancelPin = useCallback((): void => {
     setPinOpen(false);
-    pinResolver?.reject(new Error('PIN annulé'));
+    pinResolver?.reject(new Error(t('pinerr.cancelled')));
     setPinResolver(null);
-  }, [pinResolver]);
+  }, [pinResolver, t]);
 
   // Ensures unlocked before a signing operation; prompts if needed. Returns the cert list.
   const ensureUnlocked = useCallback(async (): Promise<AgentCertificate[]> => {

@@ -1,6 +1,7 @@
 import { useAgent } from '../agent/AgentContext';
 import { history, type HistoryEntry } from '../services/history';
 import { fileKind } from './ui';
+import { useT, type TFunction } from '../i18n';
 import type { Tab } from '../App';
 
 /** Extract a single RDN value (CN / O) from an RFC-ish DN. */
@@ -53,19 +54,19 @@ function fmtSize(bytes: number): string {
   return `${bytes} o`;
 }
 
-/** Relative time from an ISO timestamp, in French. */
-function relativeTime(iso: string): string {
+/** Relative time from an ISO timestamp, localised via `t`. */
+function relativeTime(iso: string, t: TFunction): string {
   const now = Date.now();
   const then = new Date(iso).getTime();
   if (isNaN(then)) return iso;
   const diffMs = now - then;
   const diffMin = Math.floor(diffMs / 60_000);
-  if (diffMin < 2) return 'à l\'instant';
-  if (diffMin < 60) return `il y a ${diffMin} min`;
+  if (diffMin < 2) return t('time.justNow');
+  if (diffMin < 60) return t('time.minutesAgo', { n: diffMin });
   const diffH = Math.floor(diffMin / 60);
-  if (diffH < 24) return `il y a ${diffH} h`;
+  if (diffH < 24) return t('time.hoursAgo', { n: diffH });
   const diffDays = Math.floor(diffH / 24);
-  if (diffDays === 1) return 'hier';
+  if (diffDays === 1) return t('time.yesterday');
   // fallback to DD/MM/YYYY
   const d = new Date(iso);
   const dd = String(d.getDate()).padStart(2, '0');
@@ -76,14 +77,15 @@ function relativeTime(iso: string): string {
 
 /* ── Activity row ── */
 function ActivityRow({ entry, last }: { entry: HistoryEntry; last: boolean }) {
+  const t = useT();
   const isPdf = !fileKind(entry.name).asic;
   const isSigned = entry.kind === 'sign';
   const isVerifyOk = entry.kind === 'verify' && entry.verdict === 'TOTAL_PASSED';
   const isVerifyFail = entry.kind === 'verify' && entry.verdict !== 'TOTAL_PASSED' && entry.verdict !== '';
   const isVerifyWarn = entry.kind === 'verify' && !isVerifyOk && !isVerifyFail;
 
-  const verb = isSigned ? 'Signé' : 'Vérifié';
-  const subLine = `${verb} ${relativeTime(entry.atIso)} · ${fmtSize(entry.sizeBytes)}`;
+  const verb = isSigned ? t('accueil.activity.signed') : t('accueil.activity.verified');
+  const subLine = `${verb} ${relativeTime(entry.atIso, t)} · ${fmtSize(entry.sizeBytes)}`;
 
   return (
     <div
@@ -160,7 +162,7 @@ function ActivityRow({ entry, last }: { entry: HistoryEntry; last: boolean }) {
             <circle cx="12" cy="12" r="9.2" fill="#E7F6EE"/>
             <path d="m8.5 12.2 2.3 2.3 4.6-4.8" stroke="#18794E" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
-          Signé
+          {t('accueil.activity.signed')}
         </span>
       )}
       {isVerifyOk && (
@@ -179,7 +181,7 @@ function ActivityRow({ entry, last }: { entry: HistoryEntry; last: boolean }) {
             <circle cx="12" cy="12" r="9.2" fill="#E7F6EE"/>
             <path d="m8.5 12.2 2.3 2.3 4.6-4.8" stroke="#18794E" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
-          Vérifié
+          {t('accueil.activity.verified')}
         </span>
       )}
       {isVerifyWarn && (
@@ -198,7 +200,7 @@ function ActivityRow({ entry, last }: { entry: HistoryEntry; last: boolean }) {
             <circle cx="12" cy="12" r="9.2" fill="#FBF0DA"/>
             <path d="M12 8.5v4M12 15.5h.01" stroke="#9A6213" strokeWidth="1.9" strokeLinecap="round"/>
           </svg>
-          Indéterminé
+          {t('accueil.activity.indeterminate')}
         </span>
       )}
       {isVerifyFail && (
@@ -217,7 +219,7 @@ function ActivityRow({ entry, last }: { entry: HistoryEntry; last: boolean }) {
             <circle cx="12" cy="12" r="9.2" fill="#FDEEEE"/>
             <path d="M9 9l6 6M15 9l-6 6" stroke="#C2362F" strokeWidth="1.9" strokeLinecap="round"/>
           </svg>
-          Invalide
+          {t('accueil.activity.invalid')}
         </span>
       )}
     </div>
@@ -229,6 +231,7 @@ interface AccueilScreenProps {
 }
 
 export function AccueilScreen({ onNavigate }: AccueilScreenProps) {
+  const t = useT();
   const { status, selectedCert } = useAgent();
   const available = status === 'available';
 
@@ -273,18 +276,18 @@ export function AccueilScreen({ onNavigate }: AccueilScreenProps) {
           {available ? (
             <div className="accueil-hero-pill accueil-hero-pill--on">
               <span className="accueil-hero-dot accueil-hero-dot--on" />
-              Clé connectée · carte reconnue
+              {t('accueil.hero.connected')}
             </div>
           ) : (
             <div className="accueil-hero-pill accueil-hero-pill--off">
               <span className="accueil-hero-dot accueil-hero-dot--off" />
-              {status === 'checking' ? 'Détection…' : 'En attente de connexion'}
+              {status === 'checking' ? t('accueil.hero.detecting') : t('accueil.hero.awaiting')}
             </div>
           )}
 
           {/* Holder name */}
           <div className="accueil-hero-name">
-            {holderName ?? 'En attente de connexion'}
+            {holderName ?? t('accueil.hero.awaiting')}
           </div>
 
           {/* Sub-line: org · issuer · valid until — only when cert is present */}
@@ -293,10 +296,10 @@ export function AccueilScreen({ onNavigate }: AccueilScreenProps) {
               <>
                 {org && <>{org} · </>}
                 {issuer && <>{issuer} · </>}
-                {validUntil && <>valide jusqu'au {validUntil}</>}
+                {validUntil && <>{t('accueil.hero.validUntil', { date: validUntil })}</>}
               </>
             ) : (
-              'Insérez votre clé USB pour commencer.'
+              t('accueil.hero.insertKey')
             )}
           </div>
         </div>
@@ -317,7 +320,7 @@ export function AccueilScreen({ onNavigate }: AccueilScreenProps) {
                 strokeLinejoin="round"
               />
             </svg>
-            Signer un document
+            {t('accueil.hero.signDoc')}
           </button>
           <button
             type="button"
@@ -339,7 +342,7 @@ export function AccueilScreen({ onNavigate }: AccueilScreenProps) {
                 strokeLinejoin="round"
               />
             </svg>
-            Vérifier une signature
+            {t('accueil.hero.verifySig')}
           </button>
         </div>
       </div>
@@ -348,7 +351,7 @@ export function AccueilScreen({ onNavigate }: AccueilScreenProps) {
       <div className="accueil-cards">
         {/* Card 1 – Documents signés ce mois */}
         <div className="accueil-card">
-          <div className="accueil-card-label">Documents signés · ce mois</div>
+          <div className="accueil-card-label">{t('accueil.cards.signedThisMonth')}</div>
           <div className={`accueil-card-value${signedThisMonth === 0 ? ' accueil-card-value--empty' : ''}`}>
             {signedThisMonth === 0 ? '—' : signedThisMonth}
           </div>
@@ -356,7 +359,7 @@ export function AccueilScreen({ onNavigate }: AccueilScreenProps) {
 
         {/* Card 2 – Vérifications réussies */}
         <div className="accueil-card">
-          <div className="accueil-card-label">Vérifications réussies</div>
+          <div className="accueil-card-label">{t('accueil.cards.verifyOk')}</div>
           {verifyTotal === 0 ? (
             <div className="accueil-card-value accueil-card-value--empty">—</div>
           ) : (
@@ -369,11 +372,11 @@ export function AccueilScreen({ onNavigate }: AccueilScreenProps) {
 
         {/* Card 3 – Certificate validity */}
         <div className="accueil-card">
-          <div className="accueil-card-label">Certificat valide</div>
+          <div className="accueil-card-label">{t('accueil.cards.certValid')}</div>
           {months !== null ? (
             <div className="accueil-card-value">
               {months}
-              <span className="accueil-card-unit"> mois restants</span>
+              <span className="accueil-card-unit"> {t('accueil.cards.monthsLeft')}</span>
             </div>
           ) : (
             <div className="accueil-card-value accueil-card-value--empty">—</div>
@@ -384,7 +387,7 @@ export function AccueilScreen({ onNavigate }: AccueilScreenProps) {
       {/* ── Recent activity ── */}
       <div className="accueil-activity-card">
         <div className="accueil-activity-header">
-          <span className="accueil-activity-title">Activité récente</span>
+          <span className="accueil-activity-title">{t('accueil.activity.title')}</span>
         </div>
         {entries.length === 0 ? (
           <div className="accueil-activity-empty">
@@ -401,9 +404,9 @@ export function AccueilScreen({ onNavigate }: AccueilScreenProps) {
                 />
               </svg>
             </div>
-            <div className="accueil-empty-title">Aucune activité pour le moment</div>
+            <div className="accueil-empty-title">{t('accueil.activity.emptyTitle')}</div>
             <div className="accueil-empty-sub">
-              Vos signatures et vérifications récentes apparaîtront ici.
+              {t('accueil.activity.emptySub')}
             </div>
           </div>
         ) : (

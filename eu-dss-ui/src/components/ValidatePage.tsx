@@ -3,10 +3,12 @@ import { backendApi, ValidationResponse, SignatureSummary } from '../services/ba
 import { fileToBase64 } from '../services/fileUtils';
 import { history } from '../services/history';
 import { Icon, Btn, Banner, fileKind } from './ui';
+import { useT, type TFunction } from '../i18n';
 
 /* ---- Report action buttons ---- */
 
 function ReportActions({ xml }: { xml: string | null }) {
+  const t = useT();
   const [copied, setCopied] = useState(false);
 
   if (!xml) return null;
@@ -34,26 +36,26 @@ function ReportActions({ xml }: { xml: string | null }) {
         type="button"
         className="btn btn-ghost btn-sm"
         onClick={handleDownload}
-        aria-label="Télécharger le rapport XML DSS"
+        aria-label={t('verify.report.downloadAria')}
       >
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
           <path d="M12 3v13M7 12l5 5 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           <path d="M5 20h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
         </svg>
-        Télécharger le rapport XML
+        {t('verify.report.download')}
       </button>
       <button
         type="button"
         className="btn btn-ghost btn-sm"
         onClick={handleCopy}
-        aria-label={copied ? 'Rapport XML copié dans le presse-papiers' : 'Copier le rapport XML dans le presse-papiers'}
+        aria-label={copied ? t('verify.report.copiedAria') : t('verify.report.copyAria')}
       >
         {copied ? (
           <>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="m5 13 4 4L19 7" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
-            Copié ✓
+            {t('common.copied')}
           </>
         ) : (
           <>
@@ -61,7 +63,7 @@ function ReportActions({ xml }: { xml: string | null }) {
               <rect x="9" y="9" width="13" height="13" rx="2" stroke="currentColor" strokeWidth="1.8" />
               <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" stroke="currentColor" strokeWidth="1.8" />
             </svg>
-            Copier
+            {t('common.copy')}
           </>
         )}
       </button>
@@ -111,6 +113,7 @@ function overallVariant(result: ValidationResponse): 'ok' | 'danger' | 'warn' | 
 /* ---- Verdict banner ---- */
 
 function VerdictBanner({ result }: { result: ValidationResponse }) {
+  const t = useT();
   const variant = overallVariant(result);
 
   if (variant === 'nosig') {
@@ -120,9 +123,9 @@ function VerdictBanner({ result }: { result: ValidationResponse }) {
           <Icon.alert size={28} />
         </span>
         <div className="vd-banner-body">
-          <div className="vd-banner-title">Aucune signature détectée</div>
+          <div className="vd-banner-title">{t('verify.verdict.noSigTitle')}</div>
           <div className="vd-banner-sub">
-            Aucune signature numérique n'a été trouvée dans ce document.
+            {t('verify.verdict.noSigSub')}
           </div>
         </div>
       </div>
@@ -141,11 +144,11 @@ function VerdictBanner({ result }: { result: ValidationResponse }) {
         </span>
         <div className="vd-banner-body">
           <div className="vd-banner-row">
-            <div className="vd-banner-title">Signature valide</div>
+            <div className="vd-banner-title">{t('verify.verdict.validTitle')}</div>
             <span className="vd-code-tag vd-code-tag--ok">TOTAL_PASSED</span>
           </div>
           <div className="vd-banner-sub">
-            Le document n'a pas été modifié depuis la signature. Certificat reconnu par la liste de confiance.
+            {t('verify.verdict.validSub')}
           </div>
         </div>
       </div>
@@ -163,11 +166,11 @@ function VerdictBanner({ result }: { result: ValidationResponse }) {
         </span>
         <div className="vd-banner-body">
           <div className="vd-banner-row">
-            <div className="vd-banner-title">Signature invalide</div>
+            <div className="vd-banner-title">{t('verify.verdict.invalidTitle')}</div>
             <span className="vd-code-tag vd-code-tag--danger">TOTAL_FAILED</span>
           </div>
           <div className="vd-banner-sub">
-            Le document a été modifié après la signature ou le certificat n'est pas reconnu.
+            {t('verify.verdict.invalidSub')}
           </div>
         </div>
       </div>
@@ -185,11 +188,11 @@ function VerdictBanner({ result }: { result: ValidationResponse }) {
       </span>
       <div className="vd-banner-body">
         <div className="vd-banner-row">
-          <div className="vd-banner-title">Validité indéterminée</div>
+          <div className="vd-banner-title">{t('verify.verdict.indetTitle')}</div>
           <span className="vd-code-tag vd-code-tag--warn">INDETERMINATE</span>
         </div>
         <div className="vd-banner-sub">
-          Impossible de vérifier la révocation du certificat ou ancre de confiance absente.
+          {t('verify.verdict.indetSub')}
         </div>
       </div>
     </div>
@@ -199,9 +202,10 @@ function VerdictBanner({ result }: { result: ValidationResponse }) {
 /* ---- Signataire card ---- */
 
 function SignataireCard({ s }: { s: SignatureSummary }) {
+  const t = useT();
   return (
     <div className="vd-sig-card">
-      <div className="vd-sig-card-label">SIGNATAIRE</div>
+      <div className="vd-sig-card-label">{t('verify.sig.label')}</div>
       <div className="vd-sig-card-hero">
         <span className="vd-sig-avatar-tile">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
@@ -210,20 +214,20 @@ function SignataireCard({ s }: { s: SignatureSummary }) {
           </svg>
         </span>
         <div className="vd-sig-name-block">
-          <div className="vd-sig-name">{s.signedBy ?? 'Signataire inconnu'}</div>
+          <div className="vd-sig-name">{s.signedBy ?? t('verify.sig.unknown')}</div>
           <div className="vd-sig-id">{s.signatureId}</div>
         </div>
       </div>
       <div className="vd-sig-row">
-        <span className="vd-sig-key">Format</span>
+        <span className="vd-sig-key">{t('verify.sig.format')}</span>
         <span className="vd-sig-val mono">{s.signatureFormat ?? '—'}</span>
       </div>
       <div className="vd-sig-row">
-        <span className="vd-sig-key">Horodaté le</span>
+        <span className="vd-sig-key">{t('verify.sig.signedOn')}</span>
         <span className="vd-sig-val mono">{s.signingDate ?? '—'}</span>
       </div>
       <div className="vd-sig-row">
-        <span className="vd-sig-key">Indication</span>
+        <span className="vd-sig-key">{t('verify.sig.indication')}</span>
         <span className={`vd-sig-val vd-ind-tag vd-ind-tag--${indicationVariant(s.indication)}`}>
           {s.indication}{s.subIndication ? ' · ' + s.subIndication : ''}
         </span>
@@ -262,13 +266,14 @@ function CheckRow({ label, sub, passed, warn }: { label: string; sub: string; pa
 }
 
 function ChecksCard({ s }: { s: SignatureSummary }) {
+  const t = useT();
   const passed = s.indication === 'TOTAL_PASSED';
   const failed = s.indication === 'TOTAL_FAILED';
 
   return (
     <div className="vd-checks-card">
       <div className="vd-checks-header">
-        <div className="vd-checks-title">Rapport de validation DSS</div>
+        <div className="vd-checks-title">{t('verify.checks.title')}</div>
         {/* indication sourced from s.indication */}
         <span className={`vd-code-tag vd-code-tag--${indicationVariant(s.indication)}`} style={{ fontSize: 10.5 }}>
           {s.indication}
@@ -279,23 +284,23 @@ function ChecksCard({ s }: { s: SignatureSummary }) {
           {/* PASS: DSS SignatureSummary does not expose individual check breakdown —
               but TOTAL_PASSED means all checks passed, so these rows are accurate. */}
           <CheckRow
-            label="Intégrité du document"
-            sub="L'empreinte signée correspond au contenu"
+            label={t('verify.checks.integrity')}
+            sub={t('verify.checks.integritySub')}
             passed={true}
           />
           <CheckRow
-            label="Chaîne de certification"
-            sub="Remonte jusqu'à une AC racine de confiance"
+            label={t('verify.checks.chain')}
+            sub={t('verify.checks.chainSub')}
             passed={true}
           />
           <CheckRow
-            label="Statut de révocation"
-            sub="Certificat non révoqué (OCSP / CRL)"
+            label={t('verify.checks.revocation')}
+            sub={t('verify.checks.revocationSub')}
             passed={true}
           />
           <CheckRow
-            label="Format de signature"
-            sub={s.signatureFormat ? `Format : ${s.signatureFormat}` : 'Format non reconnu'}
+            label={t('verify.checks.format')}
+            sub={s.signatureFormat ? t('verify.checks.formatSub', { format: s.signatureFormat }) : t('verify.checks.formatUnknown')}
             passed={true}
           />
         </>
@@ -312,12 +317,10 @@ function ChecksCard({ s }: { s: SignatureSummary }) {
           </svg>
           <div style={{ flex: 1 }}>
             <div className="vd-check-title">
-              {failed ? 'Signature invalide' : 'Validité indéterminée'}
+              {failed ? t('verify.checks.invalidTitle') : t('verify.checks.indetTitle')}
             </div>
             <div className="vd-check-sub">
-              {failed
-                ? 'Signature invalide — consultez le rapport XML pour le détail.'
-                : 'Validité indéterminée — consultez le rapport XML pour le détail.'}
+              {failed ? t('verify.checks.invalidSub') : t('verify.checks.indetSub')}
             </div>
           </div>
         </div>
@@ -328,9 +331,9 @@ function ChecksCard({ s }: { s: SignatureSummary }) {
 
 /* ---- XmlReport ---- */
 
-function XmlReport({ xml }: { xml: string | null }) {
+function XmlReport({ xml, t }: { xml: string | null; t: TFunction }) {
   if (!xml) {
-    return <div className="xmlbox"><div className="empty-note">Rapport XML indisponible.</div></div>;
+    return <div className="xmlbox"><div className="empty-note">{t('verify.report.unavailable')}</div></div>;
   }
   return (
     <div className="xmlbox">
@@ -342,6 +345,7 @@ function XmlReport({ xml }: { xml: string | null }) {
 /* ---- Main component ---- */
 
 export function ValidatePage() {
+  const t = useT();
   const inputRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
   const [dragOver, setDragOver] = useState(false);
@@ -386,7 +390,7 @@ export function ValidatePage() {
         // logging failure must never propagate
       }
     } catch (e) {
-      setError((e as Error).message ?? 'Erreur inconnue');
+      setError((e as Error).message ?? t('common.unknownError'));
     } finally {
       setBusy(false);
     }
@@ -396,8 +400,8 @@ export function ValidatePage() {
     <div className="verifier-root rise" key="verify">
       {/* ── Page header ── */}
       <div className="verifier-header">
-        <h2 className="signer-title">Vérifier</h2>
-        <p className="signer-subtitle">Contrôle de validité eIDAS et rapport de la bibliothèque EU DSS.</p>
+        <h2 className="signer-title">{t('verify.title')}</h2>
+        <p className="signer-subtitle">{t('verify.subtitle')}</p>
       </div>
 
       {/* hidden file input */}
@@ -426,8 +430,8 @@ export function ValidatePage() {
             <Icon.upload size={20} />
           </span>
           <div className="vd-dz-text">
-            <div className="vd-dz-title">Déposer un document signé, ou le choisir</div>
-            <div className="vd-dz-hint">PDF (PAdES), conteneur ASiC, XML (XAdES)…</div>
+            <div className="vd-dz-title">{t('verify.dropTitle')}</div>
+            <div className="vd-dz-hint">{t('verify.dropHint')}</div>
           </div>
           <button
             className="vd-dz-btn"
@@ -437,7 +441,7 @@ export function ValidatePage() {
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
               <path d="M4 7a2 2 0 0 1 2-2h3l2 2h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7Z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
             </svg>
-            Choisir un fichier
+            {t('verify.chooseFile')}
           </button>
         </div>
       ) : (
@@ -447,7 +451,7 @@ export function ValidatePage() {
           <div className="fmeta">
             <div className="fname">{file.name}</div>
             <div className="fsub">
-              <span>{formatBytes(file.size)} · prêt à vérifier</span>
+              <span>{formatBytes(file.size)} · {t('verify.readyToVerify')}</span>
             </div>
           </div>
           <div className="vd-file-actions">
@@ -456,7 +460,7 @@ export function ValidatePage() {
               disabled={busy}
               icon={busy ? <span className="spinner" /> : <Icon.shieldCheck size={16} />}
             >
-              {busy ? 'Vérification…' : 'Vérifier'}
+              {busy ? t('verify.verifying') : t('common.verify')}
             </Btn>
             {result !== null && (
               <Btn
@@ -464,10 +468,10 @@ export function ValidatePage() {
                 onClick={() => { setResult(null); setError(null); }}
                 icon={<Icon.refresh size={15} />}
               >
-                Réinitialiser
+                {t('verify.reset')}
               </Btn>
             )}
-            <button className="x-btn" title="Retirer" onClick={clearFile}>
+            <button className="x-btn" title={t('verify.removeFile')} onClick={clearFile}>
               <Icon.x size={15} />
             </button>
           </div>
@@ -476,7 +480,7 @@ export function ValidatePage() {
 
       {/* ── Error banner ── */}
       {error && (
-        <Banner kind="danger" icon={<Icon.alert size={20} />} title="Échec de la vérification">
+        <Banner kind="danger" icon={<Icon.alert size={20} />} title={t('verify.failTitle')}>
           {error}
         </Banner>
       )}
@@ -502,9 +506,7 @@ export function ValidatePage() {
 
           {/* Count + date */}
           <div className="vd-footer-note">
-            <span>
-              <b>{result.signatureCount}</b> signature(s) · contrôle eIDAS effectué le {todayFR()}
-            </span>
+            <span dangerouslySetInnerHTML={{ __html: t('verify.footerNote', { n: result.signatureCount, date: todayFR() }) }} />
           </div>
 
           {/* Download / copy report XML */}
@@ -514,10 +516,10 @@ export function ValidatePage() {
           <details className="disclosure">
             <summary>
               <span className="chev"><Icon.chevR size={16} /></span>
-              Rapport DSS détaillé (XML)
+              {t('verify.report.disclosure')}
             </summary>
             <div style={{ paddingBottom: 16 }}>
-              <XmlReport xml={result.simpleReportXml} />
+              <XmlReport xml={result.simpleReportXml} t={t} />
             </div>
           </details>
         </div>
