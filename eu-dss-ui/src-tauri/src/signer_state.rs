@@ -19,6 +19,11 @@ fn default_module() -> String {
     {
         "C:\\Program Files\\Smart Card Middleware\\bin\\idoPKCS.dll".into()
     }
+    #[cfg(not(any(target_os = "macos", target_os = "linux", target_os = "windows")))]
+    {
+        // Unsupported target: there is no bundled default; rely on EUDSS_PKCS11_MODULE.
+        String::new()
+    }
 }
 
 fn default_slot() -> usize {
@@ -48,6 +53,16 @@ impl SignerState {
             *guard = Some(signer);
         }
         let signer = guard.as_mut().unwrap();
-        f(signer).map_err(|e| ErrorBody::from(&e))
+        match f(signer) {
+            Ok(v) => Ok(v),
+            Err(e) => {
+                // A token-level failure (e.g. the USB token was unplugged) invalidates the
+                // cached Signer; drop it so the next call re-opens a fresh one.
+                if matches!(e, eudss_signer::SignerError::TokenUnavailable) {
+                    *guard = None;
+                }
+                Err(ErrorBody::from(&e))
+            }
+        }
     }
 }
