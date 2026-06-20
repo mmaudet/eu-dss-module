@@ -1,0 +1,129 @@
+name: Tauri app (unsigned)
+
+# Builds the EU-DSS Sign desktop client (eu-dss-ui) for the three desktop OSes.
+# UNSIGNED for now: artifacts are downloadable from the run's "Artifacts" section but
+# will trip Gatekeeper (macOS) / SmartScreen (Windows) on other machines. Code signing
+# is scaffolded below (commented) and will be enabled once the certs/credentials land:
+#   - macOS:   Developer ID Application "Linagora (KUT463DS29)" + notarization (app-specific pw)
+#   - Windows: Azure Trusted Signing
+#   - Linux:   no signing required (.deb / .AppImage / .rpm)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [feat/ui-refonte]
+    paths:
+      - 'eu-dss-ui/**'
+      - '.github/workflows/tauri-app.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tauri-app-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: ${{ matrix.label }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: macos-latest   # Apple Silicon (arm64)
+            label: macOS (arm64)
+          - platform: macos-13       # Intel (x86_64)
+            label: macOS (x86_64)
+          - platform: ubuntu-22.04   # webkit2gtk-4.1 lives in 22.04 apt
+            label: Linux (x86_64)
+          - platform: windows-latest
+            label: Windows (x86_64)
+    runs-on: ${{ matrix.platform }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Tauri 2 Linux system dependencies (not pre-installed by tauri-action).
+      # rpm = for the .rpm bundle target; patchelf = for the AppImage target.
+      - name: Install Linux system dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            libgtk-3-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev \
+            libsoup-3.0-dev \
+            libjavascriptcoregtk-4.1-dev \
+            libssl-dev \
+            libxdo-dev \
+            build-essential \
+            curl wget file \
+            patchelf \
+            rpm
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: eu-dss-ui/package-lock.json
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Rust build
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: eu-dss-ui/src-tauri -> target
+
+      - name: Install frontend dependencies
+        working-directory: eu-dss-ui
+        run: npm ci
+
+      - name: Build Tauri app (unsigned)
+        uses: tauri-apps/tauri-action@v0
+        with:
+          projectPath: eu-dss-ui
+        env:
+          # Backend URL baked in at build time. Falls back to the in-app localhost
+          # default when the repo variable is unset (fine for unsigned test artifacts).
+          VITE_BACKEND_URL: ${{ vars.VITE_BACKEND_URL }}
+          # ── macOS code signing + notarization (enable later) ───────────────────
+          # APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}            # base64 of the Developer ID .p12
+          # APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          # APPLE_SIGNING_IDENTITY: "Developer ID Application: Linagora (KUT463DS29)"
+          # APPLE_ID: ${{ secrets.APPLE_ID }}                              # mmaudet@linagora.com
+          # APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}                  # app-specific password
+          # APPLE_TEAM_ID: KUT463DS29
+
+      # ── Windows code signing via Azure Trusted Signing (enable later) ──────────
+      # Runs AFTER the build, signing the produced .msi/.exe before upload.
+      # - name: Sign Windows artifacts (Azure Trusted Signing)
+      #   if: runner.os == 'Windows'
+      #   uses: azure/trusted-signing-action@v0
+      #   with:
+      #     azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+      #     azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
+      #     azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+      #     endpoint: ${{ secrets.AZURE_SIGNING_ENDPOINT }}
+      #     trusted-signing-account-name: ${{ secrets.AZURE_SIGNING_ACCOUNT }}
+      #     certificate-profile-name: ${{ secrets.AZURE_CERT_PROFILE }}
+      #     files-folder: eu-dss-ui/src-tauri/target/release/bundle
+      #     files-folder-filter: msi,exe
+      #     files-folder-recurse: true
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: eudss-${{ matrix.platform }}
+          if-no-files-found: error
+          path: |
+            eu-dss-ui/src-tauri/target/**/release/bundle/**/*.dmg
+            eu-dss-ui/src-tauri/target/**/release/bundle/**/*.deb
+            eu-dss-ui/src-tauri/target/**/release/bundle/**/*.AppImage
+            eu-dss-ui/src-tauri/target/**/release/bundle/**/*.rpm
+            eu-dss-ui/src-tauri/target/**/release/bundle/**/*.msi
+            eu-dss-ui/src-tauri/target/**/release/bundle/**/*.exe
