@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { AgentProvider, useAgent } from './agent/AgentContext';
+import { AccueilScreen } from './components/AccueilScreen';
 import { FirstRunWizard } from './components/FirstRunWizard';
 import { KeyCertScreen } from './components/KeyCertScreen';
 import { PinModal } from './components/PinModal';
@@ -10,7 +11,7 @@ import { ValidatePage } from './components/ValidatePage';
 import { store } from './services/store';
 import type { ThemePref } from './services/store';
 
-type Tab = 'sign' | 'verify' | 'cle' | 'prerequis';
+export type Tab = 'accueil' | 'sign' | 'verify' | 'cle' | 'prerequis';
 
 // ── Agent status pill (sidebar bottom) ─────────────────────────────────────
 
@@ -99,8 +100,11 @@ function Sidebar({ tab, setTab, theme, setTheme }: SidebarProps) {
       {/* SIGNATURE group */}
       <div className="sb-group-label">SIGNATURE</div>
 
-      {/* Accueil — Phase 2 placeholder */}
-      <div className="sb-item sb-item--disabled" title="Bientôt disponible">
+      {/* Accueil — active nav target */}
+      <button
+        className={'sb-item' + (tab === 'accueil' ? ' sb-item--active' : '')}
+        onClick={() => setTab('accueil')}
+      >
         <span className="sb-item-icon">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
             <path
@@ -113,8 +117,7 @@ function Sidebar({ tab, setTab, theme, setTheme }: SidebarProps) {
           </svg>
         </span>
         <span className="sb-item-label">Accueil</span>
-        <span className="sb-soon">bientôt</span>
-      </div>
+      </button>
 
       {/* Signer — active nav target */}
       <button
@@ -262,7 +265,7 @@ function Sidebar({ tab, setTab, theme, setTheme }: SidebarProps) {
 // ── Shell ───────────────────────────────────────────────────────────────────
 
 function Shell() {
-  const [tab, setTab] = useState<Tab>('sign');
+  const [tab, setTab] = useState<Tab>('accueil');
   const [theme, setTheme] = useState<ThemePref>(() => store.getTheme());
 
   return (
@@ -271,7 +274,9 @@ function Shell() {
       <div className="shell-body">
         <Sidebar tab={tab} setTab={setTab} theme={theme} setTheme={setTheme} />
         <main className="main">
-          {tab === 'sign' ? (
+          {tab === 'accueil' ? (
+            <AccueilScreen onNavigate={setTab} />
+          ) : tab === 'sign' ? (
             <SignWorkspace onGoVerify={() => setTab('verify')} />
           ) : tab === 'verify' ? (
             <ValidatePage />
