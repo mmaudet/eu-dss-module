@@ -1623,3 +1623,128 @@ body{
 .kc-cert-empty-sub{
   font-size:13px;color:var(--ink-4);margin:0;max-width:300px;line-height:1.55;
 }
+
+/* ════════════════════════════════════════════════════════════════════════
+   Prérequis screen (PrerequisitesScreen.tsx) — re-openable standalone
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* Screen root: fills .main, scrollable column */
+.prq-screen{
+  flex:1;min-height:0;overflow-y:auto;
+  background:var(--main);
+  display:flex;flex-direction:column;
+}
+
+/* Centered content column, max-width matches canvas */
+.prq-inner{
+  max-width:620px;
+  margin:0 auto;
+  padding:46px 32px 60px;
+  width:100%;
+}
+
+/* Info banner */
+.prq-info-banner{
+  display:flex;align-items:center;gap:10px;
+  background:var(--brand-soft);border:1px solid var(--brand-ring);
+  border-radius:11px;padding:11px 14px;
+  margin-bottom:26px;
+  font-size:12.5px;color:var(--brand-strong);line-height:1.45;
+}
+.prq-info-banner strong{font-weight:600;}
+
+/* Heading */
+.prq-heading{
+  font-size:25px;font-weight:600;letter-spacing:-.02em;
+  margin:0;text-align:center;color:var(--ink);
+}
+.prq-lead{
+  font-size:14px;color:var(--ink-4);
+  margin:8px 0 0;text-align:center;line-height:1.55;
+}
+
+/* Progress bar */
+.prq-progress-wrap{
+  height:6px;border-radius:var(--r-pill);
+  background:#E2E8F2;
+  margin:26px 0 8px;
+  overflow:hidden;
+}
+.prq-progress-fill{
+  height:100%;border-radius:var(--r-pill);
+  background:var(--grad);
+  transition:width .4s ease;
+}
+.prq-progress-labels{
+  display:flex;justify-content:flex-end;
+  font-size:11px;color:var(--ink-5);font-weight:500;
+  margin-bottom:20px;
+}
+
+/* Prerequisite rows */
+.prq-row{
+  display:flex;align-items:flex-start;gap:15px;
+  background:var(--card);border:1px solid var(--line);
+  border-radius:var(--r-lg);padding:18px;
+  margin-bottom:12px;
+  transition:border-color .15s, box-shadow .15s;
+}
+.prq-row--waiting{
+  border-color:var(--brand);
+  box-shadow:0 10px 26px -14px rgba(45,99,232,.35);
+}
+.prq-row-icon{
+  width:42px;height:42px;border-radius:11px;flex:none;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--line-3);color:var(--ink-4);
+  /* keeps icon vertically centred against the title only */
+  margin-top:0;
+}
+.prq-row--ok .prq-row-icon{background:var(--ok-soft);color:var(--ok-ink);}
+.prq-row--waiting .prq-row-icon{background:var(--brand-soft);color:var(--brand);}
+.prq-row--checking .prq-row-icon{background:var(--line-3);color:var(--ink-5);}
+
+.prq-row-text{flex:1;min-width:0;align-self:center;}
+.prq-row-title{font-size:14.5px;font-weight:600;color:var(--ink);}
+.prq-row-sub{font-size:12.5px;color:var(--ink-4);margin-top:2px;}
+
+/* Inline actions shown only for 'waiting' rows */
+.prq-row-actions{
+  display:flex;align-items:center;gap:12px;
+  margin-top:12px;flex-wrap:wrap;
+}
+
+/* Status label (right-aligned, always top-aligned) */
+.prq-row-status{
+  font-size:12px;font-weight:600;flex:none;align-self:flex-start;
+  margin-top:2px; /* visual alignment with title */
+}
+.prq-row-status--ok{color:var(--ok-ink);}
+.prq-row-status--checking{
+  color:var(--ink-4);
+  display:inline-flex;align-items:center;gap:7px;
+}
+.prq-row-status--wait{
+  color:#9A6213;
+  background:var(--warn-soft);
+  border-radius:7px;padding:5px 10px;
+}
+
+/* Continue button */
+.prq-continue-btn{
+  border:none;cursor:pointer;width:100%;
+  margin-top:24px;
+  display:flex;align-items:center;justify-content:center;gap:9px;
+  background:var(--brand);color:#fff;
+  font-size:14.5px;font-weight:600;
+  padding:14px;border-radius:12px;
+  font-family:inherit;
+  box-shadow:0 8px 18px -7px rgba(45,99,232,.65);
+  transition:background .12s, box-shadow .12s, transform .04s;
+}
+.prq-continue-btn:not(:disabled):hover{background:var(--brand-strong);}
+.prq-continue-btn:not(:disabled):active{transform:translateY(1px);}
+.prq-continue-btn:disabled{
+  background:var(--line-3);color:var(--ink-6);
+  cursor:not-allowed;box-shadow:none;
+}

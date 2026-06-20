@@ -3,12 +3,13 @@ import { AgentProvider, useAgent } from './agent/AgentContext';
 import { FirstRunWizard } from './components/FirstRunWizard';
 import { KeyCertScreen } from './components/KeyCertScreen';
 import { PinModal } from './components/PinModal';
+import { PrerequisitesScreen } from './components/PrerequisitesScreen';
 import { SignWorkspace } from './components/SignWorkspace';
 import { TitleBar } from './components/TitleBar';
 import { ValidatePage } from './components/ValidatePage';
 import { store } from './services/store';
 
-type Tab = 'sign' | 'verify' | 'cle';
+type Tab = 'sign' | 'verify' | 'cle' | 'prerequis';
 
 // ── Agent status pill (sidebar bottom) ─────────────────────────────────────
 
@@ -54,6 +55,7 @@ interface SidebarProps {
   tab: Tab;
   setTab: (t: Tab) => void;
 }
+
 
 
 function Sidebar({ tab, setTab }: SidebarProps) {
@@ -170,8 +172,11 @@ function Sidebar({ tab, setTab }: SidebarProps) {
         <span className="sb-item-label">Clé &amp; certificat</span>
       </button>
 
-      {/* Prérequis — Phase 2 placeholder */}
-      <div className="sb-item sb-item--disabled" title="Bientôt disponible">
+      {/* Prérequis — active nav target */}
+      <button
+        className={'sb-item' + (tab === 'prerequis' ? ' sb-item--active' : '')}
+        onClick={() => setTab('prerequis')}
+      >
         <span className="sb-item-icon">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
             <path
@@ -183,8 +188,7 @@ function Sidebar({ tab, setTab }: SidebarProps) {
           </svg>
         </span>
         <span className="sb-item-label">Prérequis</span>
-        <span className="sb-soon">bientôt</span>
-      </div>
+      </button>
 
       {/* Spacer */}
       <div style={{ flex: 1 }} />
@@ -249,6 +253,8 @@ function Shell() {
             <SignWorkspace onGoVerify={() => setTab('verify')} />
           ) : tab === 'verify' ? (
             <ValidatePage />
+          ) : tab === 'prerequis' ? (
+            <PrerequisitesScreen onGoToSign={() => setTab('sign')} />
           ) : (
             <KeyCertScreen />
           )}
