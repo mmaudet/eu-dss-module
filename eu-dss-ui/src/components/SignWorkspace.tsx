@@ -1,7 +1,7 @@
 import { useRef, useState, type Dispatch, type SetStateAction } from 'react';
 import { useAgent } from '../agent/AgentContext';
 import { agentApi, AgentCertificate, AgentError } from '../services/agentApi';
-import { backendApi, SignatureParams } from '../services/backendApi';
+import { backendApi, SignatureForm, SignatureParams } from '../services/backendApi';
 import { detectOs, PREREQ_MANIFEST } from '../services/prerequisites';
 import { downloadBase64, downloadZip, fileToBase64 } from '../services/fileUtils';
 import { history } from '../services/history';
@@ -14,9 +14,20 @@ interface SignDoc {
   file: File;
   status: DocStatus;
   existingSignatures: number | null; // null until detected
+  /** Explicit signature form; undefined = auto-detect by file type (default). */
+  signatureForm?: SignatureForm;
   signed?: { base64: string; fileName: string; mediaType: string };
   error?: string;
 }
+
+/** Selectable signature-form options for the per-document picker. */
+const FORM_OPTIONS: { value: SignatureForm | ''; label: string; pdfOnly?: boolean }[] = [
+  { value: '', label: 'Automatique (selon le type)' },
+  { value: 'PADES', label: 'PAdES (PDF)', pdfOnly: true },
+  { value: 'ASIC_E', label: 'ASiC‑E' },
+  { value: 'XADES_ENVELOPING', label: 'XAdES (enveloppant)' },
+  { value: 'XADES_DETACHED', label: 'XAdES détaché' },
+];
 
 let counter = 0;
 const nextId = () => `doc-${++counter}`;
@@ -25,6 +36,26 @@ function fmtClock(s: number): string {
   const m = Math.floor(s / 60);
   const ss = s % 60;
   return `${m}:${ss.toString().padStart(2, '0')}`;
+}
+
+/** The form actually applied to a doc, resolving "auto" to the backend default. */
+function effectiveForm(doc: SignDoc): SignatureForm {
+  if (doc.signatureForm) return doc.signatureForm;
+  return fileKind(doc.file.name).asic ? 'ASIC_E' : 'PADES'; // auto-detect mirror
+}
+
+/** Short label for the resolved output format (used on the signed-state pill). */
+function formLabel(form: SignatureForm): string {
+  switch (form) {
+    case 'PADES':
+      return 'PAdES‑B‑T';
+    case 'ASIC_E':
+      return 'ASiC‑E';
+    case 'XADES_ENVELOPING':
+      return 'XAdES';
+    case 'XADES_DETACHED':
+      return 'XAdES détaché';
+  }
 }
 
 /** Extract a single RDN value (CN / O) from an RFC-ish DN. Falls back to the raw DN. */
@@ -100,11 +131,14 @@ export function SignWorkspace({ onGoVerify }: SignWorkspaceProps) {
     patch(doc.id, { status: 'signing', error: undefined });
     try {
       const documentBase64 = await fileToBase64(doc.file);
+      // Same params (incl. signatureForm) MUST go to BOTH prepare and assemble,
+      // otherwise the assembled signature is corrupted. undefined → backend auto-detect.
       const params: SignatureParams = {
         certificateChainBase64: cert.certificateChainBase64,
         digestAlgorithm: 'SHA256',
         signingTimeEpochMs: Date.now(),
         signatureLevel: 'BASELINE_T',
+        signatureForm: doc.signatureForm,
         signatureReason: reason || undefined,
         signatureLocation: location || undefined,
         signerName: cert.subjectDn,
@@ -609,7 +643,7 @@ function DocumentsPanel({ docs, addFiles, setDocs, busy }: DocumentsPanelProps) 
           <span className="doc-count-label">
             {docs.length} document{docs.length > 1 ? 's' : ''} prêt{docs.length > 1 ? 's' : ''}
           </span>
-          <span className="doc-count-hint">Format auto-détecté par type de fichier</span>
+          <span className="doc-count-hint">Format de signature réglable par document</span>
         </div>
       )}
 
@@ -659,12 +693,38 @@ function DocumentsPanel({ docs, addFiles, setDocs, busy }: DocumentsPanelProps) 
                       <Tag kind="warn">déjà signé : {doc.existingSignatures}</Tag>
                     )}
                   </div>
+                  {doc.signatureForm === 'XADES_DETACHED' && (
+                    <div className="doc-detached-note">
+                      <Icon.alert size={12} />
+                      Produit un fichier de signature séparé (.xml). Le document d’origine reste inchangé et doit être conservé.
+                    </div>
+                  )}
                 </div>
 
-                {/* Format pill */}
-                <div className="doc-format-pill">
-                  <span className="mono">{isPdf ? 'PAdES‑B‑T' : 'ASiC‑E'}</span>
-                </div>
+                {/* Signature-format selector (per document); read-only pill once signed */}
+                {doc.status === 'signed' && doc.signed ? (
+                  <div className="doc-format-pill">
+                    <span className="mono">{formLabel(effectiveForm(doc))}</span>
+                  </div>
+                ) : (
+                  <select
+                    className="doc-format-select"
+                    aria-label={`Format de signature pour ${doc.file.name}`}
+                    value={doc.signatureForm ?? ''}
+                    disabled={busy || doc.status === 'signing'}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      const form = v === '' ? undefined : (v as SignatureForm);
+                      setDocs((x) => x.map((y) => (y.id === doc.id ? { ...y, signatureForm: form } : y)));
+                    }}
+                  >
+                    {FORM_OPTIONS.filter((o) => !o.pdfOnly || isPdf).map((o) => (
+                      <option key={o.value || 'auto'} value={o.value}>
+                        {o.label}
+                      </option>
+                    ))}
+                  </select>
+                )}
 
                 {/* Download if signed */}
                 {doc.status === 'signed' && doc.signed && (
@@ -818,6 +878,9 @@ function SuccessView({ signedDocs, cert, reason, location, signedAtIso, onReset,
   const localStamp = signedAtIso
     ? new Date(signedAtIso).toLocaleString('fr-FR', { dateStyle: 'long', timeStyle: 'short' })
     : '';
+  // Distinct resolved formats across the batch (e.g. "PAdES‑B‑T" or "ASiC‑E + XAdES détaché").
+  const distinctForms = Array.from(new Set(signedDocs.map((d) => formLabel(effectiveForm(d)))));
+  const formatSummary = distinctForms.length ? distinctForms.join(' + ') : '—';
 
   return (
     <div className="rise" key="success" style={{ flex: 1, overflowY: 'auto' }}>
@@ -869,7 +932,7 @@ function SuccessView({ signedDocs, cert, reason, location, signedAtIso, onReset,
                         <path d="m8.5 12.2 2.3 2.3 4.6-4.8" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
                     </span>
-                    <span>Signé · {k.target} · {sizeFmt}</span>
+                    <span>Signé · {formLabel(effectiveForm(d))} · {sizeFmt}</span>
                   </div>
                 </div>
                 <Btn
@@ -916,7 +979,7 @@ function SuccessView({ signedDocs, cert, reason, location, signedAtIso, onReset,
           </div>
           {[
             { k: 'Signataire', v: signer || '—' },
-            { k: 'Niveau', v: 'Signé · PAdES-B-T', mono: true },
+            { k: 'Format', v: formatSummary, mono: true },
             { k: 'Horodatage TSA', v: signedAtIso || '—', mono: true },
             { k: 'Autorité', v: issuer || '—' },
             { k: 'Motif', v: reason || '—' },

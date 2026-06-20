@@ -13,12 +13,22 @@ async function appFetch(input: string, init?: RequestInit): Promise<Response> {
 
 export type DigestAlgo = 'SHA256' | 'SHA384' | 'SHA512';
 export type SignatureLevel = 'BASELINE_B' | 'BASELINE_T' | 'BASELINE_LT' | 'BASELINE_LTA';
+/**
+ * Explicit signature form. When omitted, the backend auto-detects
+ * (.pdf → PAdES, anything else → ASiC-E).
+ *  - PADES            → PAdES (PDF input required); output = signed PDF.
+ *  - ASIC_E           → ASiC-E container; output = <base>.asice.
+ *  - XADES_ENVELOPING → standalone XAdES with the file embedded; output = <base>.xml.
+ *  - XADES_DETACHED   → detached XAdES; output = the signature .xml only (original kept).
+ */
+export type SignatureForm = 'PADES' | 'ASIC_E' | 'XADES_ENVELOPING' | 'XADES_DETACHED';
 
 export interface SignatureParams {
   certificateChainBase64: string[];
   digestAlgorithm: DigestAlgo;
   signingTimeEpochMs: number;
   signatureLevel?: SignatureLevel;
+  signatureForm?: SignatureForm;
   signatureReason?: string;
   signatureLocation?: string;
   signerName?: string;

@@ -915,6 +915,26 @@ body{
   flex:none;
 }
 
+/* per-document signature-format selector */
+.doc-format-select{
+  font:inherit;font-size:12px;font-weight:600;color:var(--ink-2);
+  border:1px solid var(--line);background:var(--surface);
+  border-radius:8px;padding:7px 9px;
+  flex:none;max-width:170px;cursor:pointer;
+  transition:border-color .15s, box-shadow .15s;
+}
+.doc-format-select:hover:not(:disabled){border-color:var(--brand-ring);}
+.doc-format-select:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft);}
+.doc-format-select:disabled{opacity:.5;cursor:not-allowed;}
+
+/* detached-signature inline note (under the doc name/meta) */
+.doc-detached-note{
+  display:flex;align-items:flex-start;gap:5px;
+  margin-top:5px;
+  font-size:11px;line-height:1.45;color:var(--ink-3);
+}
+.doc-detached-note svg{flex:none;margin-top:1px;color:var(--brand);}
+
 /* remove button */
 .doc-remove-btn{
   flex:none;
