@@ -30,10 +30,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - platform: macos-latest   # Apple Silicon (arm64)
+          - platform: macos-latest   # macOS Apple Silicon (arm64) — Intel (macos-13) intentionally dropped
             label: macOS (arm64)
-          - platform: macos-13       # Intel (x86_64)
-            label: macOS (x86_64)
           - platform: ubuntu-22.04   # webkit2gtk-4.1 lives in 22.04 apt
             label: Linux (x86_64)
           - platform: windows-latest
