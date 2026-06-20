@@ -1,0 +1,21 @@
+[package]
+name = "eudss-signer"
+version = "0.1.0"
+edition = "2021"
+description = "PKCS#11 signing core for the EU-DSS native client"
+
+[dependencies]
+cryptoki = "0.7"
+base64 = "0.22"
+zeroize = "1"
+x509-parser = "0.16"
+thiserror = "1"
+hex = "0.4"
+
+[dev-dependencies]
+rsa = "0.9"
+sha2 = "0.10"
+
+[[bin]]
+name = "eudss-signer-cli"
+path = "src/bin/eudss-signer-cli.rs"
