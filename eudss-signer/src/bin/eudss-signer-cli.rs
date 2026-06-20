@@ -12,7 +12,10 @@ use std::time::Duration;
 
 fn arg(name: &str) -> Option<String> {
     let args: Vec<String> = std::env::args().collect();
-    args.iter().position(|a| a == name).and_then(|i| args.get(i + 1)).cloned()
+    args.iter()
+        .position(|a| a == name)
+        .and_then(|i| args.get(i + 1))
+        .cloned()
 }
 
 fn read_pin() -> String {
@@ -38,7 +41,12 @@ fn main() {
         "list" => signer.list_certificates().map(|c| {
             let items: Vec<String> = c
                 .iter()
-                .map(|e| format!("{{\"keyId\":\"{}\",\"subjectDn\":{:?}}}", e.key_id, e.subject_dn))
+                .map(|e| {
+                    format!(
+                        "{{\"keyId\":\"{}\",\"subjectDn\":{:?}}}",
+                        e.key_id, e.subject_dn
+                    )
+                })
                 .collect();
             format!("{{\"certificates\":[{}]}}", items.join(","))
         }),

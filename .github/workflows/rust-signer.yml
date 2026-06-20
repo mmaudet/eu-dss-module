@@ -1,0 +1,32 @@
+name: Rust signer
+
+on:
+  push:
+    paths:
+      - 'eudss-signer/**'
+      - '.github/workflows/rust-signer.yml'
+  pull_request:
+    paths:
+      - 'eudss-signer/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: eudss-signer
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+      - name: Install SoftHSM2 + OpenSC
+        run: sudo apt-get update && sudo apt-get install -y softhsm2 opensc openssl
+      - name: cargo fmt
+        run: cargo fmt --check
+      - name: cargo clippy
+        run: cargo clippy --all-targets -- -D warnings
+      - name: Set up SoftHSM2 token and run tests
+        run: |
+          eval "$(tests/setup_softhsm.sh)"
+          cargo test --all-targets
