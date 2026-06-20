@@ -4,7 +4,7 @@ import { agentApi, AgentCertificate, AgentError } from '../services/agentApi';
 import { backendApi, SignatureParams } from '../services/backendApi';
 import { detectOs, PREREQ_MANIFEST } from '../services/prerequisites';
 import { downloadBase64, downloadZip, fileToBase64 } from '../services/fileUtils';
-import { Banner, Btn, Card, CertGrid, fileKind, Icon, Tag, TrustBadge } from './ui';
+import { Banner, Btn, Card, CertGrid, fileKind, Icon, Tag } from './ui';
 
 type DocStatus = 'pending' | 'signing' | 'signed' | 'error';
 
@@ -685,49 +685,93 @@ interface SigningProgressProps {
 
 function SigningProgress({ docs, liveDocs }: SigningProgressProps) {
   const statusOf = (id: string): DocStatus => liveDocs.find((d) => d.id === id)?.status ?? 'pending';
+
+  const doneCount = docs.filter((d) => {
+    const st = statusOf(d.id);
+    return st === 'signed' || st === 'error';
+  }).length;
+  const progressPct = docs.length > 0 ? Math.round((doneCount / docs.length) * 100) : 0;
+
+  // Find the currently active doc (signing state)
+  const activeDocs = docs.filter((d) => statusOf(d.id) === 'signing');
+  const activeDoc = activeDocs[0] ?? docs[doneCount] ?? null;
+  const activeIdx = activeDoc ? docs.indexOf(activeDoc) + 1 : doneCount + 1;
+
   return (
     <div className="scrim">
-      <div className="modal">
-        <div className="modal-h">
-          <div className="mi">
-            <span className="spinner" />
-          </div>
-          <div>
-            <h3>Signature en cours…</h3>
-            <p>La carte calcule la signature de chaque document. Ne retirez pas le token.</p>
+      <div className="sign-modal-card">
+        {/* Ring spinner with key icon */}
+        <div className="ring-spinner" style={{ margin: '0 auto 18px' }}>
+          <div className="ring-spinner-track" />
+          <div className="ring-spinner-arc" />
+          <div className="ring-spinner-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <circle cx="8" cy="13" r="3.2" stroke="currentColor" strokeWidth="1.8"/>
+              <path d="m10.4 10.6 8-8M15 5l2.5 2.5M18.5 8 21 5.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
           </div>
         </div>
-        <div className="modal-b">
-          <div className="sign-prog">
+
+        <h3 className="sign-modal-title">Signature en cours…</h3>
+        {activeDoc && (
+          <p className="sign-modal-sub">
+            Document <strong>{activeIdx}</strong> sur {docs.length} · {activeDoc.file.name}
+          </p>
+        )}
+
+        {/* Progress bar */}
+        <div className="sign-prog-bar-wrap">
+          <div className="sign-prog-bar-fill" style={{ width: `${progressPct}%` }} />
+        </div>
+        <div className="sign-prog-bar-labels">
+          <span>Empreinte signée par la carte</span>
+          <span>{progressPct}&nbsp;%</span>
+        </div>
+
+        {/* Per-doc step list */}
+        {docs.length > 1 && (
+          <div className="sign-prog" style={{ marginTop: 18, textAlign: 'left' }}>
             {docs.map((d) => {
               const st = statusOf(d.id);
-              const rowCls = st === 'signed' ? 'done' : st === 'signing' ? 'active' : 'pending';
+              const rowCls =
+                st === 'signed' ? 'done'
+                : st === 'signing' ? 'active'
+                : st === 'error' ? 'error'
+                : 'pending';
               return (
-                <div className={'sp-row ' + rowCls} key={d.id}>
+                <div className={`sp-row ${rowCls}`} key={d.id}>
                   <div className="spi">
                     {st === 'signed' ? (
-                      <Icon.check size={15} />
+                      <Icon.check size={14} />
                     ) : st === 'signing' ? (
                       <span className="spinner" style={{ width: 13, height: 13 }} />
+                    ) : st === 'error' ? (
+                      <Icon.x size={13} />
                     ) : (
-                      <Icon.file size={14} />
+                      <Icon.file size={13} />
                     )}
                   </div>
-                  <span
-                    style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
-                  >
+                  <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', flex: 1 }}>
                     {d.file.name}
                   </span>
-                  <span style={{ marginLeft: 'auto' }}>
+                  <span style={{ flexShrink: 0 }}>
                     {st === 'signed' && <Tag kind="ok">signé</Tag>}
                     {st === 'error' && (
-                      <span style={{ color: 'var(--danger)', fontSize: 12, fontWeight: 700 }}>échec</span>
+                      <span style={{ color: 'var(--danger)', fontSize: 11, fontWeight: 700 }}>échec</span>
                     )}
                   </span>
                 </div>
               );
             })}
           </div>
+        )}
+
+        {/* Caution notice */}
+        <div className="sign-modal-caution">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+            <path d="M12 9v4m0 3h.01M10.3 4.3 2.6 18a1.5 1.5 0 0 0 1.3 2.2h16.2a1.5 1.5 0 0 0 1.3-2.2L13.7 4.3a1.5 1.5 0 0 0-2.6 0Z" stroke="#E2A53A" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          Ne retirez pas votre clé USB
         </div>
       </div>
     </div>
@@ -748,112 +792,126 @@ interface SuccessViewProps {
 function SuccessView({ signedDocs, cert, reason, location, signedAtIso, onReset, onGoVerify }: SuccessViewProps) {
   const signer = cnOf(cert?.subjectDn);
   const issuer = issuerOf(cert?.issuerDn);
-  const localStamp = signedAtIso ? new Date(signedAtIso).toLocaleString('fr-FR') : '';
+  const localStamp = signedAtIso
+    ? new Date(signedAtIso).toLocaleString('fr-FR', { dateStyle: 'long', timeStyle: 'short' })
+    : '';
 
   return (
-    <div className="rise" key="success">
-      <div className="card">
-        <div className="card-b" style={{ paddingTop: 30 }}>
-          <div className="success-hero">
-            <div className="seal">
-              <Icon.shieldCheck size={40} />
-            </div>
-            <h2>
-              {signedDocs.length} document{signedDocs.length > 1 ? 's' : ''} signé
-              {signedDocs.length > 1 ? 's' : ''}
-            </h2>
-            <p>
-              Signature électronique avancée appliquée avec horodatage qualifié. Les fichiers signés
-              sont prêts à être téléchargés.
-            </p>
-            <div className="trust-row" style={{ justifyContent: 'center', marginTop: 16 }}>
-              <TrustBadge kind="ok" icon={<Icon.shieldCheck size={14} />}>
-                PAdES-BASELINE-T
-              </TrustBadge>
-              <TrustBadge kind="solid" icon={<Icon.euro size={14} />}>
-                Conforme eIDAS
-              </TrustBadge>
-              <TrustBadge icon={<Icon.clock size={14} />}>Horodaté {localStamp}</TrustBadge>
-            </div>
+    <div className="rise" key="success" style={{ flex: 1, overflowY: 'auto' }}>
+      <div className="sv-root">
+        {/* Hero */}
+        <div className="sv-hero">
+          <div className="sv-hero-icon">
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none">
+              <path d="m6.5 12.4 3.2 3.2L18 7.2" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
           </div>
-
-          <div
-            style={{ marginTop: 26, display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}
-          >
-            <Btn
-              size="lg"
-              icon={<Icon.download size={18} />}
-              disabled={signedDocs.length === 0}
-              onClick={() =>
-                downloadZip(
-                  signedDocs.map((d) => ({ name: d.signed!.fileName, base64: d.signed!.base64 })),
-                  'documents-signes.zip',
-                )
-              }
-            >
-              Tout télécharger (ZIP)
-            </Btn>
-            <Btn variant="ghost" size="lg" icon={<Icon.sign size={18} />} onClick={onReset}>
-              Signer d'autres documents
-            </Btn>
-          </div>
+          <h2>
+            {signedDocs.length} document{signedDocs.length > 1 ? 's' : ''} signé{signedDocs.length > 1 ? 's' : ''}
+          </h2>
+          <p className="sv-hero-sub">
+            Signés avec votre certificat qualifié
+            {signer && <> <strong>{signer}</strong></>} · horodatés le {localStamp}.
+          </p>
         </div>
-      </div>
 
-      <Card title="Documents signés" desc="Fichiers scellés, prêts à archiver ou transmettre.">
-        {signedDocs.map((d) => {
-          const k = fileKind(d.file.name);
-          return (
-            <div className="frow" key={d.id}>
-              <div className="fic" style={{ background: 'var(--ok-soft)', color: 'var(--ok)' }}>
-                <Icon.fileCheck size={18} />
-              </div>
-              <div className="fmeta">
-                <div className="fname">{d.signed!.fileName}</div>
-                <div className="fsub">
-                  <Tag kind="ok">
-                    <Icon.check size={11} /> Signé
-                  </Tag>
-                  <span className="arrow">·</span>
-                  <span>{k.target}</span>
-                  {signer && (
-                    <>
-                      <span className="arrow">·</span>
-                      <span>{signer}</span>
-                    </>
+        {/* Signed files list */}
+        <div className="sv-files-card">
+          {signedDocs.map((d) => {
+            const k = fileKind(d.file.name);
+            const isPdf = !k.asic;
+            const sizeFmt = d.file.size >= 1024 * 1024
+              ? `${(d.file.size / (1024 * 1024)).toFixed(1)} Mo`
+              : `${(d.file.size / 1024).toFixed(0)} Ko`;
+            return (
+              <div className="sv-file-row" key={d.id}>
+                <span className={`sv-file-icon ${isPdf ? 'sv-file-icon--pdf' : 'sv-file-icon--office'}`}>
+                  {isPdf ? (
+                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none">
+                      <path d="M7 3h7l4 4v14H7V3Z" stroke="#D8514F" strokeWidth="1.6" strokeLinejoin="round"/>
+                      <path d="M14 3v4h4" stroke="#D8514F" strokeWidth="1.6" strokeLinejoin="round"/>
+                    </svg>
+                  ) : (
+                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none">
+                      <path d="M7 3h7l4 4v14H7V3Z" stroke="#2D63E8" strokeWidth="1.6" strokeLinejoin="round"/>
+                      <path d="M14 3v4h4" stroke="#2D63E8" strokeWidth="1.6" strokeLinejoin="round"/>
+                    </svg>
                   )}
+                </span>
+                <div className="sv-file-meta">
+                  <div className="sv-file-name">{d.signed!.fileName}</div>
+                  <div className="sv-file-sub">
+                    <span className="sv-file-sub-check">
+                      <svg width="9" height="9" viewBox="0 0 24 24" fill="none">
+                        <path d="m8.5 12.2 2.3 2.3 4.6-4.8" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </span>
+                    <span>Signé · {k.target} · {sizeFmt}</span>
+                  </div>
                 </div>
+                <Btn
+                  variant="soft"
+                  size="sm"
+                  icon={<Icon.download size={14} />}
+                  onClick={() => downloadBase64(d.signed!.base64, d.signed!.fileName, d.signed!.mediaType)}
+                >
+                  Télécharger
+                </Btn>
               </div>
-              <Btn
-                variant="soft"
-                size="sm"
-                icon={<Icon.download size={15} />}
-                onClick={() => downloadBase64(d.signed!.base64, d.signed!.fileName, d.signed!.mediaType)}
-              >
-                Télécharger
-              </Btn>
-            </div>
-          );
-        })}
-      </Card>
+            );
+          })}
+        </div>
 
-      <Card title="Détails de la signature" desc="Métadonnées scellées dans chaque document.">
-        <CertGrid
-          items={[
+        {/* Action buttons */}
+        <div className="sv-actions">
+          <Btn
+            size="lg"
+            icon={<Icon.download size={16} />}
+            disabled={signedDocs.length === 0}
+            onClick={() =>
+              downloadZip(
+                signedDocs.map((d) => ({ name: d.signed!.fileName, base64: d.signed!.base64 })),
+                'documents-signes.zip',
+              )
+            }
+          >
+            Tout télécharger (ZIP)
+          </Btn>
+          <Btn variant="ghost" size="lg" icon={<Icon.shieldCheck size={16} />} onClick={onGoVerify}>
+            Vérifier
+          </Btn>
+          <Btn variant="ghost" size="lg" onClick={onReset}>
+            Nouvelle signature
+          </Btn>
+        </div>
+
+        {/* Signature details */}
+        <div className="sv-details-card">
+          <div className="sv-details-header">
+            <Icon.doc2 size={15} />
+            Détails de la signature
+          </div>
+          {[
             { k: 'Signataire', v: signer || '—' },
-            { k: 'Niveau', v: 'PAdES-BASELINE-T', mono: true },
-            { k: 'Horodatage (TSA)', v: signedAtIso || '—', mono: true },
+            { k: 'Niveau', v: 'Signé · PAdES-B-T', mono: true },
+            { k: 'Horodatage TSA', v: signedAtIso || '—', mono: true },
             { k: 'Autorité', v: issuer || '—' },
             { k: 'Motif', v: reason || '—' },
             { k: 'Lieu', v: location || '—' },
-          ]}
-        />
-        <div style={{ marginTop: 16, textAlign: 'center' }}>
+          ].map(({ k, v, mono }) => (
+            <div className="sv-detail-row" key={k}>
+              <span className="sv-detail-key">{k}</span>
+              <span className={`sv-detail-val${mono ? ' mono' : ''}`}>{v}</span>
+            </div>
+          ))}
+        </div>
+
+        <div style={{ textAlign: 'center' }}>
           <button className="linkbtn muted" onClick={onGoVerify}>
             Vérifier une signature →
           </button>
         </div>
-      </Card>
+      </div>
     </div>
   );
 }

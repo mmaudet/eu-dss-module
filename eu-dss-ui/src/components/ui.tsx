@@ -69,8 +69,8 @@ export interface BtnProps extends React.ButtonHTMLAttributes<HTMLButtonElement> 
   iconR?: React.ReactNode;
 }
 
-export function Btn({ variant = 'primary', size, icon, iconR, children, ...rest }: BtnProps) {
-  const cls = `btn btn-${variant}${size ? ' btn-' + size : ''}`;
+export function Btn({ variant = 'primary', size, icon, iconR, children, className, ...rest }: BtnProps & { className?: string }) {
+  const cls = [`btn`, `btn-${variant}`, size ? `btn-${size}` : '', className ?? ''].filter(Boolean).join(' ');
   return (
     <button className={cls} {...rest}>
       {icon}{children}{iconR}
@@ -85,8 +85,9 @@ export interface TrustBadgeProps {
 }
 
 export function TrustBadge({ kind = 'default', icon, children }: TrustBadgeProps) {
+  const cls = ['tbadge', kind !== 'default' ? kind : ''].filter(Boolean).join(' ');
   return (
-    <span className={`tbadge ${kind === 'default' ? '' : kind}`}>
+    <span className={cls}>
       {icon && <span className="gi">{icon}</span>}
       {children}
     </span>
@@ -115,12 +116,12 @@ export function Card({ no, title, desc, action, children }: CardProps) {
     <section className="card">
       {(title || no) && (
         <div className="card-h">
-          {no && <div className="step-no">{no}</div>}
+          {no !== undefined && <div className="step-no">{no}</div>}
           <div className="hh">
             {title && <h2>{title}</h2>}
             {desc && <p>{desc}</p>}
           </div>
-          {action && <div style={{ marginLeft: 'auto' }}>{action}</div>}
+          {action && <div style={{ marginLeft: 'auto', flexShrink: 0 }}>{action}</div>}
         </div>
       )}
       <div className="card-b">{children}</div>

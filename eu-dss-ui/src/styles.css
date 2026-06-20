@@ -586,13 +586,163 @@ body{
 }
 
 /* signing overlay progress */
-.sign-prog{display:flex;flex-direction:column;gap:11px;margin-top:4px;}
-.sp-row{display:flex;align-items:center;gap:12px;font-size:13.5px;font-weight:600;}
-.sp-row .spi{width:26px;height:26px;border-radius:8px;flex:none;display:grid;place-items:center;background:color-mix(in oklab,var(--ink),transparent 95%);color:var(--ink-4);}
+.sign-prog{display:flex;flex-direction:column;gap:10px;margin-top:4px;}
+.sp-row{display:flex;align-items:center;gap:12px;font-size:13px;font-weight:500;color:var(--ink-4);}
+.sp-row .spi{width:28px;height:28px;border-radius:9px;flex:none;display:grid;place-items:center;background:var(--line-3);color:var(--ink-5);transition:background .2s,color .2s;}
 .sp-row.done .spi{background:var(--ok-soft);color:var(--ok);}
 .sp-row.active .spi{background:var(--brand-soft);color:var(--brand);}
-.sp-row.active{color:var(--ink);}
-.sp-row.pending{color:var(--ink-4);}
+.sp-row.active{color:var(--ink);font-weight:600;}
+.sp-row.error .spi{background:var(--danger-soft);color:var(--danger);}
+.sp-row.error{color:var(--danger);}
+.sp-row.pending{color:var(--ink-5);}
+
+/* large ring spinner used in signing progress modal */
+.ring-spinner{
+  position:relative;width:62px;height:62px;flex:none;
+}
+.ring-spinner-track{
+  position:absolute;inset:0;border-radius:50%;
+  border:4px solid var(--brand-ring);
+}
+.ring-spinner-arc{
+  position:absolute;inset:0;border-radius:50%;
+  border:4px solid transparent;
+  border-top-color:var(--brand);
+  border-left-color:var(--brand);
+  animation:spin .9s linear infinite;
+}
+.ring-spinner-icon{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  color:var(--brand);
+}
+
+/* progress bar */
+.sign-prog-bar-wrap{
+  height:7px;border-radius:var(--r-pill);
+  background:#E2E8F2;
+  overflow:hidden;
+  margin:22px 0 6px;
+}
+.sign-prog-bar-fill{
+  height:100%;border-radius:var(--r-pill);
+  background:var(--grad);
+  transition:width .4s ease;
+}
+.sign-prog-bar-labels{
+  display:flex;justify-content:space-between;
+  font-size:11px;color:var(--ink-5);font-weight:500;
+}
+
+/* caution notice row inside signing modal */
+.sign-modal-caution{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  margin-top:20px;padding-top:16px;
+  border-top:1px solid var(--line-3);
+  font-size:12px;color:#9A6213;font-weight:600;
+}
+
+/* refonte modal — white card centered */
+.sign-modal-card{
+  width:min(430px,100%);
+  background:var(--card);
+  border-radius:20px;
+  padding:34px 32px;
+  box-shadow:0 30px 80px -20px rgba(0,0,0,.5);
+  text-align:center;
+  animation:pop .26s cubic-bezier(.2,.8,.3,1) both;
+}
+.sign-modal-title{
+  font-size:18px;font-weight:600;letter-spacing:-.01em;margin:0;color:var(--ink);
+}
+.sign-modal-sub{
+  font-size:13px;color:var(--ink-4);margin:7px 0 0;line-height:1.5;
+}
+.sign-modal-sub strong{color:var(--ink);font-weight:600;}
+
+/* ── SuccessView refonte ── */
+.sv-root{
+  max-width:680px;
+  margin:0 auto;
+  padding:40px 32px;
+  width:100%;
+  display:flex;flex-direction:column;gap:20px;
+}
+.sv-hero{text-align:center;}
+.sv-hero-icon{
+  width:66px;height:66px;border-radius:50%;
+  background:var(--ok-soft);border:1px solid var(--ok-line);
+  display:inline-flex;align-items:center;justify-content:center;
+  box-shadow:0 8px 20px -8px rgba(24,121,78,.45);
+  margin-bottom:18px;
+  color:var(--ok-ink);
+}
+.sv-hero h2{
+  font-size:24px;font-weight:600;letter-spacing:-.02em;margin:0;color:var(--ink);
+}
+.sv-hero-sub{
+  font-size:14px;color:var(--ink-4);margin:8px 0 0;line-height:1.5;
+}
+.sv-hero-sub strong{color:var(--ink);font-weight:600;}
+
+/* signed files card — inline list */
+.sv-files-card{
+  background:var(--card);border:1px solid var(--line);
+  border-radius:var(--r-lg);overflow:hidden;
+}
+.sv-file-row{
+  display:flex;align-items:center;gap:14px;
+  padding:15px 18px;
+  border-bottom:1px solid var(--line-3);
+}
+.sv-file-row:last-child{border-bottom:none;}
+.sv-file-icon{
+  width:40px;height:40px;border-radius:9px;flex:none;
+  display:flex;align-items:center;justify-content:center;
+}
+.sv-file-icon--pdf{background:var(--danger-soft);}
+.sv-file-icon--office{background:var(--brand-hover);}
+.sv-file-meta{flex:1;min-width:0;}
+.sv-file-name{font-size:13.5px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sv-file-sub{
+  font-size:11.5px;color:var(--ink-5);margin-top:2px;
+  display:flex;align-items:center;gap:6px;
+}
+.sv-file-sub-check{
+  width:13px;height:13px;border-radius:50%;
+  background:var(--ok-soft);flex:none;
+  display:inline-flex;align-items:center;justify-content:center;
+  color:var(--ok-ink);
+}
+
+/* action row */
+.sv-actions{
+  display:flex;gap:12px;flex-wrap:wrap;
+}
+.sv-actions .btn{flex:1;min-width:160px;}
+
+/* details card */
+.sv-details-card{
+  background:var(--card);border:1px solid var(--line);
+  border-radius:var(--r-lg);
+  overflow:hidden;
+}
+.sv-details-header{
+  display:flex;align-items:center;gap:10px;
+  padding:14px 18px;
+  border-bottom:1px solid var(--line-3);
+  font-size:13px;font-weight:600;color:var(--ink);
+}
+.sv-detail-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:11px 18px;
+  border-bottom:1px solid var(--line-3);
+  gap:12px;
+}
+.sv-detail-row:last-child{border-bottom:none;}
+.sv-detail-key{font-size:12px;color:var(--ink-5);flex:none;}
+.sv-detail-val{font-size:12.5px;font-weight:600;color:var(--ink);text-align:right;}
+.sv-detail-val.mono{font-family:var(--mono);}
+
 .spinner{width:16px;height:16px;border-radius:99px;border:2.5px solid var(--brand-ring);border-top-color:var(--brand);animation:spin .7s linear infinite;}
 @keyframes pulseDot{0%,100%{box-shadow:0 0 0 0 rgba(31,164,99,.45);}70%{box-shadow:0 0 0 6px rgba(31,164,99,0);}}
 @keyframes floatKey{0%,100%{transform:translateY(0);}50%{transform:translateY(-5px);}}
