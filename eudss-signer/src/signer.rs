@@ -2,6 +2,7 @@
 
 use crate::digest::DigestAlgorithm;
 use crate::error::SignerError;
+use crate::module;
 use crate::session::SessionState;
 use crate::token::Token;
 use base64::{engine::general_purpose::STANDARD, Engine};
@@ -36,8 +37,34 @@ pub struct Signer {
 }
 
 impl Signer {
+    /// Open a signer with an explicit PKCS#11 module path.
+    ///
+    /// The module path must be an absolute path to a `.so` / `.dylib` / `.dll` file.
+    /// Use [`Signer::open`] instead if you want automatic module resolution.
     pub fn new(module_path: &str, slot_index: usize, ttl: Duration) -> Result<Self, SignerError> {
         let token = Token::open(module_path, slot_index)?;
+        Ok(Signer {
+            token,
+            session: SessionState::new(ttl),
+            live: None,
+        })
+    }
+
+    /// Open a signer using the vendor-neutral module resolution strategy:
+    ///
+    /// 1. `EUDSS_PKCS11_MODULE` env var (absolute path to a `.so`/`.dylib`/`.dll`).
+    ///    If set and the file exists, that module is used.
+    /// 2. Per-OS well-known candidate paths (IDOPTE/IDPrime, OpenSC, p11-kit-proxy,
+    ///    SafeNet, Gemalto …). The first candidate that exists on disk is used.
+    /// 3. If no module is found, returns [`SignerError::ModuleNotFound`] with a clear
+    ///    message telling the user to install their token middleware or set the env var.
+    ///
+    /// `slot_index` selects which token slot to use (0-based; typically 0 or 1).
+    /// `ttl` is the idle session timeout after which the PIN must be re-entered.
+    pub fn open(slot_index: usize, ttl: Duration) -> Result<Self, SignerError> {
+        let module_path = module::resolve().map_err(SignerError::from)?;
+        let module_str = module_path.to_string_lossy();
+        let token = Token::open(&module_str, slot_index)?;
         Ok(Signer {
             token,
             session: SessionState::new(ttl),

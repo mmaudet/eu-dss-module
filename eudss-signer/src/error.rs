@@ -26,6 +26,9 @@ pub enum SignerError {
     CertParse(String),
     #[error("pkcs11 error: {0}")]
     Pkcs11(String),
+    /// No PKCS#11 middleware was found via auto-resolution (env var or well-known paths).
+    #[error("{0}")]
+    ModuleNotFound(String),
 }
 
 impl SignerError {
@@ -42,6 +45,7 @@ impl SignerError {
             SignerError::InvalidInput(_) => "invalid_input",
             SignerError::CertParse(_) => "cert_parse_error",
             SignerError::Pkcs11(_) => "pkcs11_error",
+            SignerError::ModuleNotFound(_) => "module_not_found",
         }
     }
 
@@ -76,6 +80,12 @@ impl From<&SignerError> for ErrorBody {
             error: e.code().to_string(),
             message: e.to_string(),
         }
+    }
+}
+
+impl From<crate::module::ModuleResolutionError> for SignerError {
+    fn from(e: crate::module::ModuleResolutionError) -> Self {
+        SignerError::ModuleNotFound(e.to_string())
     }
 }
 
