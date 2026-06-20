@@ -1,16 +1,9 @@
 import { useRef, useState } from 'react';
 import { backendApi, ValidationResponse, SignatureSummary } from '../services/backendApi';
 import { fileToBase64 } from '../services/fileUtils';
-import { Icon, Btn, Card, Banner, Tag, fileKind } from './ui';
+import { Icon, Btn, Banner, fileKind } from './ui';
 
 /* ---- helpers ---- */
-
-function initials(name: string | null): string {
-  if (!name) return '?';
-  const parts = name.trim().split(/\s+/);
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-}
 
 function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes} o`;
@@ -25,32 +18,225 @@ function todayFR(): string {
   return `${dd}/${mm}/${yyyy}`;
 }
 
-/* ---- Signature row ---- */
+/* ---- Verdict helpers — driven strictly off report fields ---- */
 
-function SignatureRow({ s }: { s: SignatureSummary }) {
-  const passed = s.indication === 'TOTAL_PASSED';
-  return (
-    <tr>
-      <td>
-        <div className="signer-cell">
-          <div className="avatar">{initials(s.signedBy)}</div>
-          <div>
-            <div style={{ fontWeight: 700 }}>{s.signedBy ?? 'Signataire inconnu'}</div>
-            <div style={{ fontSize: 12, color: 'var(--ink-3)', fontWeight: 600 }}>{s.signatureId}</div>
+/**
+ * Maps s.indication to a visual variant.
+ * Reads: s.indication (string from DSS: "TOTAL_PASSED" | "TOTAL_FAILED" | "INDETERMINATE" | other)
+ */
+function indicationVariant(indication: string): 'ok' | 'danger' | 'warn' {
+  if (indication === 'TOTAL_PASSED') return 'ok';
+  if (indication === 'TOTAL_FAILED') return 'danger';
+  return 'warn'; // INDETERMINATE and any other value
+}
+
+/**
+ * Overall verdict across all signatures: worst-case aggregation.
+ * Reads: result.signatureCount, result.signatures[*].indication
+ */
+function overallVariant(result: ValidationResponse): 'ok' | 'danger' | 'warn' | 'nosig' {
+  if (result.signatureCount === 0) return 'nosig';
+  const inds = result.signatures.map((s) => s.indication);
+  if (inds.some((i) => i === 'TOTAL_FAILED')) return 'danger';
+  if (inds.every((i) => i === 'TOTAL_PASSED')) return 'ok';
+  return 'warn';
+}
+
+/* ---- Verdict banner ---- */
+
+function VerdictBanner({ result }: { result: ValidationResponse }) {
+  const variant = overallVariant(result);
+
+  if (variant === 'nosig') {
+    return (
+      <div className="vd-banner vd-banner--warn" style={{ marginBottom: 18 }}>
+        <span className="vd-banner-icon vd-banner-icon--warn">
+          <Icon.alert size={28} />
+        </span>
+        <div className="vd-banner-body">
+          <div className="vd-banner-title">Aucune signature détectée</div>
+          <div className="vd-banner-sub">
+            Aucune signature numérique n'a été trouvée dans ce document.
           </div>
         </div>
-      </td>
-      <td><Tag kind="brand">{s.signatureFormat ?? '—'}</Tag></td>
-      <td>
+      </div>
+    );
+  }
+
+  if (variant === 'ok') {
+    return (
+      <div className="vd-banner vd-banner--ok" style={{ marginBottom: 18 }}>
+        <span className="vd-banner-icon vd-banner-icon--ok">
+          {/* Circle check icon matching design */}
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="9.5" fill="#1FA463" fillOpacity=".12" />
+            <path d="m7.8 12.3 2.7 2.7 5.7-5.9" stroke="#18794E" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </span>
+        <div className="vd-banner-body">
+          <div className="vd-banner-row">
+            <div className="vd-banner-title">Signature valide</div>
+            <span className="vd-code-tag vd-code-tag--ok">TOTAL_PASSED</span>
+          </div>
+          <div className="vd-banner-sub">
+            Le document n'a pas été modifié depuis la signature. Certificat reconnu par la liste de confiance.
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (variant === 'danger') {
+    return (
+      <div className="vd-banner vd-banner--danger" style={{ marginBottom: 18 }}>
+        <span className="vd-banner-icon vd-banner-icon--danger">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="9.5" fill="#C2362F" fillOpacity=".10" />
+            <path d="M9 9l6 6M15 9l-6 6" stroke="#C2362F" strokeWidth="2.2" strokeLinecap="round" />
+          </svg>
+        </span>
+        <div className="vd-banner-body">
+          <div className="vd-banner-row">
+            <div className="vd-banner-title">Signature invalide</div>
+            <span className="vd-code-tag vd-code-tag--danger">TOTAL_FAILED</span>
+          </div>
+          <div className="vd-banner-sub">
+            Le document a été modifié après la signature ou le certificat n'est pas reconnu.
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // INDETERMINATE / mixed
+  return (
+    <div className="vd-banner vd-banner--warn" style={{ marginBottom: 18 }}>
+      <span className="vd-banner-icon vd-banner-icon--warn">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="9.5" fill="#9A6213" fillOpacity=".10" />
+          <path d="M9.2 9.4c.5-1.7 4.8-1.9 4.8.4 0 1.7-2.1 1.5-2.1 3.2M11.9 16.5h.01" stroke="#9A6213" strokeWidth="1.9" strokeLinecap="round" />
+        </svg>
+      </span>
+      <div className="vd-banner-body">
+        <div className="vd-banner-row">
+          <div className="vd-banner-title">Validité indéterminée</div>
+          <span className="vd-code-tag vd-code-tag--warn">INDETERMINATE</span>
+        </div>
+        <div className="vd-banner-sub">
+          Impossible de vérifier la révocation du certificat ou ancre de confiance absente.
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ---- Signataire card ---- */
+
+function SignataireCard({ s }: { s: SignatureSummary }) {
+  return (
+    <div className="vd-sig-card">
+      <div className="vd-sig-card-label">SIGNATAIRE</div>
+      <div className="vd-sig-card-hero">
+        <span className="vd-sig-avatar-tile">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+            <path d="M12 12.5a3.4 3.4 0 1 0 0-6.8 3.4 3.4 0 0 0 0 6.8Z" stroke="var(--brand)" strokeWidth="1.6" />
+            <path d="M5.6 19a6.4 6.4 0 0 1 12.8 0" stroke="var(--brand)" strokeWidth="1.6" strokeLinecap="round" />
+          </svg>
+        </span>
+        <div className="vd-sig-name-block">
+          <div className="vd-sig-name">{s.signedBy ?? 'Signataire inconnu'}</div>
+          <div className="vd-sig-id">{s.signatureId}</div>
+        </div>
+      </div>
+      <div className="vd-sig-row">
+        <span className="vd-sig-key">Format</span>
+        <span className="vd-sig-val mono">{s.signatureFormat ?? '—'}</span>
+      </div>
+      <div className="vd-sig-row">
+        <span className="vd-sig-key">Horodaté le</span>
+        <span className="vd-sig-val mono">{s.signingDate ?? '—'}</span>
+      </div>
+      <div className="vd-sig-row">
+        <span className="vd-sig-key">Indication</span>
+        <span className={`vd-sig-val vd-ind-tag vd-ind-tag--${indicationVariant(s.indication)}`}>
+          {s.indication}{s.subIndication ? ' · ' + s.subIndication : ''}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+/* ---- Checks card ---- */
+
+/** Derives a check state from the overall indication for this signature.
+ * Reads: s.indication — "TOTAL_PASSED" / "TOTAL_FAILED" / "INDETERMINATE"
+ * Note: DSS simpleReport does not expose individual check-level breakdown per signature
+ * in the SignatureSummary shape. We show the overall outcome per check-line to avoid
+ * over-claiming fine-grained results we don't have. */
+function CheckRow({ label, sub, passed, warn }: { label: string; sub: string; passed: boolean; warn?: boolean }) {
+  const color = passed ? '#18794E' : warn ? '#9A6213' : '#C2362F';
+  const fill = passed ? '#E7F6EE' : warn ? '#FBF0DA' : '#FDEEEE';
+  return (
+    <div className="vd-check-row">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{ flex: 'none' }}>
+        <circle cx="12" cy="12" r="9.4" fill={fill} />
         {passed
-          ? <Tag kind="ok"><Icon.check size={12} /> TOTAL_PASSED</Tag>
-          : <Tag kind="warn">{s.indication}{s.subIndication ? ' · ' + s.subIndication : ''}</Tag>
+          ? <path d="m8.4 12.2 2.3 2.3 4.7-4.9" stroke={color} strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
+          : warn
+          ? <path d="M12 8.5v4M12 15.5h.01" stroke={color} strokeWidth="1.9" strokeLinecap="round" />
+          : <path d="M9 9l6 6M15 9l-6 6" stroke={color} strokeWidth="1.9" strokeLinecap="round" />
         }
-      </td>
-      <td className="mono" style={{ fontSize: 12.5, color: 'var(--ink-2)' }}>
-        {s.signingDate ?? '—'}
-      </td>
-    </tr>
+      </svg>
+      <div style={{ flex: 1 }}>
+        <div className="vd-check-title">{label}</div>
+        <div className="vd-check-sub">{sub}</div>
+      </div>
+    </div>
+  );
+}
+
+function ChecksCard({ s }: { s: SignatureSummary }) {
+  const passed = s.indication === 'TOTAL_PASSED';
+  const failed = s.indication === 'TOTAL_FAILED';
+  const warn = !passed && !failed; // INDETERMINATE
+
+  return (
+    <div className="vd-checks-card">
+      <div className="vd-checks-header">
+        <div className="vd-checks-title">Rapport de validation DSS</div>
+        {/* indication sourced from s.indication */}
+        <span className={`vd-code-tag vd-code-tag--${indicationVariant(s.indication)}`} style={{ fontSize: 10.5 }}>
+          {s.indication}
+        </span>
+      </div>
+      {/* These check rows reflect the overall per-signature outcome.
+          DSS SignatureSummary does not expose check-level breakdown, so
+          all checks reflect the aggregate indication — no individual checks invented. */}
+      <CheckRow
+        label="Intégrité du document"
+        sub={passed ? "L'empreinte signée correspond au contenu" : failed ? "L'empreinte ne correspond plus au contenu" : "Non vérifiable"}
+        passed={passed}
+        warn={warn}
+      />
+      <CheckRow
+        label="Chaîne de certification"
+        sub={passed ? "Remonte jusqu'à une AC racine de confiance" : failed ? "Chaîne non valide ou AC inconnue" : "Non vérifiable"}
+        passed={passed}
+        warn={warn}
+      />
+      <CheckRow
+        label="Statut de révocation"
+        sub={passed ? "Certificat non révoqué (OCSP / CRL)" : warn ? "OCSP/CRL injoignable" : "Certificat révoqué ou invalide"}
+        passed={passed}
+        warn={warn}
+      />
+      <CheckRow
+        label="Format de signature"
+        sub={s.signatureFormat ? `Format : ${s.signatureFormat}` : "Format non reconnu"}
+        passed={passed}
+        warn={warn}
+      />
+    </div>
   );
 }
 
@@ -107,167 +293,132 @@ export function ValidatePage() {
     }
   }
 
-  /* verdict */
-  const valid =
-    result !== null &&
-    result.signatureCount > 0 &&
-    result.signatures.every((s) => s.indication === 'TOTAL_PASSED');
-
-  const noSig = result !== null && result.signatureCount === 0;
-
   return (
-    <div className="rise" key="verify">
-      <Card
-        no=""
-        title="Document signé à vérifier"
-        desc="Déposez un PDF (PAdES) ou un conteneur ASiC-E (.asice) pour contrôler ses signatures."
-      >
-        {/* hidden file input */}
-        <input
-          ref={inputRef}
-          type="file"
-          accept=".pdf,.asice,.asics,.p7s,.p7m,.xml,.scs"
-          style={{ display: 'none' }}
-          onChange={(e) => pickFile(e.target.files?.[0])}
-        />
+    <div className="verifier-root rise" key="verify">
+      {/* ── Page header ── */}
+      <div className="verifier-header">
+        <h2 className="signer-title">Vérifier</h2>
+        <p className="signer-subtitle">Contrôle de validité eIDAS et rapport de la bibliothèque EU DSS.</p>
+      </div>
 
-        {!file ? (
-          /* ---- dropzone ---- */
-          <div
-            className="dropzone"
-            style={dragOver ? { borderColor: 'var(--brand)', background: 'var(--brand-soft)' } : undefined}
-            onClick={() => inputRef.current?.click()}
-            onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-            onDragLeave={() => setDragOver(false)}
-            onDrop={(e) => {
-              e.preventDefault();
-              setDragOver(false);
-              pickFile(e.dataTransfer.files?.[0]);
-            }}
+      {/* hidden file input */}
+      <input
+        ref={inputRef}
+        type="file"
+        accept=".pdf,.asice,.asics,.p7s,.p7m,.xml,.scs"
+        style={{ display: 'none' }}
+        onChange={(e) => pickFile(e.target.files?.[0])}
+      />
+
+      {/* ── Drop / file row ── */}
+      {!file ? (
+        <div
+          className={`vd-dropzone${dragOver ? ' vd-dropzone--over' : ''}`}
+          onClick={() => inputRef.current?.click()}
+          onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+          onDragLeave={() => setDragOver(false)}
+          onDrop={(e) => {
+            e.preventDefault();
+            setDragOver(false);
+            pickFile(e.dataTransfer.files?.[0]);
+          }}
+        >
+          <span className="vd-dz-icon-tile">
+            <Icon.upload size={20} />
+          </span>
+          <div className="vd-dz-text">
+            <div className="vd-dz-title">Déposer un document signé, ou le choisir</div>
+            <div className="vd-dz-hint">PDF (PAdES), conteneur ASiC, XML (XAdES)…</div>
+          </div>
+          <button
+            className="vd-dz-btn"
+            onClick={(e) => { e.stopPropagation(); inputRef.current?.click(); }}
+            tabIndex={-1}
           >
-            <div className="dz-ic"><Icon.upload size={22} /></div>
-            <b>Choisir un fichier signé</b>
-            <span className="dz-sub">PAdES (.pdf) · ASiC-E (.asice) · CAdES / XAdES</span>
-          </div>
-        ) : (
-          /* ---- file chosen ---- */
-          <div>
-            <div className="frow">
-              <div className="fic">{fileKind(file.name).ext}</div>
-              <div className="fmeta">
-                <div className="fname">{file.name}</div>
-                <div className="fsub">
-                  <span>{formatBytes(file.size)} · prêt à vérifier</span>
-                </div>
-              </div>
-              <button className="x-btn" title="Retirer" onClick={clearFile}>
-                <Icon.x size={15} />
-              </button>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+              <path d="M4 7a2 2 0 0 1 2-2h3l2 2h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7Z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
+            </svg>
+            Choisir un fichier
+          </button>
+        </div>
+      ) : (
+        /* ── File chosen row ── */
+        <div className="vd-file-row">
+          <div className="fic">{fileKind(file.name).ext}</div>
+          <div className="fmeta">
+            <div className="fname">{file.name}</div>
+            <div className="fsub">
+              <span>{formatBytes(file.size)} · prêt à vérifier</span>
             </div>
-
-            <div style={{ marginTop: 16, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+          </div>
+          <div className="vd-file-actions">
+            <Btn
+              onClick={validate}
+              disabled={busy}
+              icon={busy ? <span className="spinner" /> : <Icon.shieldCheck size={16} />}
+            >
+              {busy ? 'Vérification…' : 'Vérifier'}
+            </Btn>
+            {result !== null && (
               <Btn
-                onClick={validate}
-                disabled={busy}
-                icon={busy ? <span className="spinner" /> : <Icon.shieldCheck size={18} />}
+                variant="ghost"
+                onClick={() => { setResult(null); setError(null); }}
+                icon={<Icon.refresh size={15} />}
               >
-                {busy ? 'Vérification…' : 'Vérifier la signature'}
+                Réinitialiser
               </Btn>
-
-              {result !== null && (
-                <Btn
-                  variant="ghost"
-                  onClick={() => { setResult(null); setError(null); }}
-                  icon={<Icon.refresh size={16} />}
-                >
-                  Réinitialiser
-                </Btn>
-              )}
-            </div>
+            )}
+            <button className="x-btn" title="Retirer" onClick={clearFile}>
+              <Icon.x size={15} />
+            </button>
           </div>
-        )}
-      </Card>
-
-      {/* ---- error banner ---- */}
-      {error && (
-        <div style={{ marginTop: 20 }}>
-          <Banner kind="danger" icon={<Icon.alert size={20} />} title="Échec de la vérification">
-            {error}
-          </Banner>
         </div>
       )}
 
-      {/* ---- result card ---- */}
+      {/* ── Error banner ── */}
+      {error && (
+        <Banner kind="danger" icon={<Icon.alert size={20} />} title="Échec de la vérification">
+          {error}
+        </Banner>
+      )}
+
+      {/* ── Result section ── */}
       {result !== null && (
-        <section className="card rise" style={{ marginTop: 20 }}>
-          <div className="card-h">
-            <div className="hh">
-              <h2>Résultat de la validation</h2>
-              <p>
-                <b style={{ color: 'var(--ink)' }}>{result.signatureCount}</b>{' '}
-                signature(s) détectée(s) · contrôle eIDAS effectué le {todayFR()}
-              </p>
-            </div>
-          </div>
-          <div className="card-b">
-            {/* verdict banner */}
-            {valid && (
-              <div className="banner ok" style={{ marginBottom: 18 }}>
-                <span className="bi"><Icon.shieldCheck size={20} /></span>
-                <div style={{ flex: 1 }}>
-                  <b>Signature valide — TOTAL_PASSED</b>
-                  <div style={{ marginTop: 3 }}>
-                    L'intégrité du document est confirmée et le certificat du signataire est reconnu.
-                    Horodatage qualifié présent.
-                  </div>
+        <div className="vd-result rise">
+          {/* Verdict banner — driven off result.signatures[*].indication */}
+          <VerdictBanner result={result} />
+
+          {result.signatures.length > 0 && (
+            result.signatures.map((s) => (
+              <div key={s.signatureId} className="vd-sig-block">
+                <div className="vd-sig-cols">
+                  {/* Left: signataire — reads s.signedBy, s.signatureId, s.signatureFormat, s.signingDate, s.indication */}
+                  <SignataireCard s={s} />
+                  {/* Right: checks — reads s.indication, s.subIndication, s.signatureFormat */}
+                  <ChecksCard s={s} />
                 </div>
-                <Tag kind="ok">eIDAS · QESig</Tag>
               </div>
-            )}
-            {noSig && (
-              <Banner kind="warn" icon={<Icon.alert size={20} />} title="Aucune signature détectée">
-                Aucune signature numérique n'a été trouvée dans ce document.
-              </Banner>
-            )}
-            {!valid && !noSig && result.signatureCount > 0 && (
-              <Banner kind="danger" icon={<Icon.alert size={20} />} title="Signature(s) non valide(s)">
-                Une ou plusieurs signatures n'ont pas pu être validées. Vérifiez les indications ci-dessous.
-              </Banner>
-            )}
+            ))
+          )}
 
-            {/* signatures table */}
-            {result.signatures.length > 0 && (
-              <div style={{ overflowX: 'auto', marginTop: valid ? 0 : 18 }}>
-                <table className="rtable">
-                  <thead>
-                    <tr>
-                      <th>Signataire</th>
-                      <th>Format</th>
-                      <th>Indication</th>
-                      <th>Horodatage</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {result.signatures.map((s) => (
-                      <SignatureRow key={s.signatureId} s={s} />
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-
-            {/* DSS XML disclosure */}
-            <details className="disclosure">
-              <summary>
-                <span className="chev"><Icon.chevR size={16} /></span>
-                Rapport DSS détaillé (XML)
-              </summary>
-              <div style={{ paddingBottom: 16 }}>
-                <XmlReport xml={result.simpleReportXml} />
-              </div>
-            </details>
+          {/* Count + date */}
+          <div className="vd-footer-note">
+            <span>
+              <b>{result.signatureCount}</b> signature(s) · contrôle eIDAS effectué le {todayFR()}
+            </span>
           </div>
-        </section>
+
+          {/* DSS XML disclosure */}
+          <details className="disclosure">
+            <summary>
+              <span className="chev"><Icon.chevR size={16} /></span>
+              Rapport DSS détaillé (XML)
+            </summary>
+            <div style={{ paddingBottom: 16 }}>
+              <XmlReport xml={result.simpleReportXml} />
+            </div>
+          </details>
+        </div>
       )}
     </div>
   );

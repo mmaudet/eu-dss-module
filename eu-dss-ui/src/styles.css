@@ -867,3 +867,189 @@ body{
 .sign-btn:not(:disabled):hover{background:var(--brand-strong);}
 .sign-btn:not(:disabled):active{transform:translateY(1px);}
 .sign-btn:disabled{opacity:.5;cursor:not-allowed;box-shadow:none;}
+
+/* ── Verifier screen (refonte) ── */
+
+.verifier-root{
+  display:flex;flex-direction:column;
+  padding:26px 32px 28px;
+  gap:18px;
+  flex:1;
+  min-height:0;
+}
+
+.verifier-header{padding:0 2px 6px;}
+
+/* Horizontal dropzone */
+.vd-dropzone{
+  display:flex;align-items:center;gap:14px;
+  background:var(--card);border:1.5px dashed #C7D6F5;
+  border-radius:var(--r-lg);padding:14px 18px;
+  cursor:pointer;
+  transition:border-color .15s, background .15s;
+}
+.vd-dropzone:hover,.vd-dropzone--over{
+  border-color:var(--brand);background:var(--brand-faint);
+}
+.vd-dz-icon-tile{
+  width:42px;height:42px;border-radius:11px;
+  background:var(--brand-soft);flex:none;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--brand);
+}
+.vd-dz-text{flex:1;min-width:0;}
+.vd-dz-title{font-size:13.5px;font-weight:600;color:var(--ink);}
+.vd-dz-hint{font-size:11.5px;color:var(--ink-5);margin-top:2px;}
+.vd-dz-btn{
+  flex:none;border:none;cursor:pointer;
+  background:var(--brand);color:#fff;
+  font-size:13px;font-weight:600;
+  padding:10px 16px;border-radius:10px;
+  font-family:inherit;
+  display:flex;align-items:center;gap:8px;
+  transition:background .12s;
+}
+.vd-dz-btn:hover{background:var(--brand-strong);}
+
+/* File chosen row */
+.vd-file-row{
+  display:flex;align-items:center;gap:14px;
+  padding:13px 15px;
+  border:1px solid var(--line);border-radius:var(--r-lg);
+  background:var(--card);
+}
+.vd-file-actions{
+  display:flex;align-items:center;gap:8px;flex:none;
+}
+
+/* Result wrapper */
+.vd-result{
+  display:flex;flex-direction:column;gap:16px;
+}
+
+/* Verdict banner */
+.vd-banner{
+  display:flex;align-items:center;gap:20px;
+  border-radius:16px;padding:22px 24px;
+  border:1px solid transparent;
+}
+.vd-banner--ok{
+  background:linear-gradient(110deg,var(--ok-soft),#F1FBF5);
+  border-color:var(--ok-line);
+}
+.vd-banner--danger{
+  background:linear-gradient(110deg,var(--danger-soft),#FEF5F4);
+  border-color:var(--danger-line);
+}
+.vd-banner--warn{
+  background:linear-gradient(110deg,var(--warn-soft),#FDF8EC);
+  border-color:var(--warn-line);
+}
+.vd-banner-icon{
+  width:58px;height:58px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  flex:none;background:#fff;
+}
+.vd-banner-icon--ok{border:1px solid var(--ok-line);box-shadow:0 6px 16px -8px rgba(24,121,78,.5);}
+.vd-banner-icon--danger{border:1px solid var(--danger-line);box-shadow:0 6px 16px -8px rgba(194,54,47,.4);}
+.vd-banner-icon--warn{border:1px solid var(--warn-line);box-shadow:0 6px 16px -8px rgba(154,98,19,.35);}
+.vd-banner-body{flex:1;min-width:0;}
+.vd-banner-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.vd-banner-title{
+  font-size:18px;font-weight:600;letter-spacing:-.01em;
+}
+.vd-banner--ok .vd-banner-title{color:#136B43;}
+.vd-banner--danger .vd-banner-title{color:#A12B25;}
+.vd-banner--warn .vd-banner-title{color:#825115;}
+.vd-banner-sub{
+  font-size:13px;margin-top:5px;line-height:1.5;
+}
+.vd-banner--ok .vd-banner-sub{color:#3E6B54;}
+.vd-banner--danger .vd-banner-sub{color:#8A4A46;}
+.vd-banner--warn .vd-banner-sub{color:#7A5A2A;}
+
+/* Mono code tag — driven off report field values */
+.vd-code-tag{
+  display:inline-block;
+  font-family:var(--mono);font-size:10.5px;font-weight:600;
+  border-radius:6px;padding:3px 8px;
+  border:1px solid transparent;background:#fff;
+}
+.vd-code-tag--ok{color:#136B43;border-color:var(--ok-line);}
+.vd-code-tag--danger{color:#A12B25;border-color:var(--danger-line);}
+.vd-code-tag--warn{color:#825115;border-color:var(--warn-line);}
+
+/* Per-signature block */
+.vd-sig-block{
+  display:flex;flex-direction:column;gap:0;
+}
+.vd-sig-cols{
+  display:flex;gap:18px;align-items:flex-start;
+}
+@media (max-width:780px){.vd-sig-cols{flex-direction:column;}}
+
+/* Signataire card */
+.vd-sig-card{
+  width:330px;flex:none;
+  background:var(--card);border:1px solid var(--line);
+  border-radius:var(--r-lg);padding:20px;
+}
+@media (max-width:780px){.vd-sig-card{width:100%;}}
+.vd-sig-card-label{
+  font-size:10.5px;font-weight:600;letter-spacing:.07em;
+  color:var(--ink-6);margin-bottom:14px;
+}
+.vd-sig-card-hero{
+  display:flex;align-items:center;gap:12px;margin-bottom:16px;
+}
+.vd-sig-avatar-tile{
+  width:44px;height:44px;border-radius:12px;
+  background:var(--brand-soft);flex:none;
+  display:flex;align-items:center;justify-content:center;
+}
+.vd-sig-name-block{min-width:0;}
+.vd-sig-name{font-size:15px;font-weight:600;line-height:1.25;color:var(--ink);}
+.vd-sig-id{font-size:11px;color:var(--ink-5);margin-top:2px;font-family:var(--mono);word-break:break-all;}
+.vd-sig-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:9px 0;border-top:1px solid var(--line-3);
+  gap:8px;
+}
+.vd-sig-key{font-size:12px;color:var(--ink-5);flex:none;}
+.vd-sig-val{font-size:12px;font-weight:600;color:var(--ink);text-align:right;}
+.vd-sig-val.mono{font-family:var(--mono);}
+
+/* Indication tag inline */
+.vd-ind-tag{
+  display:inline-block;
+  font-family:var(--mono);font-size:10.5px;font-weight:600;
+  border-radius:6px;padding:2px 7px;border:1px solid transparent;
+}
+.vd-ind-tag--ok{background:var(--ok-soft);color:var(--ok-ink);border-color:var(--ok-line);}
+.vd-ind-tag--danger{background:var(--danger-soft);color:var(--danger);border-color:var(--danger-line);}
+.vd-ind-tag--warn{background:var(--warn-soft);color:var(--warn);border-color:var(--warn-line);}
+
+/* Checks card */
+.vd-checks-card{
+  flex:1;min-width:0;
+  background:var(--card);border:1px solid var(--line);
+  border-radius:var(--r-lg);padding:20px;
+}
+.vd-checks-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:6px;gap:10px;flex-wrap:wrap;
+}
+.vd-checks-title{font-size:13px;font-weight:600;color:var(--ink);}
+.vd-check-row{
+  display:flex;align-items:flex-start;gap:12px;
+  padding:13px 0;border-top:1px solid var(--line-3);
+}
+.vd-check-title{font-size:13px;font-weight:600;color:var(--ink);}
+.vd-check-sub{font-size:11.5px;color:var(--ink-5);margin-top:2px;}
+
+/* Footer note */
+.vd-footer-note{
+  font-size:12.5px;color:var(--ink-4);
+  padding:0 2px;
+}
+.vd-footer-note b{font-weight:700;color:var(--ink-2);}
