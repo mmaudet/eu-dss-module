@@ -167,7 +167,7 @@
 [data-theme="dark"] .vd-code-tag--warn    { color:#E2A53A; }
 [data-theme="dark"] .vd-banner-icon       { background:rgba(255,255,255,.06); }
 [data-theme="dark"] .frw-fail-text        { color:#F0746F; }
-[data-theme="dark"] .prq-row-status--wait { color:#E2A53A; background:var(--warn-soft); }
+
 
 *{box-sizing:border-box;}
 html,body{margin:0;padding:0;}
@@ -1815,7 +1815,7 @@ body{
   display:inline-flex;align-items:center;gap:7px;
 }
 .prq-row-status--wait{
-  color:#9A6213;
+  color: var(--warn);
   background:var(--warn-soft);
   border-radius:7px;padding:5px 10px;
 }

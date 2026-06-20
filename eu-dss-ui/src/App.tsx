@@ -37,7 +37,7 @@ function AgentChip() {
   } else {
     dotCls = 'off';
     title = 'Agent non détecté';
-    sub = 'localhost:9795';
+    sub = 'Vérifiez la clé et le middleware';
   }
 
   return (
@@ -93,7 +93,7 @@ function Sidebar({ tab, setTab, theme, setTheme }: SidebarProps) {
         </span>
         <div className="sb-logo-text">
           <div className="sb-logo-name">EU-DSS Sign</div>
-          <div className="sb-logo-sub">Signature qualifiée</div>
+          <div className="sb-logo-sub">Signature électronique</div>
         </div>
       </div>
 
@@ -102,6 +102,7 @@ function Sidebar({ tab, setTab, theme, setTheme }: SidebarProps) {
 
       {/* Accueil — active nav target */}
       <button
+        type="button"
         className={'sb-item' + (tab === 'accueil' ? ' sb-item--active' : '')}
         onClick={() => setTab('accueil')}
       >
@@ -121,6 +122,7 @@ function Sidebar({ tab, setTab, theme, setTheme }: SidebarProps) {
 
       {/* Signer — active nav target */}
       <button
+        type="button"
         className={'sb-item' + (tab === 'sign' ? ' sb-item--active' : '')}
         onClick={() => setTab('sign')}
       >
@@ -140,6 +142,7 @@ function Sidebar({ tab, setTab, theme, setTheme }: SidebarProps) {
 
       {/* Vérifier — active nav target */}
       <button
+        type="button"
         className={'sb-item' + (tab === 'verify' ? ' sb-item--active' : '')}
         onClick={() => setTab('verify')}
       >
@@ -168,6 +171,7 @@ function Sidebar({ tab, setTab, theme, setTheme }: SidebarProps) {
 
       {/* Clé & certificat — active nav target */}
       <button
+        type="button"
         className={'sb-item' + (tab === 'cle' ? ' sb-item--active' : '')}
         onClick={() => setTab('cle')}
       >
@@ -188,6 +192,7 @@ function Sidebar({ tab, setTab, theme, setTheme }: SidebarProps) {
 
       {/* Prérequis — active nav target */}
       <button
+        type="button"
         className={'sb-item' + (tab === 'prerequis' ? ' sb-item--active' : '')}
         onClick={() => setTab('prerequis')}
       >

@@ -133,6 +133,7 @@ export function AccueilScreen({ onNavigate }: AccueilScreenProps) {
         {/* Action buttons */}
         <div className="accueil-hero-actions">
           <button
+            type="button"
             className="accueil-btn-primary"
             onClick={() => onNavigate('sign')}
           >
@@ -148,6 +149,7 @@ export function AccueilScreen({ onNavigate }: AccueilScreenProps) {
             Signer un document
           </button>
           <button
+            type="button"
             className="accueil-btn-ghost"
             onClick={() => onNavigate('verify')}
           >

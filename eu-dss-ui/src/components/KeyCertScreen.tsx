@@ -52,15 +52,6 @@ async function sha256Hex(base64: string): Promise<string> {
   return hex.match(/.{1,4}/g)!.join(' ');
 }
 
-// ── Chain panel (issuer CNs from chain array) ─────────────────────────────────
-
-function parseSubjectCN(base64: string): string {
-  // We cannot parse DER here without a full ASN.1 parser.
-  // Return a placeholder indicating a cert in the chain.
-  void base64; // used only to count; CNs shown would need DER parsing
-  return '(certificat intermédiaire)';
-}
-
 // ── KeyCertScreen ─────────────────────────────────────────────────────────────
 
 export function KeyCertScreen() {
@@ -69,7 +60,6 @@ export function KeyCertScreen() {
 
   const [fingerprint, setFingerprint] = useState<string | null>(null);
   const [unlocking, setUnlocking] = useState(false);
-  const [chainOpen, setChainOpen] = useState(false);
 
   // Compute SHA-256 fingerprint whenever the cert changes.
   useEffect(() => {
@@ -182,6 +172,7 @@ export function KeyCertScreen() {
           <div className="kc-token-actions">
             {locked ? (
               <button
+                type="button"
                 className="kc-btn-unlock"
                 onClick={handleUnlock}
                 disabled={unlocking || status !== 'available'}
@@ -191,6 +182,7 @@ export function KeyCertScreen() {
               </button>
             ) : (
               <button
+                type="button"
                 className="kc-btn-lock"
                 onClick={() => void agent.lock()}
               >
@@ -199,7 +191,7 @@ export function KeyCertScreen() {
               </button>
             )}
             <div className="kc-pin-row">
-              <button className="kc-btn-ghost" disabled>
+              <button type="button" className="kc-btn-ghost" disabled>
                 Changer le PIN
               </button>
               <span className="kc-pin-caption">via le middleware ChamberSign</span>
@@ -255,65 +247,66 @@ export function KeyCertScreen() {
                 </div>
               </div>
 
-              {/* Chain disclosure */}
+              {/* Chain count */}
               {chainCount > 0 && (
                 <div className="kc-chain-block">
-                  <button
-                    className="kc-chain-toggle"
-                    onClick={() => setChainOpen((o) => !o)}
-                    aria-expanded={chainOpen}
-                  >
+                  <span className="kc-chain-toggle">
                     <Icon.key size={14} />
-                    Chaîne de confiance ({chainCount} certificat{chainCount > 1 ? 's' : ''})
-                    <span className="kc-chain-chev">{chainOpen ? '▲' : '▼'}</span>
-                  </button>
-                  {chainOpen && (
-                    <div className="kc-chain-list">
-                      {selectedCert.certificateChainBase64.map((_, i) => (
-                        <div key={i} className="kc-chain-item">
-                          <span className="kc-chain-idx">{i + 1}</span>
-                          <span className="mono kc-chain-label">{parseSubjectCN(_)}</span>
-                        </div>
-                      ))}
-                      <p className="kc-chain-note">
-                        Seuls les certificats fournis par le token sont listés.
-                        La validation complète de la chaîne s'effectue lors de la vérification de signature.
-                      </p>
-                    </div>
-                  )}
+                    {chainCount} certificat{chainCount > 1 ? 's' : ''} dans la chaîne (fournis par le token)
+                  </span>
                 </div>
               )}
 
               {/* Bottom action bar */}
               <div className="kc-cert-actions">
-                <Btn variant="ghost" size="sm" icon={<Icon.download size={15} />} onClick={handleExport}>
+                <Btn type="button" variant="ghost" size="sm" icon={<Icon.download size={15} />} onClick={handleExport}>
                   Exporter (.cer)
                 </Btn>
                 {chainCount === 0 && (
-                  <Btn variant="ghost" size="sm" disabled>
+                  <Btn type="button" variant="ghost" size="sm" disabled>
                     Chaîne de confiance — bientôt
                   </Btn>
                 )}
               </div>
             </>
           ) : (
-            /* Empty / locked state */
+            /* Empty state: either token absent or card locked */
             <div className="kc-cert-empty">
               <div className="kc-cert-empty-icon">
-                <Icon.lock size={26} />
+                {status !== 'available' ? <Icon.key size={26} /> : <Icon.lock size={26} />}
               </div>
-              <p className="kc-cert-empty-title">Clé verrouillée</p>
-              <p className="kc-cert-empty-sub">
-                Déverrouillez votre clé pour afficher le certificat.
-              </p>
-              <Btn
-                variant="primary"
-                icon={<Icon.unlock size={16} />}
-                onClick={handleUnlock}
-                disabled={unlocking || status !== 'available'}
-              >
-                {unlocking ? 'Déverrouillage…' : 'Déverrouiller'}
-              </Btn>
+              {status !== 'available' ? (
+                <>
+                  <p className="kc-cert-empty-title">Clé non connectée</p>
+                  <p className="kc-cert-empty-sub">
+                    Insérez votre clé USB pour afficher le certificat.
+                  </p>
+                  <Btn
+                    type="button"
+                    variant="primary"
+                    icon={<Icon.unlock size={16} />}
+                    disabled
+                  >
+                    Déverrouiller
+                  </Btn>
+                </>
+              ) : (
+                <>
+                  <p className="kc-cert-empty-title">Clé verrouillée</p>
+                  <p className="kc-cert-empty-sub">
+                    Déverrouillez votre clé pour afficher le certificat.
+                  </p>
+                  <Btn
+                    type="button"
+                    variant="primary"
+                    icon={<Icon.unlock size={16} />}
+                    onClick={handleUnlock}
+                    disabled={unlocking}
+                  >
+                    {unlocking ? 'Déverrouillage…' : 'Déverrouiller'}
+                  </Btn>
+                </>
+              )}
             </div>
           )}
         </div>
