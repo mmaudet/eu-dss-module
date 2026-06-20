@@ -486,3 +486,271 @@ body{
 @keyframes spin{to{transform:rotate(360deg);}}
 
 .empty-note{font-size:13px;color:var(--ink-4);text-align:center;padding:18px;font-weight:600;}
+
+/* ── Signer screen (Task 3 refonte) ── */
+
+/* Page root: fills .main, column layout with padding */
+.signer-root{
+  display:flex;flex-direction:column;
+  padding:26px 32px 28px;
+  gap:20px;
+  flex:1;
+  min-height:0;
+}
+
+/* Header row */
+.signer-header{
+  display:flex;align-items:center;gap:16px;
+  flex:none;
+}
+.signer-title{
+  font-size:23px;font-weight:600;letter-spacing:-.02em;margin:0;color:var(--ink);
+}
+.signer-subtitle{
+  font-size:13.5px;color:var(--label);margin:5px 0 0;
+}
+.eidas-pill{
+  margin-left:auto;flex:none;
+  display:flex;align-items:center;gap:8px;
+  background:var(--main);border:1px solid var(--line);
+  border-radius:var(--r-pill);
+  padding:7px 14px;
+  font-size:12.5px;font-weight:600;color:var(--ink-2);
+}
+
+/* Two-column body */
+.signer-cols{
+  display:flex;gap:20px;flex:1;min-height:0;
+}
+.signer-left{
+  flex:1;min-width:0;display:flex;flex-direction:column;
+}
+.signer-right{
+  width:330px;flex:none;display:flex;flex-direction:column;gap:16px;
+}
+
+/* ── Doc panel (left column) ── */
+.doc-panel{
+  display:flex;flex-direction:column;gap:16px;flex:1;
+}
+
+/* New dropzone */
+.dropzone-new{
+  background:var(--card);
+  border:1.5px dashed #C7D6F5;
+  border-radius:var(--r-lg);
+  padding:30px;
+  display:flex;flex-direction:column;align-items:center;text-align:center;
+  cursor:pointer;
+  transition:border-color .15s, background .15s;
+}
+.dropzone-new:hover,.dropzone-new--over{
+  border-color:var(--brand);
+  background:var(--brand-faint);
+}
+.dz-icon-tile{
+  width:50px;height:50px;border-radius:13px;
+  background:var(--brand-soft);
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:13px;
+  flex:none;
+}
+.dz-title{
+  font-size:15px;font-weight:600;color:var(--ink);
+}
+.dz-hint{
+  font-size:12.5px;color:var(--ink-5);margin-top:5px;
+}
+.dz-choose-btn{
+  margin-top:15px;
+  border:none;cursor:pointer;
+  background:var(--brand);color:#fff;
+  font-size:13px;font-weight:600;
+  padding:9px 18px;border-radius:9px;
+  font-family:inherit;
+  display:flex;align-items:center;gap:8px;
+  transition:background .12s;
+}
+.dz-choose-btn:hover{background:var(--brand-strong);}
+
+/* Doc count row */
+.doc-count-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 2px;
+  flex:none;
+}
+.doc-count-label{font-size:13px;font-weight:600;color:var(--ink-2);}
+.doc-count-hint{font-size:11.5px;color:var(--ink-5);}
+
+/* Doc list */
+.doc-list{display:flex;flex-direction:column;gap:8px;}
+
+.doc-row{
+  display:flex;align-items:center;gap:14px;
+  padding:15px 16px;
+  background:var(--card);border:1px solid var(--line);
+  border-radius:13px;
+}
+
+/* type tile */
+.doc-type-tile{
+  width:40px;height:40px;border-radius:9px;flex:none;
+  display:flex;align-items:center;justify-content:center;
+}
+.doc-type-tile--pdf{background:var(--danger-soft);}
+.doc-type-tile--office{background:var(--brand-hover);}
+
+/* name + meta */
+.doc-row-meta{flex:1;min-width:0;}
+.doc-row-name{
+  font-size:13.5px;font-weight:600;color:var(--ink);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.doc-row-sub{
+  font-size:11.5px;color:var(--ink-5);margin-top:2px;
+  display:flex;align-items:center;gap:7px;flex-wrap:wrap;
+}
+
+/* format pill */
+.doc-format-pill{
+  display:flex;align-items:center;gap:6px;
+  border:1px solid var(--brand-ring);background:var(--brand-faint);
+  border-radius:8px;padding:6px 10px;
+  font-size:11.5px;font-weight:600;color:var(--brand);
+  cursor:pointer;flex:none;
+  transition:background .12s;
+}
+.doc-format-pill:hover{background:var(--brand-soft);}
+
+/* remove button */
+.doc-remove-btn{
+  flex:none;
+  background:none;border:none;padding:4px;cursor:pointer;
+  color:var(--ink-5);border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  transition:color .12s, background .12s;
+}
+.doc-remove-btn:hover:not(:disabled){color:var(--danger);background:var(--danger-soft);}
+.doc-remove-btn:disabled{opacity:.4;cursor:not-allowed;}
+
+/* ── Signature params card (right column) ── */
+.sig-params-card{
+  background:var(--card);border:1px solid var(--line);
+  border-radius:var(--r-lg);
+  padding:18px 18px 20px;
+  flex:none;
+}
+.sig-params-title{
+  font-size:13px;font-weight:600;color:var(--ink);
+  margin-bottom:14px;
+}
+.sig-param-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:9px 0;
+}
+.sig-param-row--border{
+  border-bottom:1px solid var(--line-3);
+}
+.sig-param-label{font-size:12.5px;color:var(--label);}
+.sig-param-value{
+  font-size:12.5px;font-weight:600;color:var(--ink);
+}
+.sig-param-value.mono{font-family:var(--mono);}
+
+/* TSA toggle (always-on display) */
+.sig-toggle{
+  display:inline-flex;align-items:center;
+  width:34px;height:20px;border-radius:var(--r-pill);
+  padding:2px;
+}
+.sig-toggle.on{background:var(--brand);justify-content:flex-end;}
+.sig-toggle-knob{
+  width:16px;height:16px;border-radius:50%;background:#fff;
+  box-shadow:0 1px 3px rgba(0,0,0,.2);
+}
+
+/* ── Cert hero card (right column) ── */
+.cert-hero{
+  position:relative;
+  background:linear-gradient(120deg,#16223A,#1E315A,#27408A);
+  border-radius:var(--r-lg);
+  overflow:hidden;
+  flex:none;
+}
+.cert-hero-glow{
+  position:absolute;
+  right:-26px;top:-34px;
+  width:150px;height:150px;border-radius:50%;
+  background:radial-gradient(circle,rgba(91,79,224,.45),transparent 70%);
+  pointer-events:none;
+}
+.cert-hero-body{
+  position:relative;
+  padding:18px;
+}
+.cert-hero-top{
+  display:flex;align-items:flex-start;gap:12px;
+  margin-bottom:14px;
+}
+.cert-hero-key-tile{
+  width:48px;height:48px;border-radius:12px;flex:none;
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.14);
+  display:flex;align-items:center;justify-content:center;
+}
+.cert-hero-info{
+  flex:1;min-width:0;
+}
+.cert-hero-status-pill{
+  display:inline-flex;align-items:center;gap:6px;
+  background:rgba(31,164,99,.16);color:#7BE6A8;
+  border-radius:var(--r-pill);
+  padding:3px 9px;
+  font-size:11px;font-weight:600;
+  margin-bottom:5px;
+}
+.cert-hero-status-pill--off{
+  background:rgba(174,185,204,.15);color:#A9B6D4;
+}
+.cert-hero-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:#3BD27F;flex:none;
+}
+.cert-hero-dot--off{background:#7A89A3;}
+.cert-hero-name{
+  font-size:13.5px;font-weight:600;color:#fff;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.cert-hero-ca{
+  font-size:11.5px;color:#A9B6D4;margin-top:1px;
+}
+
+/* lock info row inside hero */
+.cert-hero-lock-row{
+  display:flex;gap:9px;align-items:flex-start;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:10px;
+  padding:10px 12px;
+}
+.cert-hero-lock-text{
+  font-size:11.5px;color:#D7DEEC;line-height:1.5;
+}
+.cert-hero-lock-text strong{font-weight:600;color:#fff;}
+
+/* ── Sign button (right column, bottom) ── */
+.sign-btn{
+  width:100%;
+  display:flex;align-items:center;justify-content:center;gap:9px;
+  background:var(--brand);color:#fff;
+  font-size:14.5px;font-weight:600;
+  padding:14px;border-radius:12px;
+  border:none;cursor:pointer;
+  font-family:inherit;
+  box-shadow:0 8px 18px -7px rgba(45,99,232,.65);
+  transition:background .12s, box-shadow .12s, transform .04s;
+  flex:none;
+}
+.sign-btn:not(:disabled):hover{background:var(--brand-strong);}
+.sign-btn:not(:disabled):active{transform:translateY(1px);}
+.sign-btn:disabled{opacity:.5;cursor:not-allowed;box-shadow:none;}

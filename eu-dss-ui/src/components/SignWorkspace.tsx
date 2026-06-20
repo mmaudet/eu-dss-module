@@ -62,8 +62,9 @@ export function SignWorkspace({ onGoVerify }: SignWorkspaceProps) {
   const { status, selectedKeyId, selectedCert } = agent;
 
   const [docs, setDocs] = useState<SignDoc[]>([]);
-  const [reason, setReason] = useState('Signature électronique');
-  const [location, setLocation] = useState('');
+  // reason/location are sealed into each signature via signOne; setters available for future UI
+  const [reason, _setReason] = useState('Signature électronique');
+  const [location, _setLocation] = useState('');
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false); // success view
   const [signedSnapshot, setSignedSnapshot] = useState<SignDoc[]>([]); // docs targeted by the last batch
@@ -188,75 +189,130 @@ export function SignWorkspace({ onGoVerify }: SignWorkspaceProps) {
     );
   }
 
+  /* ── Main Signer view ── */
+  const signerName = selectedCert ? cnOf(selectedCert.subjectDn) : '';
+  const caName = selectedCert ? issuerOf(selectedCert.issuerDn) : '';
+  const { locked } = agent;
+
   return (
-    <div className="rise" key="sign">
-      <AgentPanel />
-
-      <DocumentsPanel docs={docs} addFiles={addFiles} setDocs={setDocs} busy={busy} />
-
-      <Card no="3" title="Métadonnées" desc="Informations scellées dans la signature.">
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-          <div className="field">
-            <label htmlFor="sign-reason">Motif de la signature</label>
-            <input
-              id="sign-reason"
-              className="input"
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-            />
-          </div>
-          <div className="field">
-            <label htmlFor="sign-location">Lieu</label>
-            <input
-              id="sign-location"
-              className="input"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              placeholder="ex. Paris, France"
-            />
-          </div>
+    <div className="signer-root rise" key="sign">
+      {/* Page header */}
+      <div className="signer-header">
+        <div>
+          <h2 className="signer-title">Signer</h2>
+          <p className="signer-subtitle">Vos documents, signés avec votre clé USB qualifiée.</p>
         </div>
-        <div className="help" style={{ marginTop: 14, display: 'flex', gap: 8, alignItems: 'center' }}>
-          <Tag kind="brand">PAdES-BASELINE-T</Tag> Niveau avancé avec horodatage qualifié (TSA) —
-          conforme eIDAS.
+        <div className="eidas-pill">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+            <path d="M12 3.5 5.5 6v5c0 4 2.7 7.3 6.5 8.5 3.8-1.2 6.5-4.5 6.5-8.5V6L12 3.5Z" stroke="#2D63E8" strokeWidth="1.6" strokeLinejoin="round"/>
+            <path d="m9.5 11.8 1.7 1.7 3.4-3.5" stroke="#2D63E8" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          Signature qualifiée · eIDAS
         </div>
-      </Card>
+      </div>
 
-      <div className="action-bar">
-        <div className="ab-info">
-          {available ? (
-            <>
-              <b>{docs.length}</b> document{docs.length > 1 ? 's' : ''} prêt{docs.length > 1 ? 's' : ''}
-              {selectedCert && (
-                <>
-                  {' '}· certificat <b>{cnOf(selectedCert.subjectDn)}</b>
-                </>
-              )}
-            </>
-          ) : (
-            <>
-              <Icon.alert size={15} /> Connectez l'agent pour signer
-            </>
+      {/* Two-column body */}
+      <div className="signer-cols">
+        {/* LEFT: documents */}
+        <div className="signer-left">
+          <DocumentsPanel docs={docs} addFiles={addFiles} setDocs={setDocs} busy={busy} />
+        </div>
+
+        {/* RIGHT: signature panel */}
+        <div className="signer-right">
+          {/* Paramètres de signature */}
+          <div className="sig-params-card">
+            <div className="sig-params-title">Paramètres de signature</div>
+            <div className="sig-param-row sig-param-row--border">
+              <span className="sig-param-label">Niveau eIDAS</span>
+              <span className="sig-param-value mono">B‑T</span>
+            </div>
+            <div className="sig-param-row sig-param-row--border">
+              <span className="sig-param-label">Empreinte</span>
+              <span className="sig-param-value mono">SHA‑256</span>
+            </div>
+            <div className="sig-param-row">
+              <span className="sig-param-label">Horodatage (TSA)</span>
+              <span className="sig-toggle on" aria-label="Activé">
+                <span className="sig-toggle-knob" />
+              </span>
+            </div>
+          </div>
+
+          {/* Cert hero card */}
+          <div className="cert-hero">
+            <div className="cert-hero-glow" />
+            <div className="cert-hero-body">
+              <div className="cert-hero-top">
+                <div className="cert-hero-key-tile">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <circle cx="8" cy="13" r="3.4" stroke="#9FC0FF" strokeWidth="1.7"/>
+                    <path d="m10.5 10.5 8-8M15 5l2.5 2.5M18.5 8 21 5.5" stroke="#9FC0FF" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+                <div className="cert-hero-info">
+                  {available ? (
+                    <div className="cert-hero-status-pill">
+                      <span className="cert-hero-dot" />
+                      Clé connectée
+                    </div>
+                  ) : (
+                    <div className="cert-hero-status-pill cert-hero-status-pill--off">
+                      <span className="cert-hero-dot cert-hero-dot--off" />
+                      {status === 'checking' ? 'Détection…' : 'Non connectée'}
+                    </div>
+                  )}
+                  <div className="cert-hero-name">
+                    {signerName || 'En attente de connexion'}
+                  </div>
+                  <div className="cert-hero-ca">
+                    {caName || 'Insérez votre clé USB'}
+                  </div>
+                </div>
+              </div>
+
+              <div className="cert-hero-lock-row">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }}>
+                  <rect x="5" y="11" width="14" height="9" rx="2" stroke="#F0C46B" strokeWidth="1.7"/>
+                  <path d="M8 11V8a4 4 0 0 1 8 0v3" stroke="#F0C46B" strokeWidth="1.7"/>
+                </svg>
+                <div className="cert-hero-lock-text">
+                  {!available
+                    ? "Connectez l’agent pour signer."
+                    : locked
+                    ? <>Carte verrouillée · votre <strong>code PIN</strong> sera demandé au moment de signer.</>
+                    : <>Carte déverrouillée · session active ({fmtClock(agent.secondsLeft)}).</>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Spacer */}
+          <div style={{ flex: 1 }} />
+
+          {/* Sign button */}
+          <button
+            className="sign-btn"
+            disabled={!canSign}
+            onClick={signAll}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path d="M3 17c3-1 4-7 7-7s2 4 5 3 4-6 6-6" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            {pendingCount > 0
+              ? `Signer ${pendingCount} document${pendingCount > 1 ? 's' : ''}`
+              : 'Signer'}
+          </button>
+
+          {/* Agent unavailable banner (compact, below button) */}
+          {status === 'unavailable' && (
+            <AgentPanel />
+          )}
+          {status === 'error' && (
+            <AgentPanel />
           )}
         </div>
-        <div className="sp" />
-        <Btn
-          variant="ghost"
-          size="lg"
-          disabled={signedDocs.length === 0}
-          icon={<Icon.download size={17} />}
-          onClick={() =>
-            downloadZip(
-              signedDocs.map((d) => ({ name: d.signed!.fileName, base64: d.signed!.base64 })),
-              'documents-signes.zip',
-            )
-          }
-        >
-          Tout télécharger (ZIP)
-        </Btn>
-        <Btn size="lg" disabled={!canSign} onClick={signAll} icon={<Icon.sign size={18} />}>
-          Signer tout ({pendingCount})
-        </Btn>
       </div>
 
       {busy && <SigningProgress docs={signedSnapshot.length > 0 ? signedSnapshot : docs} liveDocs={docs} />}
@@ -474,14 +530,10 @@ function DocumentsPanel({ docs, addFiles, setDocs, busy }: DocumentsPanelProps) 
   const [dragOver, setDragOver] = useState(false);
 
   return (
-    <Card
-      no="2"
-      title="Documents"
-      desc="PDF → PAdES · bureautique & autres → conteneur ASiC-E. Un document déjà signé sera contre-signé."
-    >
+    <div className="doc-panel">
+      {/* Dropzone */}
       <div
-        className="dropzone"
-        style={dragOver ? { borderColor: 'var(--brand)', background: 'var(--brand-soft)' } : undefined}
+        className={`dropzone-new${dragOver ? ' dropzone-new--over' : ''}`}
         onClick={() => inputRef.current?.click()}
         onDragOver={(e) => {
           e.preventDefault();
@@ -494,11 +546,24 @@ function DocumentsPanel({ docs, addFiles, setDocs, busy }: DocumentsPanelProps) 
           addFiles(e.dataTransfer.files);
         }}
       >
-        <div className="dz-ic">
-          <Icon.upload size={22} />
-        </div>
-        <b>Déposer ou choisir des fichiers</b>
-        <span className="dz-sub">PDF, DOCX, XLSX, images… — plusieurs fichiers acceptés</span>
+        <span className="dz-icon-tile">
+          <svg width="23" height="23" viewBox="0 0 24 24" fill="none">
+            <path d="M12 16V5m0 0L8 9m4-4 4 4" stroke="#2D63E8" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M5 15v3a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-3" stroke="#2D63E8" strokeWidth="1.9" strokeLinecap="round"/>
+          </svg>
+        </span>
+        <div className="dz-title">Déposer vos documents</div>
+        <div className="dz-hint">PDF → PAdES · bureautique &amp; images → conteneur ASiC‑E</div>
+        <button
+          className="dz-choose-btn"
+          onClick={(e) => { e.stopPropagation(); inputRef.current?.click(); }}
+          type="button"
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+            <path d="M4 7a2 2 0 0 1 2-2h3l2 2h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7Z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round"/>
+          </svg>
+          Choisir des fichiers
+        </button>
         <input
           ref={inputRef}
           type="file"
@@ -512,64 +577,103 @@ function DocumentsPanel({ docs, addFiles, setDocs, busy }: DocumentsPanelProps) 
         />
       </div>
 
+      {/* Doc count row */}
       {docs.length > 0 && (
-        <div style={{ marginTop: 16 }}>
+        <div className="doc-count-row">
+          <span className="doc-count-label">
+            {docs.length} document{docs.length > 1 ? 's' : ''} prêt{docs.length > 1 ? 's' : ''}
+          </span>
+          <span className="doc-count-hint">Format de signature réglable par document</span>
+        </div>
+      )}
+
+      {/* Document rows */}
+      {docs.length > 0 && (
+        <div className="doc-list">
           {docs.map((doc) => {
             const k = fileKind(doc.file.name);
+            const isPdf = !k.asic;
+            const sizeFmt = doc.file.size >= 1024 * 1024
+              ? `${(doc.file.size / (1024 * 1024)).toFixed(1)} Mo`
+              : `${(doc.file.size / 1024).toFixed(0)} Ko`;
+            const typeLabel = isPdf ? 'document PDF' : `document ${k.ext}`;
             return (
-              <div className="frow" key={doc.id}>
-                <div className="fic">{k.ext}</div>
-                <div className="fmeta">
-                  <div className="fname">{doc.file.name}</div>
-                  <div className="fsub">
-                    <span>{(doc.file.size / 1024).toFixed(1)} Ko</span>
-                    <span className="arrow">→</span>
-                    <Tag kind="brand">{k.target}</Tag>
+              <div className="doc-row" key={doc.id}>
+                {/* Type icon tile */}
+                <span className={`doc-type-tile${isPdf ? ' doc-type-tile--pdf' : ' doc-type-tile--office'}`}>
+                  {isPdf ? (
+                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none">
+                      <path d="M7 3h7l4 4v14H7V3Z" stroke="#D8514F" strokeWidth="1.6" strokeLinejoin="round"/>
+                      <path d="M14 3v4h4" stroke="#D8514F" strokeWidth="1.6" strokeLinejoin="round"/>
+                    </svg>
+                  ) : (
+                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none">
+                      <path d="M7 3h7l4 4v14H7V3Z" stroke="#2D63E8" strokeWidth="1.6" strokeLinejoin="round"/>
+                      <path d="M14 3v4h4" stroke="#2D63E8" strokeWidth="1.6" strokeLinejoin="round"/>
+                    </svg>
+                  )}
+                </span>
+
+                {/* Name + meta */}
+                <div className="doc-row-meta">
+                  <div className="doc-row-name">{doc.file.name}</div>
+                  <div className="doc-row-sub">
+                    {doc.status === 'signed' && doc.signed
+                      ? <Tag kind="ok"><Icon.check size={11} /> signé</Tag>
+                      : doc.status === 'signing'
+                      ? <span className="spinner" style={{ width: 13, height: 13 }} />
+                      : doc.status === 'error'
+                      ? <span style={{ color: 'var(--danger)', fontSize: 12, fontWeight: 600 }} title={doc.error}>✗ {doc.error}</span>
+                      : null
+                    }
+                    {doc.status !== 'error' && (
+                      <span>{sizeFmt} · {typeLabel}</span>
+                    )}
                     {doc.existingSignatures != null && doc.existingSignatures > 0 && (
                       <Tag kind="warn">déjà signé : {doc.existingSignatures}</Tag>
                     )}
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  {doc.status === 'signing' && <span className="spinner" />}
-                  {doc.status === 'signed' && doc.signed && (
-                    <>
-                      <Tag kind="ok">
-                        <Icon.check size={11} /> signé
-                      </Tag>
-                      <Btn
-                        variant="soft"
-                        size="sm"
-                        icon={<Icon.download size={15} />}
-                        onClick={() =>
-                          downloadBase64(doc.signed!.base64, doc.signed!.fileName, doc.signed!.mediaType)
-                        }
-                      >
-                        Télécharger
-                      </Btn>
-                    </>
-                  )}
-                  {doc.status === 'error' && (
-                    <span style={{ color: 'var(--danger)', fontSize: 12.5, fontWeight: 700 }} title={doc.error}>
-                      ✗ {doc.error}
-                    </span>
-                  )}
-                  <button
-                    className="x-btn"
-                    title="Retirer"
-                    disabled={busy}
-                    onClick={() => setDocs((x) => x.filter((y) => y.id !== doc.id))}
-                  >
-                    <Icon.x size={15} />
-                  </button>
+                {/* Format pill */}
+                <div className="doc-format-pill">
+                  <span className="mono">{isPdf ? 'PAdES‑B‑T' : 'ASiC‑E'}</span>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                    <path d="m7 10 5 5 5-5" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
                 </div>
+
+                {/* Download if signed */}
+                {doc.status === 'signed' && doc.signed && (
+                  <Btn
+                    variant="soft"
+                    size="sm"
+                    icon={<Icon.download size={15} />}
+                    onClick={() =>
+                      downloadBase64(doc.signed!.base64, doc.signed!.fileName, doc.signed!.mediaType)
+                    }
+                  >
+                    Télécharger
+                  </Btn>
+                )}
+
+                {/* Remove button */}
+                <button
+                  className="doc-remove-btn"
+                  title="Retirer"
+                  disabled={busy}
+                  onClick={() => setDocs((x) => x.filter((y) => y.id !== doc.id))}
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" style={{ color: 'var(--ink-5)' }}>
+                    <path d="M6 6l12 12M18 6 6 18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+                  </svg>
+                </button>
               </div>
             );
           })}
         </div>
       )}
-    </Card>
+    </div>
   );
 }
 
