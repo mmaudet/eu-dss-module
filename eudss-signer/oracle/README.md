@@ -12,6 +12,10 @@ Proves the Rust signing core matches the Java agent on a real ChamberSign card.
 4. Start the Java agent (`bin/eu-dss-agent-macos.sh` or the platform script).
 5. Run `EUDSS_PKCS11_MODULE=<path> ./oracle/compare.sh`.
 
+> PIN safety: the card typically allows only 3 PIN tries. `compare.sh` asks for the PIN once,
+> runs the Rust tool first, and aborts before contacting the Java agent if that login fails, so
+> a mistyped PIN costs at most ONE try (never two). A correct PIN costs zero. It never auto-retries.
+
 ## Acceptance
 
 - RSA (PKCS#1 v1.5): the two base64 signatures are EQUAL (`ORACLE PASS`).
