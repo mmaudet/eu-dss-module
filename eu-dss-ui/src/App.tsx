@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { AgentProvider, useAgent } from './agent/AgentContext';
 import { FirstRunWizard } from './components/FirstRunWizard';
+import { KeyCertScreen } from './components/KeyCertScreen';
 import { PinModal } from './components/PinModal';
 import { SignWorkspace } from './components/SignWorkspace';
 import { TitleBar } from './components/TitleBar';
 import { ValidatePage } from './components/ValidatePage';
 import { store } from './services/store';
 
-type Tab = 'sign' | 'verify';
+type Tab = 'sign' | 'verify' | 'cle';
 
 // ── Agent status pill (sidebar bottom) ─────────────────────────────────────
 
@@ -53,6 +54,7 @@ interface SidebarProps {
   tab: Tab;
   setTab: (t: Tab) => void;
 }
+
 
 function Sidebar({ tab, setTab }: SidebarProps) {
   return (
@@ -148,8 +150,11 @@ function Sidebar({ tab, setTab }: SidebarProps) {
       {/* GÉRER group */}
       <div className="sb-group-label sb-group-label--spaced">GÉRER</div>
 
-      {/* Clé & certificat — Phase 2 placeholder */}
-      <div className="sb-item sb-item--disabled" title="Bientôt disponible">
+      {/* Clé & certificat — active nav target */}
+      <button
+        className={'sb-item' + (tab === 'cle' ? ' sb-item--active' : '')}
+        onClick={() => setTab('cle')}
+      >
         <span className="sb-item-icon">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
             <circle cx="8" cy="13" r="3.3" stroke="currentColor" strokeWidth="1.8" />
@@ -163,8 +168,7 @@ function Sidebar({ tab, setTab }: SidebarProps) {
           </svg>
         </span>
         <span className="sb-item-label">Clé &amp; certificat</span>
-        <span className="sb-soon">bientôt</span>
-      </div>
+      </button>
 
       {/* Prérequis — Phase 2 placeholder */}
       <div className="sb-item sb-item--disabled" title="Bientôt disponible">
@@ -243,8 +247,10 @@ function Shell() {
         <main className="main">
           {tab === 'sign' ? (
             <SignWorkspace onGoVerify={() => setTab('verify')} />
-          ) : (
+          ) : tab === 'verify' ? (
             <ValidatePage />
+          ) : (
+            <KeyCertScreen />
           )}
         </main>
       </div>
