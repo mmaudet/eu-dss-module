@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { backendApi, ValidationResponse, SignatureSummary } from '../services/backendApi';
 import { fileToBase64 } from '../services/fileUtils';
+import { history } from '../services/history';
 import { Icon, Btn, Banner, fileKind } from './ui';
 
 /* ---- helpers ---- */
@@ -306,6 +307,19 @@ export function ValidatePage() {
       const base64 = await fileToBase64(file);
       const res = await backendApi.validate(base64);
       setResult(res);
+      // ── Record in local history (additive; never breaks validation flow) ───
+      try {
+        history.add({
+          kind: 'verify',
+          name: file.name,
+          format: res.signatures?.[0]?.signatureFormat ?? '',
+          sizeBytes: file.size,
+          verdict: overallVariant(res) === 'ok' ? 'TOTAL_PASSED' : res.signatures?.[0]?.indication ?? '',
+          atIso: new Date().toISOString(),
+        });
+      } catch {
+        // logging failure must never propagate
+      }
     } catch (e) {
       setError((e as Error).message ?? 'Erreur inconnue');
     } finally {

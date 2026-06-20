@@ -4,6 +4,7 @@ import { agentApi, AgentCertificate, AgentError } from '../services/agentApi';
 import { backendApi, SignatureParams } from '../services/backendApi';
 import { detectOs, PREREQ_MANIFEST } from '../services/prerequisites';
 import { downloadBase64, downloadZip, fileToBase64 } from '../services/fileUtils';
+import { history } from '../services/history';
 import { Banner, Btn, Card, CertGrid, fileKind, Icon, Tag } from './ui';
 
 type DocStatus = 'pending' | 'signing' | 'signed' | 'error';
@@ -123,6 +124,18 @@ export function SignWorkspace({ onGoVerify }: SignWorkspaceProps) {
           mediaType: assembled.mediaType,
         },
       });
+      // ── Record in local history (additive; never breaks signing flow) ──────
+      try {
+        history.add({
+          kind: 'sign',
+          name: doc.file.name,
+          format: fileKind(doc.file.name).target,
+          sizeBytes: doc.file.size,
+          atIso: new Date().toISOString(),
+        });
+      } catch {
+        // logging failure must never propagate
+      }
     } catch (e) {
       if (e instanceof AgentError && e.code === 'locked' && !retried) {
         try {
