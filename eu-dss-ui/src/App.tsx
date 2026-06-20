@@ -8,6 +8,7 @@ import { SignWorkspace } from './components/SignWorkspace';
 import { TitleBar } from './components/TitleBar';
 import { ValidatePage } from './components/ValidatePage';
 import { store } from './services/store';
+import type { ThemePref } from './services/store';
 
 type Tab = 'sign' | 'verify' | 'cle' | 'prerequis';
 
@@ -54,11 +55,21 @@ function AgentChip() {
 interface SidebarProps {
   tab: Tab;
   setTab: (t: Tab) => void;
+  theme: ThemePref;
+  setTheme: (t: ThemePref) => void;
 }
 
+function Sidebar({ tab, setTab, theme, setTheme }: SidebarProps) {
+  function handleTheme(t: ThemePref) {
+    store.setTheme(t);
+    if (t === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    } else {
+      document.documentElement.setAttribute('data-theme', 'light');
+    }
+    setTheme(t);
+  }
 
-
-function Sidebar({ tab, setTab }: SidebarProps) {
   return (
     <aside className="sidebar">
       {/* Logo block */}
@@ -193,7 +204,7 @@ function Sidebar({ tab, setTab }: SidebarProps) {
       {/* Spacer */}
       <div style={{ flex: 1 }} />
 
-      {/* Thème toggle — visual only, Clair active */}
+      {/* Thème toggle — wired to dark/light theme */}
       <div className="sb-toggle-row">
         <div className="sb-toggle-label">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
@@ -208,8 +219,18 @@ function Sidebar({ tab, setTab }: SidebarProps) {
           Thème
         </div>
         <div className="sb-toggle-group">
-          <span className="sb-toggle-opt sb-toggle-opt--active">Clair</span>
-          <span className="sb-toggle-opt">Sombre</span>
+          <button
+            type="button"
+            className={'sb-toggle-opt' + (theme === 'light' ? ' sb-toggle-opt--active' : '')}
+            onClick={() => handleTheme('light')}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', font: 'inherit', padding: '3px 9px', borderRadius: '6px' }}
+          >Clair</button>
+          <button
+            type="button"
+            className={'sb-toggle-opt' + (theme === 'dark' ? ' sb-toggle-opt--active' : '')}
+            onClick={() => handleTheme('dark')}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', font: 'inherit', padding: '3px 9px', borderRadius: '6px' }}
+          >Sombre</button>
         </div>
       </div>
 
@@ -242,12 +263,13 @@ function Sidebar({ tab, setTab }: SidebarProps) {
 
 function Shell() {
   const [tab, setTab] = useState<Tab>('sign');
+  const [theme, setTheme] = useState<ThemePref>(() => store.getTheme());
 
   return (
     <div className="shell">
       <TitleBar />
       <div className="shell-body">
-        <Sidebar tab={tab} setTab={setTab} />
+        <Sidebar tab={tab} setTab={setTab} theme={theme} setTheme={setTheme} />
         <main className="main">
           {tab === 'sign' ? (
             <SignWorkspace onGoVerify={() => setTab('verify')} />

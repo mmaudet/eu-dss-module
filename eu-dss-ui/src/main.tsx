@@ -8,6 +8,12 @@ import '@fontsource/geist-sans/700.css';
 import '@fontsource/geist-mono/400.css';
 import '@fontsource/geist-mono/500.css';
 import './styles.css';
+import { store } from './services/store';
+
+// Apply persisted theme before React renders to avoid a light-to-dark flash.
+if (store.getTheme() === 'dark') {
+  document.documentElement.setAttribute('data-theme', 'dark');
+}
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

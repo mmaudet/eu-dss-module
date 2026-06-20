@@ -79,6 +79,96 @@
   --hero-tint:transparent;
 }
 
+/* ── Dark theme token overrides ─────────────────────────────────────────────
+ * Applied when html[data-theme="dark"] is set (toggled via the Sombre button
+ * in the sidebar and persisted in localStorage via store.setTheme()).
+ * Only primitive tokens are overridden — derived vars (--app-bg, --sidebar-bg…)
+ * re-resolve automatically because they reference the primitives via var().
+ * Radii, shadows, spacing and the --grad brand gradient are left unchanged.
+ * ─────────────────────────────────────────────────────────────────────────── */
+[data-theme="dark"]{
+  /* Surfaces */
+  --canvas:#0E1626;      /* app / window chrome */
+  --main:#0E1626;        /* content area */
+  --rail:#101A2C;        /* sidebar */
+  --card:#16223A;        /* card / panel */
+  --surface:#16223A;     /* generic surface alias */
+
+  /* Borders / lines */
+  --line:#243353;
+  --line-2:#1E2A40;
+  --line-3:#1E2A40;
+
+  /* Ink scale */
+  --ink:#EAF0FB;         /* primary text */
+  --ink-2:#AEBBD4;       /* secondary */
+  --ink-3:#9AA8C4;       /* tertiary */
+  --ink-4:#7C8AA6;       /* muted */
+  --ink-5:#5C6B86;       /* faint */
+  --ink-6:#4E5E7C;       /* faintest */
+  --label:#7C8AA6;
+
+  /* Brand */
+  --brand:#2D63E8;               /* solid fills unchanged */
+  --brand-strong:#7FA0F5;        /* on-dark active text */
+  --brand-deep:#3A6DF0;
+  --brand-soft:rgba(58,109,240,.16);   /* active nav bg */
+  --brand-soft-2:rgba(58,109,240,.22);
+  --brand-ring:#243353;
+  --brand-hover:rgba(58,109,240,.10);
+  --brand-faint:rgba(58,109,240,.08);
+
+  /* Status: success */
+  --ok:#3BD27F;
+  --ok-ink:#7BE6A8;
+  --ok-soft:rgba(59,210,127,.13);
+  --ok-line:rgba(59,210,127,.28);
+
+  /* Status: danger */
+  --danger:#F0746F;
+  --danger-soft:rgba(240,116,111,.12);
+  --danger-line:rgba(240,116,111,.28);
+
+  /* Status: amber/warn */
+  --warn:#E2A53A;
+  --warn-soft:rgba(226,165,58,.12);
+  --warn-line:rgba(226,165,58,.28);
+
+  /* Shadows — lighten so cards stay subtly lifted on dark bg */
+  --sh-card:0 1px 3px rgba(0,0,0,.25);
+  --sh-pop:0 12px 40px -16px rgba(0,0,0,.6),0 2px 8px rgba(0,0,0,.2);
+  --sh-hero:0 18px 40px -22px rgba(0,0,0,.9);
+
+  /* Topbar */
+  --topbar-bg:rgba(16,26,44,.92);
+}
+
+/* ── Dark theme: hardcoded status text colours ───────────────────────────────
+ * These selectors use literal light-mode status hex that won't read on the
+ * dark semi-transparent backgrounds. Override them to the on-dark palette.
+ * ─────────────────────────────────────────────────────────────────────────── */
+[data-theme="dark"] .banner.ok          { color:#7BE6A8; }
+[data-theme="dark"] .banner.danger      { color:#F0746F; }
+[data-theme="dark"] .banner.warn        { color:#E2A53A; }
+[data-theme="dark"] .banner.info        { color:#7FA0F5; }
+[data-theme="dark"] .agent-ok-head .tt b,
+[data-theme="dark"] .agent-ok-head .tt span { color:#7BE6A8; }
+[data-theme="dark"] .agent-ok-head      { background:var(--ok-soft); border-color:var(--ok-line); }
+[data-theme="dark"] .agent-ok-head .ig  { background:rgba(255,255,255,.06); }
+[data-theme="dark"] .vd-banner--ok .vd-banner-title  { color:#7BE6A8; }
+[data-theme="dark"] .vd-banner--danger .vd-banner-title { color:#F0746F; }
+[data-theme="dark"] .vd-banner--warn .vd-banner-title   { color:#E2A53A; }
+[data-theme="dark"] .vd-banner--ok .vd-banner-sub    { color:#7BE6A8; opacity:.85; }
+[data-theme="dark"] .vd-banner--danger .vd-banner-sub { color:#F0746F; opacity:.85; }
+[data-theme="dark"] .vd-banner--warn .vd-banner-sub   { color:#E2A53A; opacity:.85; }
+[data-theme="dark"] .vd-code-tag          { background:rgba(255,255,255,.05); }
+[data-theme="dark"] .vd-code-tag--ok      { color:#7BE6A8; }
+[data-theme="dark"] .vd-code-tag--danger  { color:#F0746F; }
+[data-theme="dark"] .vd-code-tag--warn    { color:#E2A53A; }
+[data-theme="dark"] .vd-banner-icon       { background:rgba(255,255,255,.06); }
+[data-theme="dark"] .frw-fail-text        { color:#F0746F; }
+[data-theme="dark"] .prq-row-status--wait { color:#E2A53A; background:var(--warn-soft); }
+
 *{box-sizing:border-box;}
 html,body{margin:0;padding:0;}
 body{
@@ -557,7 +647,7 @@ body{
 /* progress bar */
 .sign-prog-bar-wrap{
   height:7px;border-radius:var(--r-pill);
-  background:#E2E8F2;
+  background:var(--line);
   overflow:hidden;
   margin:22px 0 6px;
 }
@@ -576,7 +666,7 @@ body{
   display:flex;align-items:center;justify-content:center;gap:8px;
   margin-top:20px;padding-top:16px;
   border-top:1px solid var(--line-3);
-  font-size:12px;color:#9A6213;font-weight:600;
+  font-size:12px;color:var(--warn);font-weight:600;
 }
 
 /* refonte modal — white card centered */
@@ -1666,7 +1756,7 @@ body{
 /* Progress bar */
 .prq-progress-wrap{
   height:6px;border-radius:var(--r-pill);
-  background:#E2E8F2;
+  background:var(--line);
   margin:26px 0 8px;
   overflow:hidden;
 }
