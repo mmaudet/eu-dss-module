@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Geist',system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;color:#16223A;background:#E7E5DF}
+  @keyframes pulseDot{0%,100%{box-shadow:0 0 0 0 rgba(31,164,99,.45)}70%{box-shadow:0 0 0 6px rgba(31,164,99,0)}}
+  @keyframes floatKey{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+  @keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</helmet>
+
+<div style="width:max-content;min-width:100%;min-height:100vh;box-sizing:border-box;padding:56px;background:#E7E5DF">
+
+  <!-- INTRO -->
+  <div style="max-width:1180px;margin-bottom:52px">
+    <div style="display:inline-flex;align-items:center;gap:9px;background:#fff;border:1px solid #E7ECF4;border-radius:999px;padding:7px 14px 7px 9px;font-size:12.5px;font-weight:600;color:#2D63E8;box-shadow:0 1px 2px rgba(20,34,58,.04)">
+      <span style="width:22px;height:22px;border-radius:7px;background:linear-gradient(135deg,#3A6DF0,#5B4FE0);display:flex;align-items:center;justify-content:center">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M12 2.6 5 5.4v5.3c0 4.3 2.9 8.2 7 9.4 4.1-1.2 7-5.1 7-9.4V5.4L12 2.6Z" fill="#fff" fill-opacity=".25"/><path d="m9.2 12.1 1.9 1.9 3.8-3.9" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span>
+      Refonte UX/UI · Application de signature qualifiée
+    </div>
+    <h1 style="font-size:34px;line-height:1.15;letter-spacing:-.02em;margin:22px 0 12px;font-weight:600;max-width:760px">EU-DSS Sign, une signature qualifiée enfin claire et rassurante</h1>
+    <p style="font-size:16px;line-height:1.6;color:#5A6B85;max-width:680px;margin:0 0 26px;text-wrap:pretty">Direction « SaaS premium, beaucoup d'air », inspirée de la confiance DocuSign mais bâtie autour de votre contrainte réelle&nbsp;: <strong style="color:#16223A;font-weight:600">la clé USB cryptographique</strong>. Application desktop Tauri (Windows · macOS · Linux), barre de titre intégrée. Voici le système, puis les écrans clés en maquette.</p>
+
+    <div style="display:flex;gap:14px;flex-wrap:wrap">
+      <!-- palette -->
+      <div style="flex:none;width:300px;background:#fff;border:1px solid #E7ECF4;border-radius:14px;padding:18px;box-shadow:0 1px 3px rgba(20,34,58,.05)">
+        <div style="font-size:11px;font-weight:600;letter-spacing:.08em;color:#9AA7BE;margin-bottom:13px">PALETTE</div>
+        <div style="display:flex;gap:8px;margin-bottom:12px">
+          <div style="flex:1"><div style="height:40px;border-radius:8px;background:#2D63E8"></div><div style="font-size:10px;color:#7A89A3;margin-top:5px;font-family:'Geist Mono',monospace">#2D63E8</div></div>
+          <div style="flex:1"><div style="height:40px;border-radius:8px;background:#16223A"></div><div style="font-size:10px;color:#7A89A3;margin-top:5px;font-family:'Geist Mono',monospace">#16223A</div></div>
+          <div style="flex:1"><div style="height:40px;border-radius:8px;background:#1FA463"></div><div style="font-size:10px;color:#7A89A3;margin-top:5px;font-family:'Geist Mono',monospace">#1FA463</div></div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <div style="flex:1"><div style="height:26px;border-radius:7px;background:#EEF3FE;border:1px solid #DDE7FE"></div></div>
+          <div style="flex:1"><div style="height:26px;border-radius:7px;background:#E7F6EE;border:1px solid #BCE3CC"></div></div>
+          <div style="flex:1"><div style="height:26px;border-radius:7px;background:#FBF0DA;border:1px solid #F1DFB5"></div></div>
+          <div style="flex:1"><div style="height:26px;border-radius:7px;background:#F4F6FB;border:1px solid #E7ECF4"></div></div>
+        </div>
+      </div>
+      <!-- type -->
+      <div style="flex:none;width:300px;background:#fff;border:1px solid #E7ECF4;border-radius:14px;padding:18px;box-shadow:0 1px 3px rgba(20,34,58,.05)">
+        <div style="font-size:11px;font-weight:600;letter-spacing:.08em;color:#9AA7BE;margin-bottom:13px">TYPOGRAPHIE</div>
+        <div style="font-size:25px;font-weight:600;letter-spacing:-.02em;line-height:1.1">Geist</div>
+        <div style="font-size:12.5px;color:#7A89A3;margin:2px 0 14px">Interface · titres &amp; corps</div>
+        <div style="font-family:'Geist Mono',monospace;font-size:15px;color:#16223A">Geist Mono</div>
+        <div style="font-size:12.5px;color:#7A89A3;margin-top:2px">Données techniques · n° série, empreintes</div>
+      </div>
+      <!-- principe -->
+      <div style="flex:none;width:248px;background:#16223A;border-radius:14px;padding:18px;box-shadow:0 1px 3px rgba(20,34,58,.05)">
+        <div style="font-size:11px;font-weight:600;letter-spacing:.08em;color:#6E7FA0;margin-bottom:13px">PRINCIPE</div>
+        <div style="font-size:14.5px;line-height:1.55;color:#DCE4F2;text-wrap:pretty">La clé privée ne quitte jamais le token. L'app rend ce modèle de sécurité <strong style="color:#fff;font-weight:600">visible et apaisant</strong> plutôt qu'austère.</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:56px;align-items:flex-start">
+
+    <!-- ================= SCREEN: ACCUEIL ================= -->
+    <section style="flex:none">
+      <div style="font-size:12px;font-weight:600;letter-spacing:.06em;color:#8A97AC;margin-bottom:13px;text-transform:uppercase">01 · Accueil · tableau de bord</div>
+      <div style="width:1180px;background:#fff;border:1px solid #E7ECF4;border-radius:14px;overflow:hidden;box-shadow:0 12px 40px -16px rgba(20,34,58,.22),0 2px 8px rgba(20,34,58,.05)">
+
+        <!-- titlebar -->
+        <div style="height:42px;display:flex;align-items:center;padding:0 14px;border-bottom:1px solid #EFF2F8;background:#fff">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="width:18px;height:18px;border-radius:6px;background:linear-gradient(135deg,#3A6DF0,#5B4FE0);display:flex;align-items:center;justify-content:center"><svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="m9.2 12.1 1.9 1.9 3.8-3.9" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <span style="font-size:12.5px;font-weight:600;color:#3D4D69">EU-DSS Sign</span>
+          </div>
+          <div style="flex:1"></div>
+          <div style="display:flex;align-items:center;gap:16px;color:#AEB9CC">
+            <svg width="13" height="13" viewBox="0 0 24 24"><path d="M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            <svg width="11" height="11" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+            <svg width="12" height="12" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </div>
+        </div>
+
+        <div style="display:flex;height:740px">
+          <!-- SIDEBAR -->
+          <div style="width:226px;flex:none;background:#FAFBFE;border-right:1px solid #EFF2F8;display:flex;flex-direction:column;padding:18px 14px">
+            <div style="display:flex;align-items:center;gap:11px;padding:4px 8px 18px">
+              <span style="width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#3A6DF0,#5B4FE0);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 10px -3px rgba(58,109,240,.6)"><svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M12 2.6 5 5.4v5.3c0 4.3 2.9 8.2 7 9.4 4.1-1.2 7-5.1 7-9.4V5.4L12 2.6Z" fill="#fff" fill-opacity=".22"/><path d="m9.2 12.1 1.9 1.9 3.8-3.9" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              <div><div style="font-size:14px;font-weight:600;letter-spacing:-.01em">EU-DSS Sign</div><div style="font-size:11px;color:#9AA7BE;margin-top:1px">Signature qualifiée</div></div>
+            </div>
+            <div style="font-size:10.5px;font-weight:600;letter-spacing:.08em;color:#AEB9CC;padding:6px 8px 8px">SIGNATURE</div>
+            <a style="display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:9px;background:#EEF3FE;color:#2D63E8;font-size:13.5px;font-weight:600;text-decoration:none;margin-bottom:3px"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M4 11.5 12 5l8 6.5M6 10v9h12v-9" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>Accueil</a>
+            <a style="display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:9px;color:#5A6B85;font-size:13.5px;font-weight:500;text-decoration:none;margin-bottom:3px"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M3 17c3-1 4-7 7-7s2 4 5 3 4-6 6-6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>Signer</a>
+            <a style="display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:9px;color:#5A6B85;font-size:13.5px;font-weight:500;text-decoration:none"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M12 3.5 5.5 6v5c0 4 2.7 7.3 6.5 8.5 3.8-1.2 6.5-4.5 6.5-8.5V6L12 3.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="m9.5 11.8 1.7 1.7 3.4-3.5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>Vérifier</a>
+            <div style="font-size:10.5px;font-weight:600;letter-spacing:.08em;color:#AEB9CC;padding:20px 8px 8px">GÉRER</div>
+            <a style="display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:9px;color:#5A6B85;font-size:13.5px;font-weight:500;text-decoration:none;margin-bottom:3px"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="8" cy="13" r="3.3" stroke="currentColor" stroke-width="1.8"/><path d="m10.4 10.6 8-8M15 5l2.5 2.5M18.5 8 21 5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Clé &amp; certificat</a>
+            <a style="display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:9px;color:#5A6B85;font-size:13.5px;font-weight:500;text-decoration:none"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M5 6h14M5 12h14M5 18h9" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>Prérequis</a>
+            <div style="flex:1" data-comment-anchor="621def19c2-div"></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:2px 3px 9px"><div style="display:flex;align-items:center;gap:7px;font-size:11.5px;color:#9AA7BE;font-weight:500"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.5"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.2 5.2l1.4 1.4M17.4 17.4l1.4 1.4M18.8 5.2l-1.4 1.4M6.6 17.4l-1.4 1.4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Thème</div><div style="display:flex;background:#F4F6FB;border:1px solid #EFF2F8;border-radius:8px;padding:2px"><span style="font-size:11px;font-weight:600;color:#fff;background:#2D63E8;border-radius:6px;padding:3px 9px">Clair</span><span style="font-size:11px;font-weight:600;color:#7A89A3;padding:3px 9px">Sombre</span></div></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:2px 3px 11px"><div style="display:flex;align-items:center;gap:7px;font-size:11.5px;color:#9AA7BE;font-weight:500"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 12h17M12 3c2.6 2.7 2.6 15.3 0 18M12 3c-2.6 2.7-2.6 15.3 0 18" stroke="currentColor" stroke-width="1.3"/></svg>Langue</div><div style="display:flex;background:#F4F6FB;border:1px solid #EFF2F8;border-radius:8px;padding:2px"><span style="font-size:11px;font-weight:600;color:#fff;background:#2D63E8;border-radius:6px;padding:3px 9px">FR</span><span style="font-size:11px;font-weight:600;color:#7A89A3;padding:3px 9px">EN</span></div></div>
+            <div style="display:flex;align-items:center;gap:10px;padding:11px;border:1px solid #EFF2F8;border-radius:11px;background:#fff">
+              <span style="width:9px;height:9px;border-radius:50%;background:#1FA463;animation:pulseDot 2.4s infinite;flex:none"></span>
+              <div style="line-height:1.3"><div style="font-size:12px;font-weight:600">Agent connecté</div><div style="font-size:11px;color:#9AA7BE">Carte verrouillée</div></div>
+            </div>
+          </div>
+
+          <!-- MAIN -->
+          <div style="flex:1;background:#F4F6FB;display:flex;flex-direction:column;overflow:hidden">
+            <div style="padding:26px 32px 32px;overflow:auto;flex:1">
+              <!-- HERO key card -->
+              <div style="position:relative;background:linear-gradient(120deg,#16223A 0%,#1E315A 60%,#27408A 100%);border-radius:18px;padding:26px 28px;display:flex;align-items:center;gap:28px;overflow:hidden;box-shadow:0 18px 40px -22px rgba(22,34,58,.7)">
+                <div style="position:absolute;right:-30px;top:-40px;width:230px;height:230px;border-radius:50%;background:radial-gradient(circle,rgba(91,79,224,.45),transparent 70%)"></div>
+                <div style="flex:none;width:96px;height:96px;border-radius:20px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;animation:floatKey 5s ease-in-out infinite">
+                  <svg width="46" height="46" viewBox="0 0 24 24" fill="none"><circle cx="8" cy="13" r="3.6" stroke="#9FC0FF" stroke-width="1.7"/><path d="m10.6 10.4 8.4-8.4M15.5 5l2.5 2.5M18.5 8 21 5.5" stroke="#9FC0FF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <div style="position:relative;flex:1">
+                  <div style="display:inline-flex;align-items:center;gap:7px;background:rgba(31,164,99,.16);border:1px solid rgba(31,164,99,.4);color:#7BE6A8;border-radius:999px;padding:4px 11px;font-size:12px;font-weight:600;margin-bottom:12px"><span style="width:7px;height:7px;border-radius:50%;background:#3BD27F"></span>Clé connectée · carte reconnue</div>
+                  <div style="font-size:19px;font-weight:600;color:#fff;letter-spacing:-.01em">Michel‑Marie MAUDET</div>
+                  <div style="font-size:13px;color:#A9B6D4;margin-top:3px">LINAGORA · Certificat qualifié ChamberSign · valide jusqu'au 12/2028</div>
+                </div>
+                <div style="position:relative;display:flex;flex-direction:column;gap:10px;flex:none">
+                  <a style="display:flex;align-items:center;justify-content:center;gap:9px;background:#fff;color:#16223A;font-size:14px;font-weight:600;padding:12px 22px;border-radius:11px;text-decoration:none;box-shadow:0 6px 16px -6px rgba(0,0,0,.4)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M3 17c3-1 4-7 7-7s2 4 5 3 4-6 6-6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>Signer un document</a>
+                  <a style="display:flex;align-items:center;justify-content:center;gap:9px;background:rgba(255,255,255,.1);color:#fff;font-size:14px;font-weight:600;padding:12px 22px;border-radius:11px;text-decoration:none;border:1px solid rgba(255,255,255,.18)">Vérifier une signature</a>
+                </div>
+              </div>
+
+              <!-- stats -->
+              <div style="display:flex;gap:16px;margin-top:18px">
+                <div style="flex:1;background:#fff;border:1px solid #E7ECF4;border-radius:14px;padding:18px 20px">
+                  <div style="font-size:12px;color:#8A97AC;font-weight:500">Documents signés · ce mois</div>
+                  <div style="font-size:28px;font-weight:600;letter-spacing:-.02em;margin-top:8px">24</div>
+                </div>
+                <div style="flex:1;background:#fff;border:1px solid #E7ECF4;border-radius:14px;padding:18px 20px">
+                  <div style="font-size:12px;color:#8A97AC;font-weight:500">Vérifications réussies</div>
+                  <div style="font-size:28px;font-weight:600;letter-spacing:-.02em;margin-top:8px;color:#18794E">18 <span style="font-size:13px;color:#9AA7BE;font-weight:500">/ 18</span></div>
+                </div>
+                <div style="flex:1;background:#fff;border:1px solid #E7ECF4;border-radius:14px;padding:18px 20px">
+                  <div style="font-size:12px;color:#8A97AC;font-weight:500">Certificat valide</div>
+                  <div style="font-size:28px;font-weight:600;letter-spacing:-.02em;margin-top:8px">28 <span style="font-size:13px;color:#9AA7BE;font-weight:500">mois restants</span></div>
+                </div>
+              </div>
+
+              <!-- recent -->
+              <div style="background:#fff;border:1px solid #E7ECF4;border-radius:14px;margin-top:18px;overflow:hidden">
+                <div style="display:flex;align-items:center;padding:16px 20px;border-bottom:1px solid #EFF2F8"><div style="font-size:14px;font-weight:600">Activité récente</div><div style="flex:1"></div><a style="font-size:12.5px;color:#2D63E8;font-weight:600;text-decoration:none">Tout voir</a></div>
+                <div style="display:flex;align-items:center;gap:14px;padding:14px 20px;border-bottom:1px solid #F4F6FB">
+                  <span style="width:36px;height:36px;border-radius:9px;background:#FDEEEE;display:flex;align-items:center;justify-content:center;flex:none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M7 3h7l4 4v14H7V3Z" stroke="#D8514F" stroke-width="1.6" stroke-linejoin="round"/><path d="M14 3v4h4" stroke="#D8514F" stroke-width="1.6" stroke-linejoin="round"/></svg></span>
+                  <div style="flex:1"><div style="font-size:13.5px;font-weight:600">Contrat_prestation_2026.pdf</div><div style="font-size:11.5px;color:#9AA7BE;margin-top:2px">Signé il y a 2 h · 1,4 Mo</div></div>
+                  <span style="font-size:11px;font-weight:600;font-family:'Geist Mono',monospace;color:#5A6B85;background:#F4F6FB;border:1px solid #E7ECF4;border-radius:6px;padding:3px 8px">PAdES‑B‑T</span>
+                  <span style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:#18794E"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9.2" fill="#E7F6EE"/><path d="m8.5 12.2 2.3 2.3 4.6-4.8" stroke="#18794E" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>Signé</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:14px;padding:14px 20px;border-bottom:1px solid #F4F6FB">
+                  <span style="width:36px;height:36px;border-radius:9px;background:#EAF0FE;display:flex;align-items:center;justify-content:center;flex:none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M7 3h7l4 4v14H7V3Z" stroke="#2D63E8" stroke-width="1.6" stroke-linejoin="round"/><path d="M14 3v4h4" stroke="#2D63E8" stroke-width="1.6" stroke-linejoin="round"/></svg></span>
+                  <div style="flex:1"><div style="font-size:13.5px;font-weight:600">Annexe_technique_REL.docx</div><div style="font-size:11.5px;color:#9AA7BE;margin-top:2px">Vérifié hier · conteneur ASiC‑E</div></div>
+                  <span style="font-size:11px;font-weight:600;font-family:'Geist Mono',monospace;color:#5A6B85;background:#F4F6FB;border:1px solid #E7ECF4;border-radius:6px;padding:3px 8px">XAdES‑B‑T</span>
+                  <span style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:#18794E"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9.2" fill="#E7F6EE"/><path d="m8.5 12.2 2.3 2.3 4.6-4.8" stroke="#18794E" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>Vérifié</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:14px;padding:14px 20px" data-comment-anchor="97e83934c4-div">
+                  <span style="width:36px;height:36px;border-radius:9px;background:#FDEEEE;display:flex;align-items:center;justify-content:center;flex:none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M7 3h7l4 4v14H7V3Z" stroke="#D8514F" stroke-width="1.6" stroke-linejoin="round"/><path d="M14 3v4h4" stroke="#D8514F" stroke-width="1.6" stroke-linejoin="round"/></svg></span>
+                  <div style="flex:1"><div style="font-size:13.5px;font-weight:600">Bon_de_commande_0419.pdf</div><div style="font-size:11.5px;color:#9AA7BE;margin-top:2px">Signé il y a 5 h · 640 Ko</div></div>
+                  <span style="font-size:11px;font-weight:600;font-family:'Geist Mono',monospace;color:#5A6B85;background:#F4F6FB;border:1px solid #E7ECF4;border-radius:6px;padding:3px 8px">PAdES‑B‑T</span>
+                  <span style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:#18794E"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9.2" fill="#E7F6EE"/><path d="m8.5 12.2 2.3 2.3 4.6-4.8" stroke="#18794E" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>Signé</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= SCREEN: SIGNER ================= -->
+    <section style="flex:none">
+      <div style="font-size:12px;font-weight:600;letter-spacing:.06em;color:#8A97AC;margin-bottom:13px;text-transform:uppercase">02 · Signer · du document au PIN</div>
+      <div style="width:1180px;background:#fff;border:1px solid #E7ECF4;border-radius:14px;overflow:hidden;box-shadow:0 12px 40px -16px rgba(20,34,58,.22),0 2px 8px rgba(20,34,58,.05)">
+        <div style="height:42px;display:flex;align-items:center;padding:0 14px;border-bottom:1px solid #EFF2F8;background:#fff">
+          <div style="display:flex;align-items:center;gap:8px"><span style="width:18px;height:18px;border-radius:6px;background:linear-gradient(135deg,#3A6DF0,#5B4FE0);display:flex;align-items:center;justify-content:center"><svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="m9.2 12.1 1.9 1.9 3.8-3.9" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span style="font-size:12.5px;font-weight:600;color:#3D4D69">EU-DSS Sign</span></div>
+          <div style="flex:1"></div>
+          <div style="display:flex;align-items:center;gap:16px;color:#AEB9CC"><svg width="13" height="13" viewBox="0 0 24 24"><path d="M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><svg width="11" height="11" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/></svg><svg width="12" height="12" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
+        </div>
+        <div style="display:flex;height:740px">
+          <!-- SIDEBAR (Signer active) -->
+          <div style="width:226px;flex:none;background:#FAFBFE;border-right:1px solid #EFF2F8;display:flex;flex-direction:column;padding:18px 14px">
+            <div style="display:flex;align-items:center;gap:11px;padding:4px 8px 18px"><span style="width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#3A6DF0,#5B4FE0);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 10px -3px rgba(58,109,240,.6)"><svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M12 2.6 5 5.4v5.3c0 4.3 2.9 8.2 7 9.4 4.1-1.2 7-5.1 7-9.4V5.4L12 2.6Z" fill="#fff" fill-opacity=".22"/><path d="m9.2 12.1 1.9 1.9 3.8-3.9" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div><div style="font-size:14px;font-weight:600;letter-spacing:-.01em">EU-DSS Sign</div><div style="font-size:11px;color:#9AA7BE;margin-top:1px">Signature qualifiée</div></div></div>
+            <div style="font-size:10.5px;font-weight:600;letter-spacing:.08em;color:#AEB9CC;padding:6px 8px 8px">SIGNATURE</div>
+            <a style="display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:9px;color:#5A6B85;font-size:13.5px;font-weight:500;text-decoration:none;margin-bottom:3px"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M4 11.5 12 5l8 6.5M6 10v9h12v-9" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>Accueil</a>
+            <a style="display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:9px;background:#EEF3FE;color:#2D63E8;font-size:13.5px;font-weight:600;text-decoration:none;margin-bottom:3px"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M3 17c3-1 4-7 7-7s2 4 5 3 4-6 6-6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>Signer</a>
+            <a style="display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:9px;color:#5A6B85;font-size:13.5px;font-weight:500;text-decoration:none"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M12 3.5 5.5 6v5c0 4 2.7 7.3 6.5 8.5 3.8-1.2 6.5-4.5 6.5-8.5V6L12 3.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="m9.5 11.8 1.7 1.7 3.4-3.5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>Vérifier</a>
+            <div style="font-size:10.5px;font-weight:600;letter-spacing:.08em;color:#AEB9CC;padding:20px 8px 8px">GÉRER</div>
+            <a style="display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:9px;color:#5A6B85;font-size:13.5px;font-weight:500;text-decoration:none;margin-bottom:3px"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="8" cy="13" r="3.3" stroke="currentColor" stroke-width="1.8"/><path d="m10.4 10.6 8-8M15 5l2.5 2.5M18.5 8 21 5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Clé &amp; certificat</a>
+            <a style="display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:9px;color:#5A6B85;font-size:13.5px;font-weight:500;text-decoration:none"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M5 6h14M5 12h14M5 18h9" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>Prérequis</a>
+            <div style="flex:1"></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:2px 3px 9px"><div style="display:flex;align-items:center;gap:7px;font-size:11.5px;color:#9AA7BE;font-weight:500"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.5"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.2 5.2l1.4 1.4M17.4 17.4l1.4 1.4M18.8 5.2l-1.4 1.4M6.6 17.4l-1.4 1.4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Thème</div><div style="display:flex;background:#F4F6FB;border:1px solid #EFF2F8;border-radius:8px;padding:2px"><span style="font-size:11px;font-weight:600;color:#fff;background:#2D63E8;border-radius:6px;padding:3px 9px">Clair</span><span style="font-size:11px;font-weight:600;color:#7A89A3;padding:3px 9px">Sombre</span></div></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:2px 3px 11px"><div style="display:flex;align-items:center;gap:7px;font-size:11.5px;color:#9AA7BE;font-weight:500"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 12h17M12 3c2.6 2.7 2.6 15.3 0 18M12 3c-2.6 2.7-2.6 15.3 0 18" stroke="currentColor" stroke-width="1.3"/></svg>Langue</div><div style="display:flex;background:#F4F6FB;border:1px solid #EFF2F8;border-radius:8px;padding:2px"><span style="font-size:11px;font-weight:600;color:#fff;background:#2D63E8;border-radius:6px;padding:3px 9px">FR</span><span style="font-size:11px;font-weight:600;color:#7A89A3;padding:3px 9px">EN</span></div></div>
+            <div style="display:flex;align-items:center;gap:10px;padding:11px;border:1px solid #EFF2F8;border-radius:11px;background:#fff"><span style="width:9px;height:9px;border-radius:50%;background:#1FA463;animation:pulseDot 2.4s infinite;flex:none"></span><div style="line-height:1.3"><div style="font-size:12px;font-weight:600">Agent connecté</div><div style="font-size:11px;color:#9AA7BE">Carte verrouillée</div></div></div>
+          </div>
+          <!-- MAIN -->
+          <div style="flex:1;background:#F4F6FB;display:flex;flex-direction:column;overflow:hidden">
+            <div style="padding:26px 32px 20px;display:flex;align-items:center" data-comment-anchor="c802a8db39-div">
+              <div><h2 style="font-size:23px;font-weight:600;letter-spacing:-.02em;margin:0">Signer</h2><p style="font-size:13.5px;color:#7A89A3;margin:5px 0 0">Vos documents, signés avec votre clé USB qualifiée.</p></div>
+              <div style="flex:1"></div>
+              <div style="display:flex;align-items:center;gap:8px;background:#F4F6FB;border:1px solid #E7ECF4;border-radius:999px;padding:7px 14px;font-size:12.5px;font-weight:600;color:#3D4D69"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 3.5 5.5 6v5c0 4 2.7 7.3 6.5 8.5 3.8-1.2 6.5-4.5 6.5-8.5V6L12 3.5Z" stroke="#2D63E8" stroke-width="1.6" stroke-linejoin="round"/><path d="m9.5 11.8 1.7 1.7 3.4-3.5" stroke="#2D63E8" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>Signature qualifiée · eIDAS</div>
+            </div>
+            <div style="flex:1;display:flex;gap:20px;padding:0 32px 28px;overflow:auto">
+              <!-- LEFT: documents -->
+              <div style="flex:1;display:flex;flex-direction:column;gap:16px;min-width:0">
+                <div style="background:#fff;border:1.5px dashed #C7D6F5;border-radius:14px;padding:30px;display:flex;flex-direction:column;align-items:center;text-align:center;background-image:linear-gradient(#fff,#fff),linear-gradient(#F7FAFF,#F7FAFF);background-clip:padding-box">
+                  <span style="width:50px;height:50px;border-radius:13px;background:#EEF3FE;display:flex;align-items:center;justify-content:center;margin-bottom:13px"><svg width="23" height="23" viewBox="0 0 24 24" fill="none"><path d="M12 16V5m0 0L8 9m4-4 4 4" stroke="#2D63E8" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 15v3a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-3" stroke="#2D63E8" stroke-width="1.9" stroke-linecap="round"/></svg></span>
+                  <div style="font-size:15px;font-weight:600">Déposer vos documents</div>
+                  <div style="font-size:12.5px;color:#9AA7BE;margin-top:5px">PDF → PAdES · bureautique &amp; images → conteneur ASiC‑E</div>
+                  <button style="margin-top:15px;border:none;cursor:pointer;background:#2D63E8;color:#fff;font-size:13px;font-weight:600;padding:9px 18px;border-radius:9px;font-family:inherit;display:flex;align-items:center;gap:8px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M4 7a2 2 0 0 1 2-2h3l2 2h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>Choisir des fichiers</button>
+                </div>
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:0 2px"><div style="font-size:13px;font-weight:600;color:#3D4D69">2 documents prêts</div><div style="font-size:11.5px;color:#9AA7BE">Format de signature réglable par document</div></div>
+                <div style="background:#fff;border:1px solid #E7ECF4;border-radius:13px;display:flex;align-items:center;gap:14px;padding:15px 16px">
+                  <span style="width:40px;height:40px;border-radius:9px;background:#FDEEEE;display:flex;align-items:center;justify-content:center;flex:none"><svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M7 3h7l4 4v14H7V3Z" stroke="#D8514F" stroke-width="1.6" stroke-linejoin="round"/><path d="M14 3v4h4" stroke="#D8514F" stroke-width="1.6" stroke-linejoin="round"/></svg></span>
+                  <div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:600">Contrat_prestation_2026.pdf</div><div style="font-size:11.5px;color:#9AA7BE;margin-top:2px">1,4 Mo · document PDF</div></div>
+                  <div style="display:flex;align-items:center;gap:6px;border:1px solid #DDE7FE;background:#F7FAFF;border-radius:8px;padding:6px 10px;font-size:11.5px;font-weight:600;color:#2D63E8;cursor:pointer"><span style="font-family:'Geist Mono',monospace">PAdES‑B‑T</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="m7 10 5 5 5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                  <svg width="18" height="18" viewBox="0 0 24 24" style="color:#C2CDDE;cursor:pointer"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                </div>
+                <div style="background:#fff;border:1px solid #E7ECF4;border-radius:13px;display:flex;align-items:center;gap:14px;padding:15px 16px">
+                  <span style="width:40px;height:40px;border-radius:9px;background:#EAF0FE;display:flex;align-items:center;justify-content:center;flex:none"><svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M7 3h7l4 4v14H7V3Z" stroke="#2D63E8" stroke-width="1.6" stroke-linejoin="round"/><path d="M14 3v4h4" stroke="#2D63E8" stroke-width="1.6" stroke-linejoin="round"/></svg></span>
+                  <div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:600">Annexe_technique_REL.docx</div><div style="font-size:11.5px;color:#9AA7BE;margin-top:2px">320 Ko · document Word</div></div>
+                  <div style="display:flex;align-items:center;gap:6px;border:1px solid #DDE7FE;background:#F7FAFF;border-radius:8px;padding:6px 10px;font-size:11.5px;font-weight:600;color:#2D63E8;cursor:pointer"><span style="font-family:'Geist Mono',monospace">ASiC‑E</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="m7 10 5 5 5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                  <svg width="18" height="18" viewBox="0 0 24 24" style="color:#C2CDDE;cursor:pointer"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                </div>
+              </div>
+              <!-- RIGHT: signature panel -->
+              <div style="width:330px;flex:none;display:flex;flex-direction:column;gap:16px">
+                <div style="background:#fff;border:1px solid #E7ECF4;border-radius:14px;padding:18px 18px 20px">
+                  <div style="font-size:13px;font-weight:600;margin-bottom:14px">Paramètres de signature</div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid #F4F6FB"><span style="font-size:12.5px;color:#7A89A3">Niveau eIDAS</span><span style="font-size:12.5px;font-weight:600;font-family:'Geist Mono',monospace">B‑T</span></div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid #F4F6FB"><span style="font-size:12.5px;color:#7A89A3">Empreinte</span><span style="font-size:12.5px;font-weight:600;font-family:'Geist Mono',monospace">SHA‑256</span></div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0"><span style="font-size:12.5px;color:#7A89A3">Horodatage (TSA)</span><span style="display:inline-flex;align-items:center;width:34px;height:20px;border-radius:999px;background:#2D63E8;padding:2px;justify-content:flex-end"><span style="width:16px;height:16px;border-radius:50%;background:#fff"></span></span></div>
+                </div>
+                <div style="position:relative;background:linear-gradient(120deg,#16223A,#27408A);border-radius:14px;padding:18px;overflow:hidden">
+                  <div style="position:absolute;right:-26px;top:-34px;width:150px;height:150px;border-radius:50%;background:radial-gradient(circle,rgba(91,79,224,.45),transparent 70%)"></div>
+                  <div style="position:relative">
+                    <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+                      <span style="width:48px;height:48px;border-radius:12px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;flex:none"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="8" cy="13" r="3.4" stroke="#9FC0FF" stroke-width="1.7"/><path d="m10.5 10.5 8-8M15 5l2.5 2.5M18.5 8 21 5.5" stroke="#9FC0FF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                      <div style="min-width:0"><div style="display:inline-flex;align-items:center;gap:6px;background:rgba(31,164,99,.16);color:#7BE6A8;border-radius:999px;padding:3px 9px;font-size:11px;font-weight:600;margin-bottom:5px"><span style="width:6px;height:6px;border-radius:50%;background:#3BD27F"></span>Clé connectée</div><div style="font-size:13.5px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Michel‑Marie MAUDET</div><div style="font-size:11.5px;color:#A9B6D4">ChamberSign Qualified CA</div></div>
+                    </div>
+                    <div style="display:flex;gap:9px;align-items:center;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:10px 12px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" style="flex:none"><rect x="5" y="11" width="14" height="9" rx="2" stroke="#F0C46B" stroke-width="1.7"/><path d="M8 11V8a4 4 0 0 1 8 0v3" stroke="#F0C46B" stroke-width="1.7"/></svg><div style="font-size:11.5px;color:#D7DEEC;line-height:1.5">Carte verrouillée · votre <strong style="font-weight:600;color:#fff">code PIN</strong> sera demandé au moment de signer.</div></div>
+                  </div>
+                </div>
+                <div style="flex:1"></div>
+                <button style="border:none;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center;gap:9px;background:#2D63E8;color:#fff;font-size:14.5px;font-weight:600;padding:14px;border-radius:12px;box-shadow:0 8px 18px -7px rgba(45,99,232,.65);font-family:inherit"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 17c3-1 4-7 7-7s2 4 5 3 4-6 6-6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>Signer 2 documents</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= SCREEN: PIN MODAL ================= -->
+    <section style="flex:none">
+      <div style="font-size:12px;font-weight:600;letter-spacing:.06em;color:#8A97AC;margin-bottom:13px;text-transform:uppercase">03 · Modale PIN · le moment de signer</div>
+      <div style="width:1180px;height:680px;background:#fff;border:1px solid #E7ECF4;border-radius:14px;overflow:hidden;box-shadow:0 12px 40px -16px rgba(20,34,58,.22),0 2px 8px rgba(20,34,58,.05);position:relative">
+        <!-- dimmed app backdrop -->
+        <div style="position:absolute;inset:0;background:#F4F6FB;filter:saturate(.9)">
+          <div style="height:42px;border-bottom:1px solid #EFF2F8;background:#fff;display:flex;align-items:center;padding:0 14px"><span style="width:18px;height:18px;border-radius:6px;background:linear-gradient(135deg,#3A6DF0,#5B4FE0);display:flex;align-items:center;justify-content:center"><svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="m9.2 12.1 1.9 1.9 3.8-3.9" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span style="font-size:12.5px;font-weight:600;color:#3D4D69;margin-left:8px">EU-DSS Sign</span></div>
+          <div style="display:flex;height:638px"><div style="width:226px;background:#FAFBFE;border-right:1px solid #EFF2F8"></div><div style="flex:1;padding:32px"><div style="height:60px;width:240px;background:#fff;border-radius:10px;border:1px solid #EFF2F8"></div><div style="height:130px;margin-top:18px;background:#fff;border-radius:14px;border:1px solid #EFF2F8"></div><div style="height:200px;margin-top:18px;background:#fff;border-radius:14px;border:1px solid #EFF2F8"></div></div></div>
+        </div>
+        <!-- overlay -->
+        <div style="position:absolute;inset:0;background:rgba(13,22,42,.5);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center">
+          <div style="width:412px;background:#fff;border-radius:20px;padding:30px 30px 24px;box-shadow:0 30px 80px -20px rgba(0,0,0,.5);text-align:center">
+            <span style="width:54px;height:54px;border-radius:15px;background:linear-gradient(135deg,#EEF3FE,#DDE7FE);display:inline-flex;align-items:center;justify-content:center;margin-bottom:16px"><svg width="25" height="25" viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="9" rx="2.2" stroke="#2D63E8" stroke-width="1.8"/><path d="M8 11V8a4 4 0 0 1 8 0v3" stroke="#2D63E8" stroke-width="1.8"/><circle cx="12" cy="15.5" r="1.3" fill="#2D63E8"/></svg></span>
+            <h3 style="font-size:19px;font-weight:600;letter-spacing:-.01em;margin:0">Déverrouiller la carte</h3>
+            <p style="font-size:13px;color:#7A89A3;margin:7px 0 0;line-height:1.5">Saisissez le code PIN de votre clé.<br>Il n'est jamais enregistré ni transmis.</p>
+            <!-- pin dots -->
+            <div style="display:flex;justify-content:center;gap:14px;margin:22px 0 4px" data-comment-anchor="78168837d9-div">
+              <span style="width:14px;height:14px;border-radius:50%;background:#2D63E8"></span>
+              <span style="width:14px;height:14px;border-radius:50%;background:#2D63E8"></span>
+              <span style="width:14px;height:14px;border-radius:50%;background:#2D63E8"></span>
+              <span style="width:14px;height:14px;border-radius:50%;border:2px solid #2D63E8;box-sizing:border-box"></span>
+            </div>
+            <!-- keypad -->
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:22px 0 18px">
+              <div style="height:48px;border-radius:11px;border:1px solid #E7ECF4;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:500;background:#fff">1</div>
+              <div style="height:48px;border-radius:11px;border:1px solid #E7ECF4;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:500;background:#fff">2</div>
+              <div style="height:48px;border-radius:11px;border:1px solid #E7ECF4;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:500;background:#fff">3</div>
+              <div style="height:48px;border-radius:11px;border:1px solid #E7ECF4;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:500;background:#fff">4</div>
+              <div style="height:48px;border-radius:11px;border:1px solid #E7ECF4;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:500;background:#fff">5</div>
+              <div style="height:48px;border-radius:11px;border:1px solid #E7ECF4;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:500;background:#fff">6</div>
+              <div style="height:48px;border-radius:11px;border:1px solid #E7ECF4;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:500;background:#fff">7</div>
+              <div style="height:48px;border-radius:11px;border:1px solid #E7ECF4;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:500;background:#fff">8</div>
+              <div style="height:48px;border-radius:11px;border:1px solid #E7ECF4;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:500;background:#fff">9</div>
+              <div></div>
+              <div style="height:48px;border-radius:11px;border:1px solid #E7ECF4;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:500;background:#fff">0</div>
+              <div style="height:48px;border-radius:11px;display:flex;align-items:center;justify-content:center;color:#9AA7BE"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M20 6H9L4 12l5 6h11a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="m13 10 4 4m0-4-4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></div>
+            </div>
+            <button style="border:none;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center;gap:9px;background:#2D63E8;color:#fff;font-size:14.5px;font-weight:600;padding:14px;border-radius:12px;box-shadow:0 8px 18px -7px rgba(45,99,232,.65);font-family:inherit;margin-bottom:10px">Déverrouiller &amp; signer 2 documents</button>
+            <button style="border:none;background:none;cursor:pointer;font-size:13px;color:#7A89A3;font-weight:500;font-family:inherit;padding:6px">Annuler</button>
+            <div style="display:flex;align-items:center;justify-content:center;gap:7px;margin-top:14px;padding-top:14px;border-top:1px solid #F4F6FB;font-size:11px;color:#9AA7BE"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 8v4l2.5 1.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Session active 5 min, puis re‑verrouillage automatique</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= SCREEN: VERIFIER ================= -->
+    <section style="flex:none">
+      <div style="font-size:12px;font-weight:600;letter-spacing:.06em;color:#8A97AC;margin-bottom:13px;text-transform:uppercase">04 · Vérifier · verdict eIDAS &amp; rapport</div>
+      <div style="width:1180px;background:#fff;border:1px solid #E7ECF4;border-radius:14px;overflow:hidden;box-shadow:0 12px 40px -16px rgba(20,34,58,.22),0 2px 8px rgba(20,34,58,.05)">
+        <div style="height:42px;display:flex;align-items:center;padding:0 14px;border-bottom:1px solid #EFF2F8;background:#fff"><div style="display:flex;align-items:center;gap:8px"><span style="width:18px;height:18px;border-radius:6px;background:linear-gradient(135deg,#3A6DF0,#5B4FE0);display:flex;align-items:center;justify-content:center"><svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="m9.2 12.1 1.9 1.9 3.8-3.9" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span style="font-size:12.5px;font-weight:600;color:#3D4D69">EU-DSS Sign</span></div><div style="flex:1"></div><div style="display:flex;align-items:center;gap:16px;color:#AEB9CC"><svg width="13" height="13" viewBox="0 0 24 24"><path d="M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><svg width="11" height="11" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/></svg><svg width="12" height="12" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div></div>
+        <div style="display:flex;height:740px">
+          <!-- SIDEBAR (Vérifier active) -->
+          <div style="width:226px;flex:none;background:#FAFBFE;border-right:1px solid #EFF2F8;display:flex;flex-direction:column;padding:18px 14px">
+            <div style="display:flex;align-items:center;gap:11px;padding:4px 8px 18px"><span style="width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#3A6DF0,#5B4FE0);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 10px -3px rgba(58,109,240,.6)"><svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M12 2.6 5 5.4v5.3c0 4.3 2.9 8.2 7 9.4 4.1-1.2 7-5.1 7-9.4V5.4L12 2.6Z" fill="#fff" fill-opacity=".22"/><path d="m9.2 12.1 1.9 1.9 3.8-3.9" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div><div style="font-size:14px;font-weight:600;letter-spacing:-.01em">EU-DSS Sign</div><div style="font-size:11px;color:#9AA7BE;margin-top:1px">Signature qualifiée</div></div></div>
+            <div style="font-size:10.5px;font-weight:600;letter-spacing:.08em;color:#AEB9CC;padding:6px 8px 8px">SIGNATURE</div>
+            <a style="display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:9px;color:#5A6B85;font-size:13.5px;font-weight:500;text-decoration:none;margin-bottom:3px"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M4 11.5 12 5l8 6.5M6 10v9h12v-9" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>Accueil</a>
+            <a style="display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:9px;color:#5A6B85;font-size:13.5px;font-weight:500;text-decoration:none;margin-bottom:3px"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M3 17c3-1 4-7 7-7s2 4 5 3 4-6 6-6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>Signer</a>
+            <a style="display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:9px;background:#EEF3FE;color:#2D63E8;font-size:13.5px;font-weight:600;text-decoration:none"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M12 3.5 5.5 6v5c0 4 2.7 7.3 6.5 8.5 3.8-1.2 6.5-4.5 6.5-8.5V6L12 3.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="m9.5 11.8 1.7 1.7 3.4-3.5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>Vérifier</a>
+            <div style="font-size:10.5px;font-weight:600;letter-spacing:.08em;color:#AEB9CC;padding:20px 8px 8px">GÉRER</div>
+            <a style="display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:9px;color:#5A6B85;font-size:13.5px;font-weight:500;text-decoration:none;margin-bottom:3px"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="8" cy="13" r="3.3" stroke="currentColor" stroke-width="1.8"/><path d="m10.4 10.6 8-8M15 5l2.5 2.5M18.5 8 21 5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Clé &amp; certificat</a>
+            <a style="display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:9px;color:#5A6B85;font-size:13.5px;font-weight:500;text-decoration:none"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M5 6h14M5 12h14M5 18h9" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>Prérequis</a>
+            <div style="flex:1"></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:2px 3px 9px"><div style="display:flex;align-items:center;gap:7px;font-size:11.5px;color:#9AA7BE;font-weight:500"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.5"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.2 5.2l1.4 1.4M17.4 17.4l1.4 1.4M18.8 5.2l-1.4 1.4M6.6 17.4l-1.4 1.4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Thème</div><div style="display:flex;background:#F4F6FB;border:1px solid #EFF2F8;border-radius:8px;padding:2px"><span style="font-size:11px;font-weight:600;color:#fff;background:#2D63E8;border-radius:6px;padding:3px 9px">Clair</span><span style="font-size:11px;font-weight:600;color:#7A89A3;padding:3px 9px">Sombre</span></div></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:2px 3px 11px"><div style="display:flex;align-items:center;gap:7px;font-size:11.5px;color:#9AA7BE;font-weight:500"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 12h17M12 3c2.6 2.7 2.6 15.3 0 18M12 3c-2.6 2.7-2.6 15.3 0 18" stroke="currentColor" stroke-width="1.3"/></svg>Langue</div><div style="display:flex;background:#F4F6FB;border:1px solid #EFF2F8;border-radius:8px;padding:2px"><span style="font-size:11px;font-weight:600;color:#fff;background:#2D63E8;border-radius:6px;padding:3px 9px">FR</span><span style="font-size:11px;font-weight:600;color:#7A89A3;padding:3px 9px">EN</span></div></div>
+            <div style="display:flex;align-items:center;gap:10px;padding:11px;border:1px solid #EFF2F8;border-radius:11px;background:#fff"><span style="width:9px;height:9px;border-radius:50%;background:#1FA463;animation:pulseDot 2.4s infinite;flex:none"></span><div style="line-height:1.3"><div style="font-size:12px;font-weight:600">Agent connecté</div><div style="font-size:11px;color:#9AA7BE">Carte verrouillée</div></div></div>
+          </div>
+          <!-- MAIN -->
+          <div style="flex:1;background:#F4F6FB;display:flex;flex-direction:column;overflow:hidden">
+            <div style="padding:26px 32px 20px"><h2 style="font-size:23px;font-weight:600;letter-spacing:-.02em;margin:0">Vérifier</h2><p style="font-size:13.5px;color:#7A89A3;margin:5px 0 0" data-comment-anchor="54f1c948e3-p">Contrôle de validité eIDAS et rapport de la bibliothèque EU DSS.</p></div>
+            <div style="flex:1;padding:0 32px 28px;overflow:auto">
+              <!-- file selector -->
+              <div style="display:flex;align-items:center;gap:14px;background:#F8FAFE;border:1.5px dashed #C7D6F5;border-radius:14px;padding:14px 18px;margin-bottom:18px">
+                <span style="width:42px;height:42px;border-radius:11px;background:#EEF3FE;display:flex;align-items:center;justify-content:center;flex:none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 16V5m0 0L8 9m4-4 4 4" stroke="#2D63E8" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 15v3a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-3" stroke="#2D63E8" stroke-width="1.9" stroke-linecap="round"/></svg></span>
+                <div style="flex:1"><div style="font-size:13.5px;font-weight:600">Déposer un document signé, ou le choisir</div><div style="font-size:11.5px;color:#9AA7BE;margin-top:2px">PDF (PAdES), conteneur ASiC, XML (XAdES)… · un ou plusieurs fichiers</div></div>
+                <button style="border:none;cursor:pointer;background:#2D63E8;color:#fff;font-size:13px;font-weight:600;padding:10px 16px;border-radius:10px;font-family:inherit;display:flex;align-items:center;gap:8px;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M4 7a2 2 0 0 1 2-2h3l2 2h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>Choisir des fichiers</button>
+              </div>
+              <!-- verdict banner -->
+              <div style="background:linear-gradient(110deg,#E7F6EE,#F1FBF5);border:1px solid #BCE3CC;border-radius:16px;padding:22px 24px;display:flex;align-items:center;gap:20px">
+                <span style="width:62px;height:62px;border-radius:50%;background:#fff;border:1px solid #BCE3CC;display:flex;align-items:center;justify-content:center;flex:none;box-shadow:0 6px 16px -8px rgba(24,121,78,.5)"><svg width="32" height="32" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9.5" fill="#1FA463" fill-opacity=".12"/><path d="m7.8 12.3 2.7 2.7 5.7-5.9" stroke="#18794E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                <div style="flex:1"><div style="display:flex;align-items:center;gap:10px"><div style="font-size:19px;font-weight:600;color:#136B43;letter-spacing:-.01em">Signature qualifiée valide</div><span style="font-size:10.5px;font-weight:600;font-family:'Geist Mono',monospace;color:#136B43;background:#fff;border:1px solid #BCE3CC;border-radius:6px;padding:3px 8px">TOTAL_PASSED</span></div><div style="font-size:13px;color:#3E6B54;margin-top:4px">Le document n'a pas été modifié depuis la signature. Certificat qualifié reconnu par la liste de confiance française (LOTL).</div></div>
+                <button style="border:1px solid #BCE3CC;background:#fff;color:#136B43;font-size:13px;font-weight:600;padding:11px 16px;border-radius:10px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:8px;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 4v11m0 0 4-4m-4 4-4-4M5 19h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Rapport PDF</button>
+              </div>
+              <div style="display:flex;gap:20px;margin-top:18px">
+                <!-- signataire -->
+                <div style="width:340px;flex:none;background:#fff;border:1px solid #E7ECF4;border-radius:14px;padding:20px">
+                  <div style="font-size:10.5px;font-weight:600;letter-spacing:.07em;color:#AEB9CC;margin-bottom:14px">SIGNATAIRE</div>
+                  <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px"><span style="width:44px;height:44px;border-radius:12px;background:#EEF3FE;display:flex;align-items:center;justify-content:center;flex:none"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 12.5a3.4 3.4 0 1 0 0-6.8 3.4 3.4 0 0 0 0 6.8Z" stroke="#2D63E8" stroke-width="1.6"/><path d="M5.6 19a6.4 6.4 0 0 1 12.8 0" stroke="#2D63E8" stroke-width="1.6" stroke-linecap="round"/></svg></span><div style="min-width:0"><div style="font-size:15px;font-weight:600;line-height:1.25">Michel‑Marie MAUDET</div><div style="font-size:12px;color:#9AA7BE;margin-top:2px">LINAGORA</div></div></div>
+                  <div style="display:flex;justify-content:space-between;padding:9px 0;border-top:1px solid #F4F6FB"><span style="font-size:12px;color:#9AA7BE">Émetteur</span><span style="font-size:12px;font-weight:600">ChamberSign Qualified CA</span></div>
+                  <div style="display:flex;justify-content:space-between;padding:9px 0;border-top:1px solid #F4F6FB"><span style="font-size:12px;color:#9AA7BE">Format</span><span style="font-size:12px;font-weight:600;font-family:'Geist Mono',monospace">PAdES‑B‑T</span></div>
+                  <div style="display:flex;justify-content:space-between;padding:9px 0;border-top:1px solid #F4F6FB"><span style="font-size:12px;color:#9AA7BE">Horodaté le</span><span style="font-size:12px;font-weight:600;font-family:'Geist Mono',monospace">18/06/2026 14:32</span></div>
+                  <div style="display:flex;justify-content:space-between;padding:9px 0;border-top:1px solid #F4F6FB"><span style="font-size:12px;color:#9AA7BE">Autorité (TSA)</span><span style="font-size:12px;font-weight:600">freetsa.org</span></div>
+                </div>
+                <!-- rapport checks -->
+                <div style="flex:1;background:#fff;border:1px solid #E7ECF4;border-radius:14px;padding:20px">
+                  <div style="display:flex;align-items:center;margin-bottom:6px"><div style="font-size:13px;font-weight:600">Rapport de validation DSS</div><div style="flex:1"></div><span style="font-size:11px;color:#9AA7BE">5 contrôles · 5 réussis</span></div>
+                  <div style="display:flex;align-items:center;gap:12px;padding:13px 0;border-top:1px solid #F4F6FB"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="flex:none"><circle cx="12" cy="12" r="9.4" fill="#E7F6EE"/><path d="m8.4 12.2 2.3 2.3 4.7-4.9" stroke="#18794E" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg><div style="flex:1"><div style="font-size:13px;font-weight:600">Intégrité du document</div><div style="font-size:11.5px;color:#9AA7BE">L'empreinte signée correspond au contenu</div></div></div>
+                  <div style="display:flex;align-items:center;gap:12px;padding:13px 0;border-top:1px solid #F4F6FB"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="flex:none"><circle cx="12" cy="12" r="9.4" fill="#E7F6EE"/><path d="m8.4 12.2 2.3 2.3 4.7-4.9" stroke="#18794E" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg><div style="flex:1"><div style="font-size:13px;font-weight:600">Chaîne de certification</div><div style="font-size:11.5px;color:#9AA7BE">Remonte jusqu'à une AC racine de confiance</div></div></div>
+                  <div style="display:flex;align-items:center;gap:12px;padding:13px 0;border-top:1px solid #F4F6FB"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="flex:none"><circle cx="12" cy="12" r="9.4" fill="#E7F6EE"/><path d="m8.4 12.2 2.3 2.3 4.7-4.9" stroke="#18794E" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg><div style="flex:1"><div style="font-size:13px;font-weight:600">Statut de révocation</div><div style="font-size:11.5px;color:#9AA7BE">Certificat non révoqué (OCSP / CRL)</div></div></div>
+                  <div style="display:flex;align-items:center;gap:12px;padding:13px 0;border-top:1px solid #F4F6FB"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="flex:none"><circle cx="12" cy="12" r="9.4" fill="#E7F6EE"/><path d="m8.4 12.2 2.3 2.3 4.7-4.9" stroke="#18794E" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg><div style="flex:1"><div style="font-size:13px;font-weight:600">Horodatage qualifié</div><div style="font-size:11.5px;color:#9AA7BE">Jeton TSA valide, date certaine</div></div></div>
+                  <div style="display:flex;align-items:center;gap:12px;padding:13px 0;border-top:1px solid #F4F6FB"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="flex:none"><circle cx="12" cy="12" r="9.4" fill="#E7F6EE"/><path d="m8.4 12.2 2.3 2.3 4.7-4.9" stroke="#18794E" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg><div style="flex:1"><div style="font-size:13px;font-weight:600">Certificat qualifié (QC)</div><div style="font-size:11.5px;color:#9AA7BE">Attribut eIDAS « QCStatement » présent</div></div><span style="font-size:10.5px;font-weight:600;color:#136B43;background:#E7F6EE;border-radius:6px;padding:3px 8px">QSCD</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= SCREEN: PREREQUIS ================= -->
+    <section style="flex:none">
+      <div style="font-size:12px;font-weight:600;letter-spacing:.06em;color:#8A97AC;margin-bottom:13px;text-transform:uppercase">05 · Assistant de prérequis · guidé &amp; rassurant</div>
+      <div style="width:1180px;background:#fff;border:1px solid #E7ECF4;border-radius:14px;overflow:hidden;box-shadow:0 12px 40px -16px rgba(20,34,58,.22),0 2px 8px rgba(20,34,58,.05)">
+        <div style="height:42px;display:flex;align-items:center;padding:0 14px;border-bottom:1px solid #EFF2F8;background:#fff"><div style="display:flex;align-items:center;gap:8px"><span style="width:18px;height:18px;border-radius:6px;background:linear-gradient(135deg,#3A6DF0,#5B4FE0);display:flex;align-items:center;justify-content:center"><svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="m9.2 12.1 1.9 1.9 3.8-3.9" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span style="font-size:12.5px;font-weight:600;color:#3D4D69">EU-DSS Sign</span></div><div style="flex:1"></div><div style="display:flex;align-items:center;gap:16px;color:#AEB9CC"><svg width="13" height="13" viewBox="0 0 24 24"><path d="M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><svg width="11" height="11" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/></svg><svg width="12" height="12" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div></div>
+        <div style="display:flex;height:740px">
+          <!-- SIDEBAR (Prérequis active) -->
+          <div style="width:226px;flex:none;background:#FAFBFE;border-right:1px solid #EFF2F8;display:flex;flex-direction:column;padding:18px 14px">
+            <div style="display:flex;align-items:center;gap:11px;padding:4px 8px 18px"><span style="width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#3A6DF0,#5B4FE0);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 10px -3px rgba(58,109,240,.6)"><svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M12 2.6 5 5.4v5.3c0 4.3 2.9 8.2 7 9.4 4.1-1.2 7-5.1 7-9.4V5.4L12 2.6Z" fill="#fff" fill-opacity=".22"/><path d="m9.2 12.1 1.9 1.9 3.8-3.9" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div><div style="font-size:14px;font-weight:600;letter-spacing:-.01em">EU-DSS Sign</div><div style="font-size:11px;color:#9AA7BE;margin-top:1px">Signature qualifiée</div></div></div>
+            <div style="font-size:10.5px;font-weight:600;letter-spacing:.08em;color:#AEB9CC;padding:6px 8px 8px">SIGNATURE</div>
+            <a style="display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:9px;color:#5A6B85;font-size:13.5px;font-weight:500;text-decoration:none;margin-bottom:3px"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M4 11.5 12 5l8 6.5M6 10v9h12v-9" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>Accueil</a>
+            <a style="display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:9px;color:#5A6B85;font-size:13.5px;font-weight:500;text-decoration:none;margin-bottom:3px"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M3 17c3-1 4-7 7-7s2 4 5 3 4-6 6-6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>Signer</a>
+            <a style="display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:9px;color:#5A6B85;font-size:13.5px;font-weight:500;text-decoration:none"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M12 3.5 5.5 6v5c0 4 2.7 7.3 6.5 8.5 3.8-1.2 6.5-4.5 6.5-8.5V6L12 3.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="m9.5 11.8 1.7 1.7 3.4-3.5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>Vérifier</a>
+            <div style="font-size:10.5px;font-weight:600;letter-spacing:.08em;color:#AEB9CC;padding:20px 8px 8px">GÉRER</div>
+            <a style="display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:9px;color:#5A6B85;font-size:13.5px;font-weight:500;text-decoration:none;margin-bottom:3px"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="8" cy="13" r="3.3" stroke="currentColor" stroke-width="1.8"/><path d="m10.4 10.6 8-8M15 5l2.5 2.5M18.5 8 21 5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Clé &amp; certificat</a>
+            <a style="display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:9px;background:#EEF3FE;color:#2D63E8;font-size:13.5px;font-weight:600;text-decoration:none"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M5 6h14M5 12h14M5 18h9" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>Prérequis</a>
+            <div style="flex:1"></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:2px 3px 9px"><div style="display:flex;align-items:center;gap:7px;font-size:11.5px;color:#9AA7BE;font-weight:500"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.5"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.2 5.2l1.4 1.4M17.4 17.4l1.4 1.4M18.8 5.2l-1.4 1.4M6.6 17.4l-1.4 1.4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Thème</div><div style="display:flex;background:#F4F6FB;border:1px solid #EFF2F8;border-radius:8px;padding:2px"><span style="font-size:11px;font-weight:600;color:#fff;background:#2D63E8;border-radius:6px;padding:3px 9px">Clair</span><span style="font-size:11px;font-weight:600;color:#7A89A3;padding:3px 9px">Sombre</span></div></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:2px 3px 11px"><div style="display:flex;align-items:center;gap:7px;font-size:11.5px;color:#9AA7BE;font-weight:500"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 12h17M12 3c2.6 2.7 2.6 15.3 0 18M12 3c-2.6 2.7-2.6 15.3 0 18" stroke="currentColor" stroke-width="1.3"/></svg>Langue</div><div style="display:flex;background:#F4F6FB;border:1px solid #EFF2F8;border-radius:8px;padding:2px"><span style="font-size:11px;font-weight:600;color:#fff;background:#2D63E8;border-radius:6px;padding:3px 9px">FR</span><span style="font-size:11px;font-weight:600;color:#7A89A3;padding:3px 9px">EN</span></div></div>
+            <div style="display:flex;align-items:center;gap:10px;padding:11px;border:1px solid #F1DFB5;border-radius:11px;background:#FBF8F0"><span style="width:9px;height:9px;border-radius:50%;background:#E2A53A;flex:none"></span><div style="line-height:1.3"><div style="font-size:12px;font-weight:600">Agent connecté</div><div style="font-size:11px;color:#B08A3E">Clé non détectée</div></div></div>
+          </div>
+          <!-- MAIN -->
+          <div style="flex:1;background:#F4F6FB;display:flex;flex-direction:column;overflow:auto" data-comment-anchor="6a12204d2b-div">
+            <div style="max-width:620px;margin:0 auto;padding:46px 32px;width:100%">
+              <div style="display:flex;align-items:center;gap:10px;background:#EEF3FE;border:1px solid #DDE7FE;border-radius:11px;padding:11px 14px;margin-bottom:26px;font-size:12.5px;color:#2D63E8;line-height:1.45"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex:none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M12 11.5v5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="8" r="1.1" fill="currentColor"/></svg><span>S'ouvre <strong style="font-weight:600">automatiquement au premier lancement</strong>. Vous pouvez le rouvrir ici à tout moment.</span></div>
+              <div style="text-align:center;margin-bottom:8px"><span style="font-size:12px;font-weight:600;color:#2D63E8;letter-spacing:.02em">ÉTAPE 2 SUR 3</span></div>
+              <h2 style="font-size:25px;font-weight:600;letter-spacing:-.02em;margin:0;text-align:center">Préparons votre signature</h2>
+              <p style="font-size:14px;color:#7A89A3;margin:8px 0 0;text-align:center;line-height:1.55">Trois éléments sont nécessaires pour signer. EU‑DSS les détecte automatiquement.</p>
+              <!-- progress -->
+              <div style="height:6px;border-radius:999px;background:#E2E8F2;margin:26px 0 28px;overflow:hidden"><div style="width:66%;height:100%;border-radius:999px;background:linear-gradient(90deg,#2D63E8,#5B4FE0)"></div></div>
+
+              <!-- step 1 done -->
+              <div style="background:#fff;border:1px solid #E7ECF4;border-radius:14px;padding:18px;display:flex;align-items:center;gap:15px;margin-bottom:12px">
+                <span style="width:42px;height:42px;border-radius:11px;background:#E7F6EE;display:flex;align-items:center;justify-content:center;flex:none"><svg width="21" height="21" viewBox="0 0 24 24" fill="none"><path d="m6.5 12.4 3.2 3.2L18 7.2" stroke="#18794E" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                <div style="flex:1"><div style="font-size:14.5px;font-weight:600">Agent local installé</div><div style="font-size:12.5px;color:#9AA7BE;margin-top:2px">Connecté · <span style="font-family:'Geist Mono',monospace">https://localhost:9795</span></div></div>
+                <span style="font-size:12px;font-weight:600;color:#18794E">Prêt</span>
+              </div>
+              <!-- step 2 done -->
+              <div style="background:#fff;border:1px solid #E7ECF4;border-radius:14px;padding:18px;display:flex;align-items:center;gap:15px;margin-bottom:12px">
+                <span style="width:42px;height:42px;border-radius:11px;background:#E7F6EE;display:flex;align-items:center;justify-content:center;flex:none"><svg width="21" height="21" viewBox="0 0 24 24" fill="none"><path d="m6.5 12.4 3.2 3.2L18 7.2" stroke="#18794E" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                <div style="flex:1"><div style="font-size:14.5px;font-weight:600">Middleware ChamberSign / IDOPTE</div><div style="font-size:12.5px;color:#9AA7BE;margin-top:2px">Pilote PKCS#11 détecté</div></div>
+                <span style="font-size:12px;font-weight:600;color:#18794E">Prêt</span>
+              </div>
+              <!-- step 3 action -->
+              <div style="background:#fff;border:1.5px solid #2D63E8;border-radius:14px;padding:18px;box-shadow:0 10px 26px -14px rgba(45,99,232,.5)">
+                <div style="display:flex;align-items:center;gap:15px">
+                  <span style="width:42px;height:42px;border-radius:11px;background:#EEF3FE;display:flex;align-items:center;justify-content:center;flex:none"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="8" cy="13" r="3.3" stroke="#2D63E8" stroke-width="1.8"/><path d="m10.4 10.6 8-8M15 5l2.5 2.5M18.5 8 21 5.5" stroke="#2D63E8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                  <div style="flex:1"><div style="font-size:14.5px;font-weight:600">Branchez votre clé USB</div><div style="font-size:12.5px;color:#7A89A3;margin-top:2px">Insérez votre carte / token de signature dans un port USB.</div></div>
+                  <span style="font-size:12px;font-weight:600;color:#9A6213;background:#FBF0DA;border-radius:7px;padding:5px 10px">En attente</span>
+                </div>
+                <div style="display:flex;gap:10px;margin-top:16px;padding-left:57px">
+                  <button style="border:none;cursor:pointer;background:#2D63E8;color:#fff;font-size:13px;font-weight:600;padding:10px 18px;border-radius:10px;font-family:inherit;display:flex;align-items:center;gap:8px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M20 11A8 8 0 1 0 12 20" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><path d="M20 5v6h-6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>Réessayer la détection</button>
+                  <button style="border:1px solid #E7ECF4;cursor:pointer;background:#fff;color:#5A6B85;font-size:13px;font-weight:600;padding:10px 18px;border-radius:10px;font-family:inherit">Besoin d'aide ?</button>
+                </div>
+              </div>
+
+              <button style="border:none;width:100%;margin-top:24px;background:#E8ECF3;color:#A6B0C2;font-size:14.5px;font-weight:600;padding:14px;border-radius:12px;font-family:inherit;cursor:not-allowed">Continuer vers Signer</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= SCREEN: CLE & CERTIFICAT ================= -->
+    <section style="flex:none">
+      <div style="font-size:12px;font-weight:600;letter-spacing:.06em;color:#8A97AC;margin-bottom:13px;text-transform:uppercase">06 · Clé USB &amp; certificat · gestion</div>
+      <div style="width:1180px;background:#fff;border:1px solid #E7ECF4;border-radius:14px;overflow:hidden;box-shadow:0 12px 40px -16px rgba(20,34,58,.22),0 2px 8px rgba(20,34,58,.05)">
+        <div style="height:42px;display:flex;align-items:center;padding:0 14px;border-bottom:1px solid #EFF2F8;background:#fff"><div style="display:flex;align-items:center;gap:8px"><span style="width:18px;height:18px;border-radius:6px;background:linear-gradient(135deg,#3A6DF0,#5B4FE0);display:flex;align-items:center;justify-content:center"><svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="m9.2 12.1 1.9 1.9 3.8-3.9" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span style="font-size:12.5px;font-weight:600;color:#3D4D69">EU-DSS Sign</span></div><div style="flex:1"></div><div style="display:flex;align-items:center;gap:16px;color:#AEB9CC"><svg width="13" height="13" viewBox="0 0 24 24"><path d="M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><svg width="11" height="11" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/></svg><svg width="12" height="12" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div></div>
+        <div style="display:flex;height:740px">
+          <!-- SIDEBAR (Clé active) -->
+          <div style="width:226px;flex:none;background:#FAFBFE;border-right:1px solid #EFF2F8;display:flex;flex-direction:column;padding:18px 14px">
+            <div style="display:flex;align-items:center;gap:11px;padding:4px 8px 18px"><span style="width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#3A6DF0,#5B4FE0);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 10px -3px rgba(58,109,240,.6)"><svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M12 2.6 5 5.4v5.3c0 4.3 2.9 8.2 7 9.4 4.1-1.2 7-5.1 7-9.4V5.4L12 2.6Z" fill="#fff" fill-opacity=".22"/><path d="m9.2 12.1 1.9 1.9 3.8-3.9" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div><div style="font-size:14px;font-weight:600;letter-spacing:-.01em">EU-DSS Sign</div><div style="font-size:11px;color:#9AA7BE;margin-top:1px">Signature qualifiée</div></div></div>
+            <div style="font-size:10.5px;font-weight:600;letter-spacing:.08em;color:#AEB9CC;padding:6px 8px 8px">SIGNATURE</div>
+            <a style="display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:9px;color:#5A6B85;font-size:13.5px;font-weight:500;text-decoration:none;margin-bottom:3px"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M4 11.5 12 5l8 6.5M6 10v9h12v-9" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>Accueil</a>
+            <a style="display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:9px;color:#5A6B85;font-size:13.5px;font-weight:500;text-decoration:none;margin-bottom:3px"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M3 17c3-1 4-7 7-7s2 4 5 3 4-6 6-6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>Signer</a>
+            <a style="display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:9px;color:#5A6B85;font-size:13.5px;font-weight:500;text-decoration:none"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M12 3.5 5.5 6v5c0 4 2.7 7.3 6.5 8.5 3.8-1.2 6.5-4.5 6.5-8.5V6L12 3.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="m9.5 11.8 1.7 1.7 3.4-3.5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>Vérifier</a>
+            <div style="font-size:10.5px;font-weight:600;letter-spacing:.08em;color:#AEB9CC;padding:20px 8px 8px">GÉRER</div>
+            <a style="display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:9px;background:#EEF3FE;color:#2D63E8;font-size:13.5px;font-weight:600;text-decoration:none;margin-bottom:3px"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="8" cy="13" r="3.3" stroke="currentColor" stroke-width="1.8"/><path d="m10.4 10.6 8-8M15 5l2.5 2.5M18.5 8 21 5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Clé &amp; certificat</a>
+            <a style="display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:9px;color:#5A6B85;font-size:13.5px;font-weight:500;text-decoration:none"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M5 6h14M5 12h14M5 18h9" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>Prérequis</a>
+            <div style="flex:1"></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:2px 3px 9px"><div style="display:flex;align-items:center;gap:7px;font-size:11.5px;color:#9AA7BE;font-weight:500"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.5"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.2 5.2l1.4 1.4M17.4 17.4l1.4 1.4M18.8 5.2l-1.4 1.4M6.6 17.4l-1.4 1.4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Thème</div><div style="display:flex;background:#F4F6FB;border:1px solid #EFF2F8;border-radius:8px;padding:2px"><span style="font-size:11px;font-weight:600;color:#fff;background:#2D63E8;border-radius:6px;padding:3px 9px">Clair</span><span style="font-size:11px;font-weight:600;color:#7A89A3;padding:3px 9px">Sombre</span></div></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:2px 3px 11px"><div style="display:flex;align-items:center;gap:7px;font-size:11.5px;color:#9AA7BE;font-weight:500"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 12h17M12 3c2.6 2.7 2.6 15.3 0 18M12 3c-2.6 2.7-2.6 15.3 0 18" stroke="currentColor" stroke-width="1.3"/></svg>Langue</div><div style="display:flex;background:#F4F6FB;border:1px solid #EFF2F8;border-radius:8px;padding:2px"><span style="font-size:11px;font-weight:600;color:#fff;background:#2D63E8;border-radius:6px;padding:3px 9px">FR</span><span style="font-size:11px;font-weight:600;color:#7A89A3;padding:3px 9px">EN</span></div></div>
+            <div style="display:flex;align-items:center;gap:10px;padding:11px;border:1px solid #EFF2F8;border-radius:11px;background:#fff"><span style="width:9px;height:9px;border-radius:50%;background:#1FA463;animation:pulseDot 2.4s infinite;flex:none"></span><div style="line-height:1.3"><div style="font-size:12px;font-weight:600">Agent connecté</div><div style="font-size:11px;color:#9AA7BE">Carte verrouillée</div></div></div>
+          </div>
+          <!-- MAIN -->
+          <div style="flex:1;background:#F4F6FB;display:flex;flex-direction:column;overflow:auto">
+            <div style="padding:26px 32px 20px"><h2 style="font-size:23px;font-weight:600;letter-spacing:-.02em;margin:0">Clé &amp; certificat</h2><p style="font-size:13.5px;color:#7A89A3;margin:5px 0 0">Votre token de signature et son certificat qualifié.</p></div>
+            <div style="display:flex;gap:20px;padding:0 32px 28px">
+              <!-- token card -->
+              <div style="width:340px;flex:none;background:linear-gradient(160deg,#1A2942,#16223A);border-radius:16px;padding:24px;display:flex;flex-direction:column;box-shadow:0 18px 40px -22px rgba(22,34,58,.8)">
+                <div style="display:flex;align-items:center;justify-content:center;height:120px;position:relative">
+                  <!-- USB token illustration -->
+                  <div style="display:flex;align-items:center;animation:floatKey 5s ease-in-out infinite">
+                    <div style="width:24px;height:30px;background:linear-gradient(#D7DEEC,#9FAAC6);border-radius:3px 0 0 3px;display:flex;flex-direction:column;justify-content:center;gap:3px;padding:0 4px"><span style="height:3px;background:#7C88A6;border-radius:2px"></span><span style="height:3px;background:#7C88A6;border-radius:2px"></span><span style="height:3px;background:#7C88A6;border-radius:2px"></span></div>
+                    <div style="width:96px;height:46px;background:linear-gradient(135deg,#3A6DF0,#5B4FE0);border-radius:8px;display:flex;align-items:center;justify-content:center;position:relative;box-shadow:0 8px 20px -6px rgba(58,109,240,.7)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 2.6 5 5.4v5.3c0 4.3 2.9 8.2 7 9.4 4.1-1.2 7-5.1 7-9.4V5.4L12 2.6Z" fill="#fff" fill-opacity=".22"/><path d="m9.2 12.1 1.9 1.9 3.8-3.9" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span style="position:absolute;right:8px;top:8px;width:6px;height:6px;border-radius:50%;background:#3BD27F;box-shadow:0 0 8px #3BD27F"></span></div>
+                  </div>
+                </div>
+                <div style="display:inline-flex;align-self:center;align-items:center;gap:7px;background:rgba(31,164,99,.16);border:1px solid rgba(31,164,99,.4);color:#7BE6A8;border-radius:999px;padding:5px 12px;font-size:12px;font-weight:600;margin:6px 0 18px"><span style="width:7px;height:7px;border-radius:50%;background:#3BD27F"></span>Connectée · verrouillée</div>
+                <div style="display:flex;justify-content:space-between;padding:9px 0;border-top:1px solid rgba(255,255,255,.08)"><span style="font-size:12px;color:#8092B4">Modèle</span><span style="font-size:12px;font-weight:600;color:#DCE4F2">ChamberSign IAS‑ECC</span></div>
+                <div style="display:flex;justify-content:space-between;padding:9px 0;border-top:1px solid rgba(255,255,255,.08)"><span style="font-size:12px;color:#8092B4">Slot · interface</span><span style="font-size:12px;font-weight:600;color:#DCE4F2;font-family:'Geist Mono',monospace">0 · PKCS#11</span></div>
+                <div style="display:flex;justify-content:space-between;padding:9px 0;border-top:1px solid rgba(255,255,255,.08)"><span style="font-size:12px;color:#8092B4">Session</span><span style="font-size:12px;font-weight:600;color:#F0C46B">PIN requis</span></div>
+                <div style="display:flex;gap:10px;margin-top:18px">
+                  <button style="flex:1;border:none;cursor:pointer;background:#fff;color:#16223A;font-size:13px;font-weight:600;padding:11px;border-radius:10px;font-family:inherit">Déverrouiller</button>
+                  <button style="flex:1;border:1px solid rgba(255,255,255,.18);cursor:pointer;background:rgba(255,255,255,.08);color:#DCE4F2;font-size:13px;font-weight:600;padding:11px;border-radius:10px;font-family:inherit">Changer le PIN</button>
+                </div>
+              </div>
+              <!-- cert details -->
+              <div style="flex:1;background:#fff;border:1px solid #E7ECF4;border-radius:16px;padding:22px 24px;display:flex;flex-direction:column">
+                <div style="display:flex;align-items:center;margin-bottom:18px"><div style="font-size:15px;font-weight:600">Certificat de signature qualifié</div><div style="flex:1"></div><span style="font-size:10.5px;font-weight:600;font-family:'Geist Mono',monospace;color:#136B43;background:#E7F6EE;border:1px solid #BCE3CC;border-radius:6px;padding:4px 9px">QC · eIDAS</span></div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 36px">
+                  <div style="padding:11px 0;border-bottom:1px solid #F4F6FB"><div style="font-size:11px;color:#9AA7BE;font-weight:500;margin-bottom:3px">TITULAIRE</div><div style="font-size:13.5px;font-weight:600">Michel‑Marie MAUDET</div></div>
+                  <div style="padding:11px 0;border-bottom:1px solid #F4F6FB"><div style="font-size:11px;color:#9AA7BE;font-weight:500;margin-bottom:3px">ORGANISATION</div><div style="font-size:13.5px;font-weight:600">LINAGORA</div></div>
+                  <div style="padding:11px 0;border-bottom:1px solid #F4F6FB"><div style="font-size:11px;color:#9AA7BE;font-weight:500;margin-bottom:3px">ÉMETTEUR</div><div style="font-size:13.5px;font-weight:600;font-family:'Geist Mono',monospace">ChamberSign Qualified CA</div></div>
+                  <div style="padding:11px 0;border-bottom:1px solid #F4F6FB"><div style="font-size:11px;color:#9AA7BE;font-weight:500;margin-bottom:3px">VALIDITÉ</div><div style="font-size:13.5px;font-weight:600;font-family:'Geist Mono',monospace">12/2025 → 12/2028</div></div>
+                  <div style="padding:11px 0;border-bottom:1px solid #F4F6FB"><div style="font-size:11px;color:#9AA7BE;font-weight:500;margin-bottom:3px">USAGE</div><div style="font-size:13.5px;font-weight:600">Non‑répudiation, signature</div></div>
+                  <div style="padding:11px 0;border-bottom:1px solid #F4F6FB"><div style="font-size:11px;color:#9AA7BE;font-weight:500;margin-bottom:3px">N° DE SÉRIE</div><div style="font-size:13.5px;font-weight:600;font-family:'Geist Mono',monospace">3F:A1:9C:…:E2</div></div>
+                </div>
+                <div style="padding:13px 0 4px"><div style="font-size:11px;color:#9AA7BE;font-weight:500;margin-bottom:4px">EMPREINTE SHA‑256</div><div style="font-size:12px;font-weight:500;font-family:'Geist Mono',monospace;color:#3D4D69;word-break:break-all;line-height:1.6">9f86 d081 884c 7d65 9a2f eaa0 c55a d015 a3bf 4f1b 2b0b 822c d15d 6c15 b0f0 0a08</div></div>
+                <div style="flex:1"></div>
+                <div style="display:flex;gap:10px;margin-top:18px;padding-top:16px;border-top:1px solid #F4F6FB">
+                  <button style="border:1px solid #E7ECF4;cursor:pointer;background:#fff;color:#3D4D69;font-size:13px;font-weight:600;padding:10px 16px;border-radius:10px;font-family:inherit;display:flex;align-items:center;gap:8px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 4v11m0 0 4-4m-4 4-4-4M5 19h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Exporter (.cer)</button>
+                  <button style="border:1px solid #E7ECF4;cursor:pointer;background:#fff;color:#3D4D69;font-size:13px;font-weight:600;padding:10px 16px;border-radius:10px;font-family:inherit;display:flex;align-items:center;gap:8px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="6" cy="6" r="2.4" stroke="currentColor" stroke-width="1.7"/><circle cx="6" cy="18" r="2.4" stroke="currentColor" stroke-width="1.7"/><circle cx="18" cy="12" r="2.4" stroke="currentColor" stroke-width="1.7"/><path d="M8.2 7.3 15.8 11M8.2 16.7 15.8 13" stroke="currentColor" stroke-width="1.7"/></svg>Chaîne de confiance</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= KEY-UX VARIANTS ================= -->
+    <section style="flex:none">
+      <div style="font-size:12px;font-weight:600;letter-spacing:.06em;color:#8A97AC;margin-bottom:5px;text-transform:uppercase">Exploration · présence de la clé USB dans l'UX</div>
+      <div style="font-size:13.5px;color:#7A89A3;margin-bottom:18px;max-width:680px">Trois manières de faire vivre l'état du token. À mixer selon l'écran · le dashboard ci‑dessus utilise la variante B.</div>
+      <div style="display:flex;gap:24px;align-items:flex-start">
+
+        <!-- A discret -->
+        <div style="flex:none;width:372px">
+          <div style="font-size:12px;font-weight:600;color:#16223A;margin-bottom:10px">A · Discret · badge dans la barre</div>
+          <div style="background:#fff;border:1px solid #E7ECF4;border-radius:12px;padding:18px;box-shadow:0 1px 3px rgba(20,34,58,.06)">
+            <div style="background:#F4F6FB;border:1px solid #EFF2F8;border-radius:10px;height:44px;display:flex;align-items:center;padding:0 12px">
+              <span style="font-size:12.5px;font-weight:600;color:#3D4D69">Signer</span><div style="flex:1"></div>
+              <span style="display:flex;align-items:center;gap:7px;background:#fff;border:1px solid #E7ECF4;border-radius:999px;padding:5px 11px;font-size:11.5px;font-weight:600;color:#3D4D69"><span style="width:7px;height:7px;border-radius:50%;background:#1FA463;animation:pulseDot 2.4s infinite"></span>Carte verrouillée</span>
+            </div>
+            <p style="font-size:12px;color:#9AA7BE;line-height:1.55;margin:14px 0 0">Présence permanente mais minimale. Idéal pour l'utilisateur quotidien qui sait que sa clé est là.</p>
+          </div>
+        </div>
+
+        <!-- B central -->
+        <div style="flex:none;width:372px">
+          <div style="font-size:12px;font-weight:600;color:#16223A;margin-bottom:10px;display:flex;align-items:center;gap:8px">B · Central · carte rassurante <span style="font-size:10px;font-weight:600;color:#136B43;background:#E7F6EE;border:1px solid #BCE3CC;border-radius:5px;padding:2px 7px">Retenue</span></div>
+          <div style="background:#fff;border:1px solid #E7ECF4;border-radius:12px;padding:18px;box-shadow:0 1px 3px rgba(20,34,58,.06)">
+            <div style="position:relative;background:linear-gradient(120deg,#16223A,#27408A);border-radius:12px;padding:18px;overflow:hidden">
+              <div style="position:absolute;right:-20px;top:-30px;width:130px;height:130px;border-radius:50%;background:radial-gradient(circle,rgba(91,79,224,.45),transparent 70%)"></div>
+              <div style="position:relative;display:flex;align-items:center;gap:13px">
+                <span style="width:52px;height:52px;border-radius:13px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;flex:none"><svg width="26" height="26" viewBox="0 0 24 24" fill="none"><circle cx="8" cy="13" r="3.4" stroke="#9FC0FF" stroke-width="1.7"/><path d="m10.5 10.5 8-8M15 5l2.5 2.5M18.5 8 21 5.5" stroke="#9FC0FF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                <div><div style="display:inline-flex;align-items:center;gap:6px;background:rgba(31,164,99,.16);color:#7BE6A8;border-radius:999px;padding:3px 9px;font-size:11px;font-weight:600;margin-bottom:5px"><span style="width:6px;height:6px;border-radius:50%;background:#3BD27F"></span>Connectée</div><div style="font-size:14px;font-weight:600;color:#fff">Michel‑Marie MAUDET</div><div style="font-size:11px;color:#A9B6D4">Certificat qualifié · 12/2028</div></div>
+              </div>
+            </div>
+            <p style="font-size:12px;color:#9AA7BE;line-height:1.55;margin:14px 0 0">Met la clé au cœur de l'écran. Rassure et valorise · parfait pour l'accueil et les usages occasionnels.</p>
+          </div>
+        </div>
+
+        <!-- C guidé -->
+        <div style="flex:none;width:372px">
+          <div style="font-size:12px;font-weight:600;color:#16223A;margin-bottom:10px">C · Guidé · fil d'étapes</div>
+          <div style="background:#fff;border:1px solid #E7ECF4;border-radius:12px;padding:18px;box-shadow:0 1px 3px rgba(20,34,58,.06)">
+            <div style="display:flex;align-items:center;background:#F8FAFE;border:1px solid #EFF2F8;border-radius:10px;padding:14px 12px">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:1"><span style="width:28px;height:28px;border-radius:50%;background:#E7F6EE;display:flex;align-items:center;justify-content:center"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="m6.5 12.4 3.2 3.2L18 7.2" stroke="#18794E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span style="font-size:10.5px;font-weight:600;color:#18794E">Brancher</span></div>
+              <div style="height:2px;flex:1;background:#2D63E8;margin-bottom:18px"></div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:1"><span style="width:28px;height:28px;border-radius:50%;background:#2D63E8;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;box-shadow:0 4px 10px -3px rgba(45,99,232,.7)">2</span><span style="font-size:10.5px;font-weight:600;color:#2D63E8">Détecter</span></div>
+              <div style="height:2px;flex:1;background:#E2E8F2;margin-bottom:18px"></div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:1"><span style="width:28px;height:28px;border-radius:50%;background:#fff;border:1.5px solid #E2E8F2;color:#AEB9CC;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600">3</span><span style="font-size:10.5px;font-weight:600;color:#AEB9CC">Signer</span></div>
+            </div>
+            <p style="font-size:12px;color:#9AA7BE;line-height:1.55;margin:14px 0 0">Dramatise positivement la mise en place. Idéal au premier lancement et pour l'assistant de prérequis.</p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+    <!-- ================= SCREEN 07: SIGNATURE EN COURS ================= -->
+    <section style="flex:none">
+      <div style="font-size:12px;font-weight:600;letter-spacing:.06em;color:#8A97AC;margin-bottom:13px;text-transform:uppercase">07 · Signature en cours</div>
+      <div style="width:1180px;height:560px;background:#fff;border:1px solid #E7ECF4;border-radius:14px;overflow:hidden;box-shadow:0 12px 40px -16px rgba(20,34,58,.22),0 2px 8px rgba(20,34,58,.05);position:relative">
+        <div style="position:absolute;inset:0;background:#F4F6FB"><div style="height:42px;border-bottom:1px solid #EFF2F8;background:#fff;display:flex;align-items:center;padding:0 14px"><span style="width:18px;height:18px;border-radius:6px;background:linear-gradient(135deg,#3A6DF0,#5B4FE0);display:flex;align-items:center;justify-content:center"><svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="m9.2 12.1 1.9 1.9 3.8-3.9" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span style="font-size:12.5px;font-weight:600;color:#3D4D69;margin-left:8px">EU-DSS Sign</span></div></div>
+        <div style="position:absolute;inset:0;top:42px;background:rgba(13,22,42,.45);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center">
+          <div style="width:430px;background:#fff;border-radius:20px;padding:34px 32px;box-shadow:0 30px 80px -20px rgba(0,0,0,.5);text-align:center">
+            <div style="width:62px;height:62px;margin:0 auto 18px;position:relative"><div style="position:absolute;inset:0;border-radius:50%;border:4px solid #EAF0FE"></div><div style="position:absolute;inset:0;border-radius:50%;border:4px solid #2D63E8;border-right-color:transparent;border-bottom-color:transparent;animation:spin 0.9s linear infinite"></div><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="8" cy="13" r="3.2" stroke="#2D63E8" stroke-width="1.8"/><path d="m10.4 10.6 8-8M15 5l2.5 2.5M18.5 8 21 5.5" stroke="#2D63E8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+            <h3 style="font-size:18px;font-weight:600;letter-spacing:-.01em;margin:0">Signature en cours…</h3>
+            <p style="font-size:13px;color:#7A89A3;margin:7px 0 0">Document <strong style="color:#16223A;font-weight:600">1</strong> sur 2 · Contrat_prestation_2026.pdf</p>
+            <div style="height:7px;border-radius:999px;background:#E2E8F2;margin:22px 0 8px;overflow:hidden"><div style="width:50%;height:100%;border-radius:999px;background:linear-gradient(90deg,#2D63E8,#5B4FE0)"></div></div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:#9AA7BE;font-weight:500"><span>Empreinte signée par la carte</span><span>50&nbsp;%</span></div>
+            <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:22px;padding-top:18px;border-top:1px solid #F4F6FB;font-size:12px;color:#9A6213;font-weight:600"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 9v4m0 3h.01M10.3 4.3 2.6 18a1.5 1.5 0 0 0 1.3 2.2h16.2a1.5 1.5 0 0 0 1.3-2.2L13.7 4.3a1.5 1.5 0 0 0-2.6 0Z" stroke="#E2A53A" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>Ne retirez pas votre clé USB</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= SCREEN 08: RECAP POST-SIGNATURE ================= -->
+    <section style="flex:none">
+      <div style="font-size:12px;font-weight:600;letter-spacing:.06em;color:#8A97AC;margin-bottom:13px;text-transform:uppercase">08 · Récap post-signature · la boucle est bouclée</div>
+      <div style="width:1180px;background:#fff;border:1px solid #E7ECF4;border-radius:14px;overflow:hidden;box-shadow:0 12px 40px -16px rgba(20,34,58,.22),0 2px 8px rgba(20,34,58,.05)">
+        <div style="height:42px;display:flex;align-items:center;padding:0 14px;border-bottom:1px solid #EFF2F8;background:#fff"><div style="display:flex;align-items:center;gap:8px"><span style="width:18px;height:18px;border-radius:6px;background:linear-gradient(135deg,#3A6DF0,#5B4FE0);display:flex;align-items:center;justify-content:center"><svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="m9.2 12.1 1.9 1.9 3.8-3.9" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span style="font-size:12.5px;font-weight:600;color:#3D4D69">EU-DSS Sign</span></div><div style="flex:1"></div><div style="display:flex;align-items:center;gap:16px;color:#AEB9CC"><svg width="13" height="13" viewBox="0 0 24 24"><path d="M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><svg width="11" height="11" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/></svg><svg width="12" height="12" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div></div>
+        <div style="display:flex;height:680px">
+          <div style="width:226px;flex:none;background:#FAFBFE;border-right:1px solid #EFF2F8;display:flex;flex-direction:column;padding:18px 14px">
+            <div style="display:flex;align-items:center;gap:11px;padding:4px 8px 18px"><span style="width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#3A6DF0,#5B4FE0);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 10px -3px rgba(58,109,240,.6)"><svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M12 2.6 5 5.4v5.3c0 4.3 2.9 8.2 7 9.4 4.1-1.2 7-5.1 7-9.4V5.4L12 2.6Z" fill="#fff" fill-opacity=".22"/><path d="m9.2 12.1 1.9 1.9 3.8-3.9" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div><div style="font-size:14px;font-weight:600;letter-spacing:-.01em">EU-DSS Sign</div><div style="font-size:11px;color:#9AA7BE;margin-top:1px">Signature qualifiée</div></div></div>
+            <div style="font-size:10.5px;font-weight:600;letter-spacing:.08em;color:#AEB9CC;padding:6px 8px 8px">SIGNATURE</div>
+            <a style="display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:9px;color:#5A6B85;font-size:13.5px;font-weight:500;text-decoration:none;margin-bottom:3px"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M4 11.5 12 5l8 6.5M6 10v9h12v-9" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>Accueil</a>
+            <a style="display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:9px;background:#EEF3FE;color:#2D63E8;font-size:13.5px;font-weight:600;text-decoration:none;margin-bottom:3px"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M3 17c3-1 4-7 7-7s2 4 5 3 4-6 6-6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>Signer</a>
+            <a style="display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:9px;color:#5A6B85;font-size:13.5px;font-weight:500;text-decoration:none"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M12 3.5 5.5 6v5c0 4 2.7 7.3 6.5 8.5 3.8-1.2 6.5-4.5 6.5-8.5V6L12 3.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="m9.5 11.8 1.7 1.7 3.4-3.5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>Vérifier</a>
+            <div style="flex:1"></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:2px 3px 9px"><div style="display:flex;align-items:center;gap:7px;font-size:11.5px;color:#9AA7BE;font-weight:500"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.5"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.2 5.2l1.4 1.4M17.4 17.4l1.4 1.4M18.8 5.2l-1.4 1.4M6.6 17.4l-1.4 1.4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Thème</div><div style="display:flex;background:#F4F6FB;border:1px solid #EFF2F8;border-radius:8px;padding:2px"><span style="font-size:11px;font-weight:600;color:#fff;background:#2D63E8;border-radius:6px;padding:3px 9px">Clair</span><span style="font-size:11px;font-weight:600;color:#7A89A3;padding:3px 9px">Sombre</span></div></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:2px 3px 11px"><div style="display:flex;align-items:center;gap:7px;font-size:11.5px;color:#9AA7BE;font-weight:500"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 12h17M12 3c2.6 2.7 2.6 15.3 0 18M12 3c-2.6 2.7-2.6 15.3 0 18" stroke="currentColor" stroke-width="1.3"/></svg>Langue</div><div style="display:flex;background:#F4F6FB;border:1px solid #EFF2F8;border-radius:8px;padding:2px"><span style="font-size:11px;font-weight:600;color:#fff;background:#2D63E8;border-radius:6px;padding:3px 9px">FR</span><span style="font-size:11px;font-weight:600;color:#7A89A3;padding:3px 9px">EN</span></div></div>
+            <div style="display:flex;align-items:center;gap:10px;padding:11px;border:1px solid #EFF2F8;border-radius:11px;background:#fff"><span style="width:9px;height:9px;border-radius:50%;background:#1FA463;animation:pulseDot 2.4s infinite;flex:none"></span><div style="line-height:1.3"><div style="font-size:12px;font-weight:600">Agent connecté</div><div style="font-size:11px;color:#9AA7BE">Carte verrouillée</div></div></div>
+          </div>
+          <div style="flex:1;background:#F4F6FB;display:flex;flex-direction:column;overflow:auto">
+            <div style="max-width:680px;margin:0 auto;padding:40px 32px;width:100%">
+              <div style="text-align:center">
+                <span style="width:66px;height:66px;border-radius:50%;background:#E7F6EE;border:1px solid #BCE3CC;display:inline-flex;align-items:center;justify-content:center;box-shadow:0 8px 20px -8px rgba(24,121,78,.45)"><svg width="34" height="34" viewBox="0 0 24 24" fill="none"><path d="m6.5 12.4 3.2 3.2L18 7.2" stroke="#18794E" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                <h2 style="font-size:24px;font-weight:600;letter-spacing:-.02em;margin:18px 0 0">2 documents signés</h2>
+                <p style="font-size:14px;color:#7A89A3;margin:8px 0 0;line-height:1.5">Signés avec votre certificat qualifié <strong style="color:#16223A;font-weight:600">ChamberSign</strong> · horodatés le 18/06/2026 à 14:32.</p>
+              </div>
+              <div style="background:#fff;border:1px solid #E7ECF4;border-radius:14px;margin-top:26px;overflow:hidden">
+                <div style="display:flex;align-items:center;gap:14px;padding:15px 18px;border-bottom:1px solid #F4F6FB">
+                  <span style="width:40px;height:40px;border-radius:9px;background:#FDEEEE;display:flex;align-items:center;justify-content:center;flex:none"><svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M7 3h7l4 4v14H7V3Z" stroke="#D8514F" stroke-width="1.6" stroke-linejoin="round"/><path d="M14 3v4h4" stroke="#D8514F" stroke-width="1.6" stroke-linejoin="round"/></svg></span>
+                  <div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:600">Contrat_prestation_2026_signe.pdf</div><div style="font-size:11.5px;color:#9AA7BE;margin-top:2px;display:flex;align-items:center;gap:6px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9.2" fill="#E7F6EE"/><path d="m8.5 12.2 2.3 2.3 4.6-4.8" stroke="#18794E" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>Signé · PAdES‑B‑T · 1,4 Mo</div></div>
+                  <button style="border:1px solid #DDE7FE;cursor:pointer;background:#fff;color:#2D63E8;font-size:12.5px;font-weight:600;padding:8px 14px;border-radius:9px;font-family:inherit;display:flex;align-items:center;gap:7px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 4v11m0 0 4-4m-4 4-4-4M5 19h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Télécharger</button>
+                </div>
+                <div style="display:flex;align-items:center;gap:14px;padding:15px 18px">
+                  <span style="width:40px;height:40px;border-radius:9px;background:#EAF0FE;display:flex;align-items:center;justify-content:center;flex:none"><svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M7 3h7l4 4v14H7V3Z" stroke="#2D63E8" stroke-width="1.6" stroke-linejoin="round"/><path d="M14 3v4h4" stroke="#2D63E8" stroke-width="1.6" stroke-linejoin="round"/></svg></span>
+                  <div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:600">Annexe_technique_REL.asice</div><div style="font-size:11.5px;color:#9AA7BE;margin-top:2px;display:flex;align-items:center;gap:6px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9.2" fill="#E7F6EE"/><path d="m8.5 12.2 2.3 2.3 4.6-4.8" stroke="#18794E" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>Signé · ASiC‑E / XAdES · 340 Ko</div></div>
+                  <button style="border:1px solid #DDE7FE;cursor:pointer;background:#fff;color:#2D63E8;font-size:12.5px;font-weight:600;padding:8px 14px;border-radius:9px;font-family:inherit;display:flex;align-items:center;gap:7px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 4v11m0 0 4-4m-4 4-4-4M5 19h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Télécharger</button>
+                </div>
+              </div>
+              <div style="display:flex;gap:12px;margin-top:22px">
+                <button style="flex:1;border:none;cursor:pointer;background:#2D63E8;color:#fff;font-size:14px;font-weight:600;padding:13px;border-radius:11px;box-shadow:0 8px 18px -7px rgba(45,99,232,.6);font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 4v11m0 0 4-4m-4 4-4-4M5 19h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Tout télécharger (ZIP)</button>
+                <button style="border:1px solid #E7ECF4;cursor:pointer;background:#fff;color:#3D4D69;font-size:14px;font-weight:600;padding:13px 18px;border-radius:11px;font-family:inherit;display:flex;align-items:center;gap:8px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 3.5 5.5 6v5c0 4 2.7 7.3 6.5 8.5 3.8-1.2 6.5-4.5 6.5-8.5V6L12 3.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="m9.5 11.8 1.7 1.7 3.4-3.5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>Vérifier</button>
+                <button style="border:1px solid #E7ECF4;cursor:pointer;background:#fff;color:#3D4D69;font-size:14px;font-weight:600;padding:13px 18px;border-radius:11px;font-family:inherit">Nouvelle signature</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 09: ERREURS PIN ================= -->
+    <section style="flex:none">
+      <div style="font-size:12px;font-weight:600;letter-spacing:.06em;color:#8A97AC;margin-bottom:13px;text-transform:uppercase">09 · États d'erreur · code PIN</div>
+      <div style="display:flex;gap:24px;align-items:flex-start">
+        <div style="flex:none;width:412px"><div style="font-size:12px;font-weight:600;color:#16223A;margin-bottom:10px">PIN incorrect</div>
+          <div style="background:#fff;border:1px solid #E7ECF4;border-radius:20px;padding:30px;text-align:center;box-shadow:0 10px 30px -16px rgba(20,34,58,.25)">
+            <span style="width:54px;height:54px;border-radius:15px;background:#FDEEEE;display:inline-flex;align-items:center;justify-content:center;margin-bottom:16px"><svg width="25" height="25" viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="9" rx="2.2" stroke="#C2362F" stroke-width="1.8"/><path d="M8 11V8a4 4 0 0 1 8 0v3" stroke="#C2362F" stroke-width="1.8"/><path d="M12 14.5v2.5" stroke="#C2362F" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+            <h3 style="font-size:18px;font-weight:600;margin:0;color:#16223A">Code PIN incorrect</h3>
+            <p style="font-size:13px;color:#C2362F;margin:7px 0 0;font-weight:500">2 essais restants avant blocage de la carte.</p>
+            <div style="display:flex;justify-content:center;gap:14px;margin:22px 0 4px"><span style="width:14px;height:14px;border-radius:50%;border:2px solid #E3A6A2;box-sizing:border-box"></span><span style="width:14px;height:14px;border-radius:50%;border:2px solid #E3A6A2;box-sizing:border-box"></span><span style="width:14px;height:14px;border-radius:50%;border:2px solid #E3A6A2;box-sizing:border-box"></span><span style="width:14px;height:14px;border-radius:50%;border:2px solid #E3A6A2;box-sizing:border-box"></span></div>
+            <button style="border:none;cursor:pointer;width:100%;margin-top:22px;background:#2D63E8;color:#fff;font-size:14px;font-weight:600;padding:13px;border-radius:12px;font-family:inherit">Réessayer</button>
+            <button style="border:none;background:none;cursor:pointer;font-size:13px;color:#7A89A3;font-weight:500;font-family:inherit;padding:8px;margin-top:4px">Annuler</button>
+          </div>
+        </div>
+        <div style="flex:none;width:412px"><div style="font-size:12px;font-weight:600;color:#16223A;margin-bottom:10px">Carte bloquée (PUK)</div>
+          <div style="background:#fff;border:1px solid #E7ECF4;border-radius:20px;padding:30px;text-align:center;box-shadow:0 10px 30px -16px rgba(20,34,58,.25)">
+            <span style="width:54px;height:54px;border-radius:15px;background:#FDEEEE;display:inline-flex;align-items:center;justify-content:center;margin-bottom:16px"><svg width="25" height="25" viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="9" rx="2.2" fill="#C2362F" fill-opacity=".12" stroke="#C2362F" stroke-width="1.8"/><path d="M8 11V8a4 4 0 0 1 8 0v3" stroke="#C2362F" stroke-width="1.8"/><path d="M9.5 15.5h5" stroke="#C2362F" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+            <h3 style="font-size:18px;font-weight:600;margin:0;color:#16223A">Carte bloquée</h3>
+            <p style="font-size:13px;color:#7A89A3;margin:8px 0 0;line-height:1.55">Trop de tentatives. Débloquez votre carte avec votre <strong style="color:#16223A;font-weight:600">code PUK</strong> via le middleware ChamberSign.</p>
+            <button style="border:none;cursor:pointer;width:100%;margin-top:22px;background:#2D63E8;color:#fff;font-size:14px;font-weight:600;padding:13px;border-radius:12px;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M9 5H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M14 4h6v6M20 4l-9 9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Ouvrir le middleware</button>
+            <button style="border:none;background:none;cursor:pointer;font-size:13px;color:#7A89A3;font-weight:500;font-family:inherit;padding:8px;margin-top:4px">Plus tard</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 10: ERREURS CLE / AGENT ================= -->
+    <section style="flex:none">
+      <div style="font-size:12px;font-weight:600;letter-spacing:.06em;color:#8A97AC;margin-bottom:13px;text-transform:uppercase">10 · États d'erreur · clé &amp; agent</div>
+      <div style="display:flex;gap:24px;align-items:flex-start">
+        <div style="flex:none;width:372px;background:#fff;border:1px solid #F3CFCD;border-radius:14px;padding:20px;box-shadow:0 1px 3px rgba(20,34,58,.05)">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:13px"><span style="width:40px;height:40px;border-radius:11px;background:#FDEEEE;display:flex;align-items:center;justify-content:center;flex:none"><svg width="21" height="21" viewBox="0 0 24 24" fill="none"><circle cx="8" cy="13" r="3.3" stroke="#C2362F" stroke-width="1.8"/><path d="m10.4 10.6 8-8M15 5l2.5 2.5M18.5 8 21 5.5" stroke="#C2362F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div style="font-size:14.5px;font-weight:600">Clé USB retirée</div></div>
+          <p style="font-size:12.5px;color:#7A89A3;line-height:1.55;margin:0 0 15px">La signature a été interrompue. Rebranchez votre clé puis relancez l'opération, aucun document n'a été modifié.</p>
+          <button style="border:none;cursor:pointer;background:#C2362F;color:#fff;font-size:13px;font-weight:600;padding:10px 16px;border-radius:10px;font-family:inherit">Réessayer</button>
+        </div>
+        <div style="flex:none;width:372px;background:#fff;border:1px solid #F1DFB5;border-radius:14px;padding:20px;box-shadow:0 1px 3px rgba(20,34,58,.05)">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:13px"><span style="width:40px;height:40px;border-radius:11px;background:#FBF0DA;display:flex;align-items:center;justify-content:center;flex:none"><svg width="21" height="21" viewBox="0 0 24 24" fill="none"><path d="M12 9v4m0 3h.01M10.3 4.3 2.6 18a1.5 1.5 0 0 0 1.3 2.2h16.2a1.5 1.5 0 0 0 1.3-2.2L13.7 4.3a1.5 1.5 0 0 0-2.6 0Z" stroke="#9A6213" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div style="font-size:14.5px;font-weight:600">Carte non reconnue</div></div>
+          <p style="font-size:12.5px;color:#7A89A3;line-height:1.55;margin:0 0 15px">Le middleware ne reconnaît pas cette carte. Vérifiez qu'elle est prise en charge et que le bon pilote est installé.</p>
+          <button style="border:1px solid #E7ECF4;cursor:pointer;background:#fff;color:#3D4D69;font-size:13px;font-weight:600;padding:10px 16px;border-radius:10px;font-family:inherit">Consulter l'aide</button>
+        </div>
+        <div style="flex:none;width:372px;background:#fff;border:1px solid #E7ECF4;border-radius:14px;padding:20px;box-shadow:0 1px 3px rgba(20,34,58,.05)">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:13px"><span style="width:40px;height:40px;border-radius:11px;background:#F4F6FB;display:flex;align-items:center;justify-content:center;flex:none"><svg width="21" height="21" viewBox="0 0 24 24" fill="none"><path d="M5 12a7 7 0 0 1 7-7M19 12a7 7 0 0 1-7 7" stroke="#7A89A3" stroke-width="1.8" stroke-linecap="round"/><path d="M12 8v4M12 16h.01" stroke="#7A89A3" stroke-width="1.8" stroke-linecap="round"/></svg></span><div style="font-size:14.5px;font-weight:600">Agent non démarré</div></div>
+          <p style="font-size:12.5px;color:#7A89A3;line-height:1.55;margin:0 0 15px">Le service local EU‑DSS ne répond pas <span style="font-family:'Geist Mono',monospace">(localhost:9795)</span>. Démarrez l'agent pour signer.</p>
+          <button style="border:none;cursor:pointer;background:#2D63E8;color:#fff;font-size:13px;font-weight:600;padding:10px 16px;border-radius:10px;font-family:inherit">Démarrer l'agent</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 11: VERDICTS ALTERNATIFS ================= -->
+    <section style="flex:none">
+      <div style="font-size:12px;font-weight:600;letter-spacing:.06em;color:#8A97AC;margin-bottom:13px;text-transform:uppercase">11 · Vérifier · autres verdicts</div>
+      <div style="display:flex;gap:24px;align-items:flex-start">
+        <div style="flex:none;width:560px">
+          <div style="background:linear-gradient(110deg,#FDEEEE,#FEF5F4);border:1px solid #F3CFCD;border-radius:16px;padding:22px 24px;display:flex;align-items:center;gap:18px">
+            <span style="width:58px;height:58px;border-radius:50%;background:#fff;border:1px solid #F3CFCD;display:flex;align-items:center;justify-content:center;flex:none;box-shadow:0 6px 16px -8px rgba(194,54,47,.4)"><svg width="30" height="30" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9.5" fill="#C2362F" fill-opacity=".1"/><path d="M9 9l6 6M15 9l-6 6" stroke="#C2362F" stroke-width="2.2" stroke-linecap="round"/></svg></span>
+            <div><div style="display:flex;align-items:center;gap:9px"><div style="font-size:18px;font-weight:600;color:#A12B25">Signature invalide</div><span style="font-size:10px;font-weight:600;font-family:'Geist Mono',monospace;color:#A12B25;background:#fff;border:1px solid #F3CFCD;border-radius:6px;padding:3px 7px">TOTAL_FAILED</span></div><div style="font-size:12.5px;color:#8A4A46;margin-top:5px;line-height:1.5">Le document a été modifié après la signature : l'empreinte signée ne correspond plus au contenu.</div></div>
+          </div>
+        </div>
+        <div style="flex:none;width:560px">
+          <div style="background:linear-gradient(110deg,#FBF0DA,#FDF8EC);border:1px solid #F1DFB5;border-radius:16px;padding:22px 24px;display:flex;align-items:center;gap:18px">
+            <span style="width:58px;height:58px;border-radius:50%;background:#fff;border:1px solid #F1DFB5;display:flex;align-items:center;justify-content:center;flex:none;box-shadow:0 6px 16px -8px rgba(154,98,19,.35)"><svg width="30" height="30" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9.5" fill="#9A6213" fill-opacity=".1"/><path d="M9.2 9.4c.5-1.7 4.8-1.9 4.8.4 0 1.7-2.1 1.5-2.1 3.2M11.9 16.5h.01" stroke="#9A6213" stroke-width="1.9" stroke-linecap="round"/></svg></span>
+            <div><div style="display:flex;align-items:center;gap:9px"><div style="font-size:18px;font-weight:600;color:#825115">Validité indéterminée</div><span style="font-size:10px;font-weight:600;font-family:'Geist Mono',monospace;color:#825115;background:#fff;border:1px solid #F1DFB5;border-radius:6px;padding:3px 7px">INDETERMINATE</span></div><div style="font-size:12.5px;color:#7A5A2A;margin-top:5px;line-height:1.5">Impossible de vérifier la révocation du certificat (OCSP/CRL injoignable) ou ancre de confiance absente.</div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 12: ETAT VIDE / PREMIER LANCEMENT ================= -->
+    <section style="flex:none">
+      <div style="font-size:12px;font-weight:600;letter-spacing:.06em;color:#8A97AC;margin-bottom:13px;text-transform:uppercase">12 · État vide · premier lancement</div>
+      <div style="width:720px;background:#fff;border:1px solid #E7ECF4;border-radius:14px;padding:48px 40px;text-align:center;box-shadow:0 1px 3px rgba(20,34,58,.05)">
+        <span style="width:72px;height:72px;border-radius:20px;background:linear-gradient(135deg,#EEF3FE,#DDE7FE);display:inline-flex;align-items:center;justify-content:center;margin-bottom:20px"><svg width="34" height="34" viewBox="0 0 24 24" fill="none"><path d="M7 3h7l4 4v14H7V3Z" stroke="#2D63E8" stroke-width="1.5" stroke-linejoin="round"/><path d="M14 3v4h4" stroke="#2D63E8" stroke-width="1.5" stroke-linejoin="round"/><path d="M9.5 13.5h5M9.5 16.5h3" stroke="#2D63E8" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+        <h2 style="font-size:22px;font-weight:600;letter-spacing:-.02em;margin:0">Bienvenue dans EU‑DSS Sign</h2>
+        <p style="font-size:14px;color:#7A89A3;margin:9px auto 0;line-height:1.55;max-width:420px">Vous n'avez encore signé aucun document. Glissez un fichier ou choisissez‑en un pour commencer · votre clé USB qualifiée fait le reste.</p>
+        <div style="display:flex;gap:12px;justify-content:center;margin-top:24px">
+          <button style="border:none;cursor:pointer;background:#2D63E8;color:#fff;font-size:14px;font-weight:600;padding:13px 22px;border-radius:11px;box-shadow:0 8px 18px -7px rgba(45,99,232,.6);font-family:inherit;display:flex;align-items:center;gap:8px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M3 17c3-1 4-7 7-7s2 4 5 3 4-6 6-6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>Signer un document</button>
+          <button style="border:1px solid #E7ECF4;cursor:pointer;background:#fff;color:#3D4D69;font-size:14px;font-weight:600;padding:13px 22px;border-radius:11px;font-family:inherit">Configurer ma clé</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 13: BARRE DE TITRE OS ================= -->
+    <section style="flex:none">
+      <div style="font-size:12px;font-weight:600;letter-spacing:.06em;color:#8A97AC;margin-bottom:13px;text-transform:uppercase">13 · Barre de titre · variantes par OS</div>
+      <div style="display:flex;gap:24px;align-items:flex-start">
+        <div style="flex:none;width:520px"><div style="font-size:12px;font-weight:600;color:#16223A;margin-bottom:10px">Windows / Linux · contrôles à droite</div>
+          <div style="border:1px solid #E7ECF4;border-radius:12px 12px 0 0;overflow:hidden;box-shadow:0 6px 18px -10px rgba(20,34,58,.25)"><div style="height:42px;display:flex;align-items:center;padding:0 14px;background:#fff;border-bottom:1px solid #EFF2F8"><span style="width:18px;height:18px;border-radius:6px;background:linear-gradient(135deg,#3A6DF0,#5B4FE0);display:flex;align-items:center;justify-content:center"><svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="m9.2 12.1 1.9 1.9 3.8-3.9" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span style="font-size:12.5px;font-weight:600;color:#3D4D69;margin-left:8px">EU-DSS Sign</span><div style="flex:1"></div><div style="display:flex;align-items:center;gap:16px;color:#AEB9CC"><svg width="13" height="13" viewBox="0 0 24 24"><path d="M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><svg width="11" height="11" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/></svg><svg width="12" height="12" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div></div><div style="height:60px;background:#F4F6FB"></div></div>
+        </div>
+        <div style="flex:none;width:520px"><div style="font-size:12px;font-weight:600;color:#16223A;margin-bottom:10px">macOS · feux tricolores à gauche</div>
+          <div style="border:1px solid #E7ECF4;border-radius:12px 12px 0 0;overflow:hidden;box-shadow:0 6px 18px -10px rgba(20,34,58,.25)"><div style="height:42px;display:flex;align-items:center;padding:0 14px;background:#fff;border-bottom:1px solid #EFF2F8"><div style="display:flex;gap:8px"><span style="width:12px;height:12px;border-radius:50%;background:#FF5F57"></span><span style="width:12px;height:12px;border-radius:50%;background:#FEBC2E"></span><span style="width:12px;height:12px;border-radius:50%;background:#28C840"></span></div><div style="flex:1"></div><span style="font-size:12.5px;font-weight:600;color:#3D4D69">EU-DSS Sign</span><div style="flex:1"></div><div style="width:54px"></div></div><div style="height:60px;background:#F4F6FB"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 14: SELECTEUR FORMAT OUVERT ================= -->
+    <section style="flex:none">
+      <div style="font-size:12px;font-weight:600;letter-spacing:.06em;color:#8A97AC;margin-bottom:13px;text-transform:uppercase">14 · Format par document · menu ouvert</div>
+      <div style="width:560px;background:#fff;border:1px solid #E7ECF4;border-radius:13px;padding:15px 16px;box-shadow:0 1px 3px rgba(20,34,58,.05)">
+        <div style="display:flex;align-items:center;gap:14px">
+          <span style="width:40px;height:40px;border-radius:9px;background:#FDEEEE;display:flex;align-items:center;justify-content:center;flex:none"><svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M7 3h7l4 4v14H7V3Z" stroke="#D8514F" stroke-width="1.6" stroke-linejoin="round"/><path d="M14 3v4h4" stroke="#D8514F" stroke-width="1.6" stroke-linejoin="round"/></svg></span>
+          <div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:600">Contrat_prestation_2026.pdf</div><div style="font-size:11.5px;color:#9AA7BE;margin-top:2px">1,4 Mo · document PDF</div></div>
+          <div style="position:relative">
+            <div style="display:flex;align-items:center;gap:6px;border:1.5px solid #2D63E8;background:#F7FAFF;border-radius:8px;padding:6px 10px;font-size:11.5px;font-weight:600;color:#2D63E8"><span style="font-family:'Geist Mono',monospace">PAdES‑B‑T</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="m7 14 5-5 5 5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div style="position:absolute;top:38px;right:0;width:230px;background:#fff;border:1px solid #E7ECF4;border-radius:11px;box-shadow:0 16px 40px -12px rgba(20,34,58,.3);padding:6px;z-index:2">
+              <div style="font-size:10px;font-weight:600;letter-spacing:.06em;color:#AEB9CC;padding:7px 9px 4px">SIGNATURE PDF (PAdES)</div>
+              <div style="display:flex;align-items:center;gap:9px;padding:8px 9px;border-radius:7px;font-size:12.5px;color:#5A6B85"><span style="font-family:'Geist Mono',monospace">PAdES‑B</span><span style="font-size:10.5px;color:#AEB9CC">basique</span></div>
+              <div style="display:flex;align-items:center;gap:9px;padding:8px 9px;border-radius:7px;background:#EEF3FE;font-size:12.5px;font-weight:600;color:#2D63E8"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="m6 12 4 4 8-9" stroke="#2D63E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span style="font-family:'Geist Mono',monospace">PAdES‑B‑T</span><span style="font-size:10.5px;color:#7FA0E8">horodaté · recommandé</span></div>
+              <div style="display:flex;align-items:center;gap:9px;padding:8px 9px;border-radius:7px;font-size:12.5px;color:#5A6B85"><span style="font-family:'Geist Mono',monospace">PAdES‑B‑LT</span><span style="font-size:10.5px;color:#AEB9CC">long terme</span></div>
+              <div style="display:flex;align-items:center;gap:9px;padding:8px 9px;border-radius:7px;font-size:12.5px;color:#5A6B85"><span style="font-family:'Geist Mono',monospace">PAdES‑B‑LTA</span><span style="font-size:10.5px;color:#AEB9CC">archivage</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 15: THEME SOMBRE ================= -->
+    <section style="flex:none">
+      <div style="font-size:12px;font-weight:600;letter-spacing:.06em;color:#8A97AC;margin-bottom:13px;text-transform:uppercase">15 · Thème sombre (démonstration · Accueil)</div>
+      <div style="width:1180px;background:#0E1626;border:1px solid #1E2A40;border-radius:14px;overflow:hidden;box-shadow:0 12px 40px -16px rgba(0,0,0,.6)">
+        <div style="height:42px;display:flex;align-items:center;padding:0 14px;border-bottom:1px solid #1E2A40;background:#101A2C"><div style="display:flex;align-items:center;gap:8px"><span style="width:18px;height:18px;border-radius:6px;background:linear-gradient(135deg,#3A6DF0,#5B4FE0);display:flex;align-items:center;justify-content:center"><svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="m9.2 12.1 1.9 1.9 3.8-3.9" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span style="font-size:12.5px;font-weight:600;color:#AEBBD4">EU-DSS Sign</span></div><div style="flex:1"></div><div style="display:flex;align-items:center;gap:16px;color:#5C6B86"><svg width="13" height="13" viewBox="0 0 24 24"><path d="M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><svg width="11" height="11" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/></svg><svg width="12" height="12" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div></div>
+        <div style="display:flex;height:560px">
+          <div style="width:226px;flex:none;background:#101A2C;border-right:1px solid #1E2A40;display:flex;flex-direction:column;padding:18px 14px">
+            <div style="display:flex;align-items:center;gap:11px;padding:4px 8px 18px"><span style="width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#3A6DF0,#5B4FE0);display:flex;align-items:center;justify-content:center"><svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M12 2.6 5 5.4v5.3c0 4.3 2.9 8.2 7 9.4 4.1-1.2 7-5.1 7-9.4V5.4L12 2.6Z" fill="#fff" fill-opacity=".22"/><path d="m9.2 12.1 1.9 1.9 3.8-3.9" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div><div style="font-size:14px;font-weight:600;color:#EAF0FB">EU-DSS Sign</div><div style="font-size:11px;color:#5C6B86;margin-top:1px">Signature qualifiée</div></div></div>
+            <div style="font-size:10.5px;font-weight:600;letter-spacing:.08em;color:#4E5E7C;padding:6px 8px 8px">SIGNATURE</div>
+            <a style="display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:9px;background:rgba(58,109,240,.16);color:#7FA0F5;font-size:13.5px;font-weight:600;text-decoration:none;margin-bottom:3px"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M4 11.5 12 5l8 6.5M6 10v9h12v-9" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>Accueil</a>
+            <a style="display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:9px;color:#9AA8C4;font-size:13.5px;font-weight:500;text-decoration:none;margin-bottom:3px"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M3 17c3-1 4-7 7-7s2 4 5 3 4-6 6-6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>Signer</a>
+            <a style="display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:9px;color:#9AA8C4;font-size:13.5px;font-weight:500;text-decoration:none"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M12 3.5 5.5 6v5c0 4 2.7 7.3 6.5 8.5 3.8-1.2 6.5-4.5 6.5-8.5V6L12 3.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="m9.5 11.8 1.7 1.7 3.4-3.5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>Vérifier</a>
+            <div style="flex:1"></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:2px 3px 9px"><div style="display:flex;align-items:center;gap:7px;font-size:11.5px;color:#5C6B86;font-weight:500"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.3 6.3 0 0 0 10.5 10.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>Thème</div><div style="display:flex;background:#0E1626;border:1px solid #243353;border-radius:8px;padding:2px"><span style="font-size:11px;font-weight:600;color:#7C8AA6;padding:3px 9px">Clair</span><span style="font-size:11px;font-weight:600;color:#fff;background:#2D63E8;border-radius:6px;padding:3px 9px">Sombre</span></div></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:2px 3px 11px"><div style="display:flex;align-items:center;gap:7px;font-size:11.5px;color:#5C6B86;font-weight:500"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 12h17M12 3c2.6 2.7 2.6 15.3 0 18M12 3c-2.6 2.7-2.6 15.3 0 18" stroke="currentColor" stroke-width="1.3"/></svg>Langue</div><div style="display:flex;background:#0E1626;border:1px solid #243353;border-radius:8px;padding:2px"><span style="font-size:11px;font-weight:600;color:#fff;background:#2D63E8;border-radius:6px;padding:3px 9px">FR</span><span style="font-size:11px;font-weight:600;color:#7C8AA6;padding:3px 9px">EN</span></div></div>
+            <div style="display:flex;align-items:center;gap:10px;padding:11px;border:1px solid #1E2A40;border-radius:11px;background:#16223A"><span style="width:9px;height:9px;border-radius:50%;background:#3BD27F;animation:pulseDot 2.4s infinite;flex:none"></span><div style="line-height:1.3"><div style="font-size:12px;font-weight:600;color:#EAF0FB">Agent connecté</div><div style="font-size:11px;color:#5C6B86">Carte verrouillée</div></div></div>
+          </div>
+          <div style="flex:1;background:#0E1626;display:flex;flex-direction:column;padding:26px 32px">
+            <div style="position:relative;background:linear-gradient(120deg,#16223A 0%,#1E315A 60%,#27408A 100%);border-radius:18px;padding:24px 26px;display:flex;align-items:center;gap:24px;overflow:hidden;border:1px solid #243353">
+              <div style="position:absolute;right:-30px;top:-40px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(91,79,224,.5),transparent 70%)"></div>
+              <span style="position:relative;flex:none;width:84px;height:84px;border-radius:18px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;animation:floatKey 5s ease-in-out infinite"><svg width="40" height="40" viewBox="0 0 24 24" fill="none"><circle cx="8" cy="13" r="3.6" stroke="#9FC0FF" stroke-width="1.7"/><path d="m10.6 10.4 8.4-8.4M15.5 5l2.5 2.5M18.5 8 21 5.5" stroke="#9FC0FF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              <div style="position:relative;flex:1"><div style="display:inline-flex;align-items:center;gap:7px;background:rgba(31,164,99,.18);border:1px solid rgba(31,164,99,.42);color:#7BE6A8;border-radius:999px;padding:4px 11px;font-size:12px;font-weight:600;margin-bottom:11px"><span style="width:7px;height:7px;border-radius:50%;background:#3BD27F"></span>Clé connectée · carte reconnue</div><div style="font-size:18px;font-weight:600;color:#fff">Michel‑Marie MAUDET</div><div style="font-size:13px;color:#A9B6D4;margin-top:3px">LINAGORA · Certificat qualifié ChamberSign · valide jusqu'au 12/2028</div></div>
+              <div style="position:relative;display:flex;flex-direction:column;gap:10px;flex:none"><a style="display:flex;align-items:center;justify-content:center;gap:9px;background:#fff;color:#16223A;font-size:14px;font-weight:600;padding:11px 20px;border-radius:11px;text-decoration:none">Signer un document</a><a style="display:flex;align-items:center;justify-content:center;gap:9px;background:rgba(255,255,255,.1);color:#fff;font-size:14px;font-weight:600;padding:11px 20px;border-radius:11px;text-decoration:none;border:1px solid rgba(255,255,255,.18)">Vérifier</a></div>
+            </div>
+            <div style="display:flex;gap:16px;margin-top:18px">
+              <div style="flex:1;background:#16223A;border:1px solid #243353;border-radius:14px;padding:16px 18px"><div style="font-size:12px;color:#7C8AA6">Documents signés · ce mois</div><div style="font-size:26px;font-weight:600;color:#EAF0FB;margin-top:7px">24</div></div>
+              <div style="flex:1;background:#16223A;border:1px solid #243353;border-radius:14px;padding:16px 18px"><div style="font-size:12px;color:#7C8AA6">Vérifications réussies</div><div style="font-size:26px;font-weight:600;color:#3BD27F;margin-top:7px">18 <span style="font-size:13px;color:#5C6B86;font-weight:500">/ 18</span></div></div>
+              <div style="flex:1;background:#16223A;border:1px solid #243353;border-radius:14px;padding:16px 18px"><div style="font-size:12px;color:#7C8AA6">Certificat valide</div><div style="font-size:26px;font-weight:600;color:#EAF0FB;margin-top:7px">28 <span style="font-size:13px;color:#5C6B86;font-weight:500">mois</span></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 16: DEBLOCAGE PUK ================= -->
+    <section style="flex:none">
+      <div style="font-size:12px;font-weight:600;letter-spacing:.06em;color:#8A97AC;margin-bottom:13px;text-transform:uppercase">16 · Déblocage par code PUK</div>
+      <div style="display:flex;gap:24px;align-items:flex-start">
+        <div style="flex:none;width:430px"><div style="font-size:12px;font-weight:600;color:#16223A;margin-bottom:10px">Saisie du PUK + nouveau PIN</div>
+          <div style="background:#fff;border:1px solid #E7ECF4;border-radius:20px;padding:30px;box-shadow:0 10px 30px -16px rgba(20,34,58,.25)">
+            <div style="text-align:center"><span style="width:54px;height:54px;border-radius:15px;background:linear-gradient(135deg,#EEF3FE,#DDE7FE);display:inline-flex;align-items:center;justify-content:center;margin-bottom:15px"><svg width="25" height="25" viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="9" rx="2.2" stroke="#2D63E8" stroke-width="1.8"/><path d="M8 11V8a4 4 0 0 1 7.5-2" stroke="#2D63E8" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+              <h3 style="font-size:18px;font-weight:600;margin:0">Débloquer votre carte</h3>
+              <p style="font-size:12.5px;color:#7A89A3;margin:7px 0 0;line-height:1.5">Saisissez le <strong style="color:#16223A;font-weight:600">code PUK</strong> fourni avec votre carte, puis choisissez un nouveau code PIN.</p>
+            </div>
+            <div style="margin-top:22px">
+              <div style="font-size:11px;font-weight:600;color:#9AA7BE;margin-bottom:6px">CODE PUK</div>
+              <div style="display:flex;align-items:center;border:1px solid #E7ECF4;border-radius:11px;padding:12px 14px;font-family:'Geist Mono',monospace;font-size:15px;letter-spacing:.3em;color:#16223A">••••••••<div style="flex:1"></div><svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="color:#C2CDDE"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12" r="2.5" stroke="currentColor" stroke-width="1.7"/></svg></div>
+            </div>
+            <div style="display:flex;gap:12px;margin-top:14px">
+              <div style="flex:1"><div style="font-size:11px;font-weight:600;color:#9AA7BE;margin-bottom:6px">NOUVEAU PIN</div><div style="border:1px solid #E7ECF4;border-radius:11px;padding:12px 14px;font-family:'Geist Mono',monospace;font-size:15px;letter-spacing:.35em;color:#16223A">••••</div></div>
+              <div style="flex:1"><div style="font-size:11px;font-weight:600;color:#9AA7BE;margin-bottom:6px">CONFIRMER</div><div style="border:1.5px solid #2D63E8;border-radius:11px;padding:12px 14px;font-family:'Geist Mono',monospace;font-size:15px;letter-spacing:.35em;color:#16223A">•••<span style="opacity:.3">•</span></div></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:7px;margin-top:14px;font-size:11.5px;color:#9A6213"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 8v4l2.5 1.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>10 essais PUK maximum avant blocage définitif.</div>
+            <button style="border:none;cursor:pointer;width:100%;margin-top:20px;background:#2D63E8;color:#fff;font-size:14px;font-weight:600;padding:13px;border-radius:12px;font-family:inherit">Débloquer la carte</button>
+          </div>
+        </div>
+        <div style="flex:none;width:430px"><div style="font-size:12px;font-weight:600;color:#16223A;margin-bottom:10px">Carte débloquée</div>
+          <div style="background:#fff;border:1px solid #E7ECF4;border-radius:20px;padding:38px 30px;box-shadow:0 10px 30px -16px rgba(20,34,58,.25);text-align:center">
+            <span style="width:64px;height:64px;border-radius:50%;background:#E7F6EE;border:1px solid #BCE3CC;display:inline-flex;align-items:center;justify-content:center;margin-bottom:18px"><svg width="32" height="32" viewBox="0 0 24 24" fill="none"><path d="m6.5 12.4 3.2 3.2L18 7.2" stroke="#18794E" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <h3 style="font-size:19px;font-weight:600;margin:0">Carte débloquée</h3>
+            <p style="font-size:13px;color:#7A89A3;margin:9px auto 0;line-height:1.55;max-width:300px">Votre nouveau code PIN est actif. Vous pouvez de nouveau signer vos documents.</p>
+            <button style="border:none;cursor:pointer;width:100%;margin-top:24px;background:#2D63E8;color:#fff;font-size:14px;font-weight:600;padding:13px;border-radius:12px;font-family:inherit">Continuer vers la signature</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 17: SOMBRE · SIGNER ================= -->
+    <section style="flex:none">
+      <div style="font-size:12px;font-weight:600;letter-spacing:.06em;color:#8A97AC;margin-bottom:13px;text-transform:uppercase">17 · Thème sombre · Signer</div>
+      <div style="width:1180px;background:#0E1626;border:1px solid #1E2A40;border-radius:14px;overflow:hidden;box-shadow:0 12px 40px -16px rgba(0,0,0,.6)">
+        <div style="height:42px;display:flex;align-items:center;padding:0 14px;border-bottom:1px solid #1E2A40;background:#101A2C"><div style="display:flex;align-items:center;gap:8px"><span style="width:18px;height:18px;border-radius:6px;background:linear-gradient(135deg,#3A6DF0,#5B4FE0);display:flex;align-items:center;justify-content:center"><svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="m9.2 12.1 1.9 1.9 3.8-3.9" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span style="font-size:12.5px;font-weight:600;color:#AEBBD4">EU-DSS Sign</span></div><div style="flex:1"></div><div style="display:flex;align-items:center;gap:16px;color:#5C6B86"><svg width="13" height="13" viewBox="0 0 24 24"><path d="M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><svg width="11" height="11" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/></svg><svg width="12" height="12" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div></div>
+        <div style="display:flex;height:740px">
+          <div style="width:226px;flex:none;background:#101A2C;border-right:1px solid #1E2A40;display:flex;flex-direction:column;padding:18px 14px">
+            <div style="display:flex;align-items:center;gap:11px;padding:4px 8px 18px"><span style="width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#3A6DF0,#5B4FE0);display:flex;align-items:center;justify-content:center"><svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M12 2.6 5 5.4v5.3c0 4.3 2.9 8.2 7 9.4 4.1-1.2 7-5.1 7-9.4V5.4L12 2.6Z" fill="#fff" fill-opacity=".22"/><path d="m9.2 12.1 1.9 1.9 3.8-3.9" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div><div style="font-size:14px;font-weight:600;color:#EAF0FB">EU-DSS Sign</div><div style="font-size:11px;color:#5C6B86;margin-top:1px">Signature qualifiée</div></div></div>
+            <div style="font-size:10.5px;font-weight:600;letter-spacing:.08em;color:#4E5E7C;padding:6px 8px 8px">SIGNATURE</div>
+            <a style="display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:9px;color:#9AA8C4;font-size:13.5px;font-weight:500;text-decoration:none;margin-bottom:3px"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M4 11.5 12 5l8 6.5M6 10v9h12v-9" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>Accueil</a>
+            <a style="display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:9px;background:rgba(58,109,240,.16);color:#7FA0F5;font-size:13.5px;font-weight:600;text-decoration:none;margin-bottom:3px"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M3 17c3-1 4-7 7-7s2 4 5 3 4-6 6-6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>Signer</a>
+            <a style="display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:9px;color:#9AA8C4;font-size:13.5px;font-weight:500;text-decoration:none"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M12 3.5 5.5 6v5c0 4 2.7 7.3 6.5 8.5 3.8-1.2 6.5-4.5 6.5-8.5V6L12 3.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="m9.5 11.8 1.7 1.7 3.4-3.5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>Vérifier</a>
+            <div style="flex:1"></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:2px 3px 9px"><div style="display:flex;align-items:center;gap:7px;font-size:11.5px;color:#5C6B86;font-weight:500"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.3 6.3 0 0 0 10.5 10.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>Thème</div><div style="display:flex;background:#0E1626;border:1px solid #243353;border-radius:8px;padding:2px"><span style="font-size:11px;font-weight:600;color:#7C8AA6;padding:3px 9px">Clair</span><span style="font-size:11px;font-weight:600;color:#fff;background:#2D63E8;border-radius:6px;padding:3px 9px">Sombre</span></div></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:2px 3px 11px"><div style="display:flex;align-items:center;gap:7px;font-size:11.5px;color:#5C6B86;font-weight:500"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 12h17M12 3c2.6 2.7 2.6 15.3 0 18M12 3c-2.6 2.7-2.6 15.3 0 18" stroke="currentColor" stroke-width="1.3"/></svg>Langue</div><div style="display:flex;background:#0E1626;border:1px solid #243353;border-radius:8px;padding:2px"><span style="font-size:11px;font-weight:600;color:#fff;background:#2D63E8;border-radius:6px;padding:3px 9px">FR</span><span style="font-size:11px;font-weight:600;color:#7C8AA6;padding:3px 9px">EN</span></div></div>
+            <div style="display:flex;align-items:center;gap:10px;padding:11px;border:1px solid #1E2A40;border-radius:11px;background:#16223A"><span style="width:9px;height:9px;border-radius:50%;background:#3BD27F;animation:pulseDot 2.4s infinite;flex:none"></span><div style="line-height:1.3"><div style="font-size:12px;font-weight:600;color:#EAF0FB">Agent connecté</div><div style="font-size:11px;color:#5C6B86">Carte verrouillée</div></div></div>
+          </div>
+          <div style="flex:1;background:#0E1626;display:flex;flex-direction:column;overflow:hidden">
+            <div style="padding:26px 32px 20px;display:flex;align-items:center"><div><h2 style="font-size:23px;font-weight:600;letter-spacing:-.02em;margin:0;color:#EAF0FB">Signer</h2><p style="font-size:13.5px;color:#7C8AA6;margin:5px 0 0">Vos documents, signés avec votre clé USB qualifiée.</p></div><div style="flex:1"></div><div style="display:flex;align-items:center;gap:8px;background:#16223A;border:1px solid #243353;border-radius:999px;padding:7px 14px;font-size:12.5px;font-weight:600;color:#AEBBD4"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 3.5 5.5 6v5c0 4 2.7 7.3 6.5 8.5 3.8-1.2 6.5-4.5 6.5-8.5V6L12 3.5Z" stroke="#7FA0F5" stroke-width="1.6" stroke-linejoin="round"/><path d="m9.5 11.8 1.7 1.7 3.4-3.5" stroke="#7FA0F5" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>Signature qualifiée · eIDAS</div></div>
+            <div style="flex:1;display:flex;gap:20px;padding:0 32px 28px;overflow:auto">
+              <div style="flex:1;display:flex;flex-direction:column;gap:16px;min-width:0">
+                <div style="background:#131F33;border:1.5px dashed #2E3E5C;border-radius:14px;padding:30px;display:flex;flex-direction:column;align-items:center;text-align:center">
+                  <span style="width:50px;height:50px;border-radius:13px;background:rgba(58,109,240,.16);display:flex;align-items:center;justify-content:center;margin-bottom:13px"><svg width="23" height="23" viewBox="0 0 24 24" fill="none"><path d="M12 16V5m0 0L8 9m4-4 4 4" stroke="#7FA0F5" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 15v3a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-3" stroke="#7FA0F5" stroke-width="1.9" stroke-linecap="round"/></svg></span>
+                  <div style="font-size:15px;font-weight:600;color:#EAF0FB">Déposer vos documents</div>
+                  <div style="font-size:12.5px;color:#7C8AA6;margin-top:5px">PDF → PAdES · bureautique &amp; images → conteneur ASiC‑E</div>
+                  <button style="margin-top:15px;border:none;cursor:pointer;background:#2D63E8;color:#fff;font-size:13px;font-weight:600;padding:9px 18px;border-radius:9px;font-family:inherit">Choisir des fichiers</button>
+                </div>
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:0 2px"><div style="font-size:13px;font-weight:600;color:#AEBBD4">2 documents prêts</div><div style="font-size:11.5px;color:#5C6B86">Format réglable par document</div></div>
+                <div style="background:#16223A;border:1px solid #243353;border-radius:13px;display:flex;align-items:center;gap:14px;padding:15px 16px">
+                  <span style="width:40px;height:40px;border-radius:9px;background:rgba(216,81,79,.16);display:flex;align-items:center;justify-content:center;flex:none"><svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M7 3h7l4 4v14H7V3Z" stroke="#E87C7A" stroke-width="1.6" stroke-linejoin="round"/><path d="M14 3v4h4" stroke="#E87C7A" stroke-width="1.6" stroke-linejoin="round"/></svg></span>
+                  <div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:600;color:#EAF0FB">Contrat_prestation_2026.pdf</div><div style="font-size:11.5px;color:#7C8AA6;margin-top:2px">1,4 Mo · document PDF</div></div>
+                  <div style="display:flex;align-items:center;gap:6px;border:1px solid #2D63E8;background:rgba(58,109,240,.14);border-radius:8px;padding:6px 10px;font-size:11.5px;font-weight:600;color:#7FA0F5"><span style="font-family:'Geist Mono',monospace">PAdES‑B‑T</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="m7 10 5 5 5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                </div>
+                <div style="background:#16223A;border:1px solid #243353;border-radius:13px;display:flex;align-items:center;gap:14px;padding:15px 16px">
+                  <span style="width:40px;height:40px;border-radius:9px;background:rgba(58,109,240,.16);display:flex;align-items:center;justify-content:center;flex:none"><svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M7 3h7l4 4v14H7V3Z" stroke="#7FA0F5" stroke-width="1.6" stroke-linejoin="round"/><path d="M14 3v4h4" stroke="#7FA0F5" stroke-width="1.6" stroke-linejoin="round"/></svg></span>
+                  <div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:600;color:#EAF0FB">Annexe_technique_REL.docx</div><div style="font-size:11.5px;color:#7C8AA6;margin-top:2px">320 Ko · document Word</div></div>
+                  <div style="display:flex;align-items:center;gap:6px;border:1px solid #2D63E8;background:rgba(58,109,240,.14);border-radius:8px;padding:6px 10px;font-size:11.5px;font-weight:600;color:#7FA0F5"><span style="font-family:'Geist Mono',monospace">ASiC‑E</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="m7 10 5 5 5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                </div>
+              </div>
+              <div style="width:330px;flex:none;display:flex;flex-direction:column;gap:16px">
+                <div style="background:#16223A;border:1px solid #243353;border-radius:14px;padding:18px 18px 20px">
+                  <div style="font-size:13px;font-weight:600;margin-bottom:14px;color:#EAF0FB">Paramètres de signature</div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid #243353"><span style="font-size:12.5px;color:#7C8AA6">Niveau eIDAS</span><span style="font-size:12.5px;font-weight:600;font-family:'Geist Mono',monospace;color:#EAF0FB">B‑T</span></div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid #243353"><span style="font-size:12.5px;color:#7C8AA6">Empreinte</span><span style="font-size:12.5px;font-weight:600;font-family:'Geist Mono',monospace;color:#EAF0FB">SHA‑256</span></div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0"><span style="font-size:12.5px;color:#7C8AA6">Horodatage (TSA)</span><span style="display:inline-flex;align-items:center;width:34px;height:20px;border-radius:999px;background:#2D63E8;padding:2px;justify-content:flex-end"><span style="width:16px;height:16px;border-radius:50%;background:#fff"></span></span></div>
+                </div>
+                <div style="position:relative;background:linear-gradient(120deg,#16223A,#27408A);border:1px solid #243353;border-radius:14px;padding:18px;overflow:hidden">
+                  <div style="position:absolute;right:-26px;top:-34px;width:150px;height:150px;border-radius:50%;background:radial-gradient(circle,rgba(91,79,224,.45),transparent 70%)"></div>
+                  <div style="position:relative"><div style="display:flex;align-items:center;gap:12px;margin-bottom:14px"><span style="width:48px;height:48px;border-radius:12px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;flex:none"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="8" cy="13" r="3.4" stroke="#9FC0FF" stroke-width="1.7"/><path d="m10.5 10.5 8-8M15 5l2.5 2.5M18.5 8 21 5.5" stroke="#9FC0FF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div style="min-width:0"><div style="display:inline-flex;align-items:center;gap:6px;background:rgba(31,164,99,.16);color:#7BE6A8;border-radius:999px;padding:3px 9px;font-size:11px;font-weight:600;margin-bottom:5px"><span style="width:6px;height:6px;border-radius:50%;background:#3BD27F"></span>Clé connectée</div><div style="font-size:13.5px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Michel‑Marie MAUDET</div><div style="font-size:11.5px;color:#A9B6D4">ChamberSign Qualified CA</div></div></div><div style="display:flex;gap:9px;align-items:center;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:10px 12px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" style="flex:none"><rect x="5" y="11" width="14" height="9" rx="2" stroke="#F0C46B" stroke-width="1.7"/><path d="M8 11V8a4 4 0 0 1 8 0v3" stroke="#F0C46B" stroke-width="1.7"/></svg><div style="font-size:11.5px;color:#D7DEEC;line-height:1.5">Carte verrouillée · votre <strong style="font-weight:600;color:#fff">code PIN</strong> sera demandé au moment de signer.</div></div></div>
+                </div>
+                <div style="flex:1"></div>
+                <button style="border:none;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center;gap:9px;background:#2D63E8;color:#fff;font-size:14.5px;font-weight:600;padding:14px;border-radius:12px;box-shadow:0 8px 18px -7px rgba(45,99,232,.65);font-family:inherit"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 17c3-1 4-7 7-7s2 4 5 3 4-6 6-6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>Signer 2 documents</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= WIZARD PREMIER LANCEMENT (OBLIGATOIRE) ================= -->
+    <section style="flex:none">
+      <div style="font-size:12px;font-weight:600;letter-spacing:.06em;color:#8A97AC;margin-bottom:5px;text-transform:uppercase">Wizard de premier lancement · obligatoire</div>
+      <div style="font-size:13.5px;color:#7A89A3;margin-bottom:18px;max-width:760px">Imposé au tout premier démarrage : vérifie middleware, agent et clé, puis <strong style="color:#16223A;font-weight:600">teste réellement le code PIN</strong> en signant un document interne pour valider toute la boucle. Une fois réussi, les lancements suivants ouvrent directement l'écran principal.</div>
+      <div style="display:flex;gap:24px;align-items:flex-start">
+
+        <!-- FRAME 1 · PREREQUIS -->
+        <div style="flex:none;width:720px"><div style="font-size:12px;font-weight:600;color:#16223A;margin-bottom:10px">Étape 1 · Prérequis détectés</div>
+          <div style="background:#fff;border:1px solid #E7ECF4;border-radius:14px;overflow:hidden;box-shadow:0 10px 30px -16px rgba(20,34,58,.22)">
+            <div style="height:42px;display:flex;align-items:center;padding:0 16px;border-bottom:1px solid #EFF2F8"><span style="width:18px;height:18px;border-radius:6px;background:linear-gradient(135deg,#3A6DF0,#5B4FE0);display:flex;align-items:center;justify-content:center"><svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="m9.2 12.1 1.9 1.9 3.8-3.9" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span style="font-size:12.5px;font-weight:600;color:#3D4D69;margin-left:8px">EU-DSS Sign · Configuration initiale</span></div>
+            <div style="padding:24px 30px 28px">
+              <div style="display:flex;align-items:center;gap:0;margin-bottom:26px">
+                <div style="display:flex;align-items:center;gap:8px"><span style="width:24px;height:24px;border-radius:50%;background:#2D63E8;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600">1</span><span style="font-size:12.5px;font-weight:600;color:#2D63E8">Prérequis</span></div>
+                <div style="flex:1;height:2px;background:#E2E8F2;margin:0 12px"></div>
+                <div style="display:flex;align-items:center;gap:8px"><span style="width:24px;height:24px;border-radius:50%;background:#fff;border:1.5px solid #E2E8F2;color:#AEB9CC;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600">2</span><span style="font-size:12.5px;font-weight:600;color:#AEB9CC">Test du PIN</span></div>
+                <div style="flex:1;height:2px;background:#E2E8F2;margin:0 12px"></div>
+                <div style="display:flex;align-items:center;gap:8px"><span style="width:24px;height:24px;border-radius:50%;background:#fff;border:1.5px solid #E2E8F2;color:#AEB9CC;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600">3</span><span style="font-size:12.5px;font-weight:600;color:#AEB9CC">Terminé</span></div>
+              </div>
+              <h3 style="font-size:20px;font-weight:600;letter-spacing:-.01em;margin:0">Bienvenue · configurons votre signature</h3>
+              <p style="font-size:13px;color:#7A89A3;margin:7px 0 18px;line-height:1.55">Cette configuration est nécessaire au premier lancement. EU‑DSS vérifie automatiquement les trois prérequis.</p>
+              <div style="display:flex;align-items:center;gap:13px;padding:13px 15px;border:1px solid #EFF2F8;border-radius:11px;margin-bottom:10px">
+                <span style="width:36px;height:36px;border-radius:9px;background:#E7F6EE;display:flex;align-items:center;justify-content:center;flex:none"><svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="m6.5 12.4 3.2 3.2L18 7.2" stroke="#18794E" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                <div style="flex:1"><div style="font-size:13.5px;font-weight:600">Middleware ChamberSign / IDOPTE</div><div style="font-size:11.5px;color:#9AA7BE;margin-top:1px">Pilote PKCS#11 détecté</div></div><span style="font-size:12px;font-weight:600;color:#18794E">OK</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:13px;padding:13px 15px;border:1px solid #EFF2F8;border-radius:11px;margin-bottom:10px">
+                <span style="width:36px;height:36px;border-radius:9px;background:#E7F6EE;display:flex;align-items:center;justify-content:center;flex:none"><svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="m6.5 12.4 3.2 3.2L18 7.2" stroke="#18794E" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                <div style="flex:1"><div style="font-size:13.5px;font-weight:600">Agent local</div><div style="font-size:11.5px;color:#9AA7BE;margin-top:1px">Connecté · <span style="font-family:'Geist Mono',monospace">localhost:9795</span></div></div><span style="font-size:12px;font-weight:600;color:#18794E">OK</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:13px;padding:13px 15px;border:1px solid #EFF2F8;border-radius:11px">
+                <span style="width:36px;height:36px;border-radius:9px;background:#E7F6EE;display:flex;align-items:center;justify-content:center;flex:none"><svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="m6.5 12.4 3.2 3.2L18 7.2" stroke="#18794E" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                <div style="flex:1"><div style="font-size:13.5px;font-weight:600">Clé USB de signature</div><div style="font-size:11.5px;color:#9AA7BE;margin-top:1px">ChamberSign IAS‑ECC · slot 0</div></div><span style="font-size:12px;font-weight:600;color:#18794E">Détectée</span>
+              </div>
+              <button style="border:none;cursor:pointer;width:100%;margin-top:22px;background:#2D63E8;color:#fff;font-size:14px;font-weight:600;padding:13px;border-radius:11px;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px">Continuer vers le test du PIN<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m0 0-5-5m5 5-5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- FRAME 2 · TEST PIN -->
+        <div style="flex:none;width:720px"><div style="font-size:12px;font-weight:600;color:#16223A;margin-bottom:10px">Étape 2 · Test du code PIN</div>
+          <div style="background:#fff;border:1px solid #E7ECF4;border-radius:14px;overflow:hidden;box-shadow:0 10px 30px -16px rgba(20,34,58,.22)">
+            <div style="height:42px;display:flex;align-items:center;padding:0 16px;border-bottom:1px solid #EFF2F8"><span style="width:18px;height:18px;border-radius:6px;background:linear-gradient(135deg,#3A6DF0,#5B4FE0);display:flex;align-items:center;justify-content:center"><svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="m9.2 12.1 1.9 1.9 3.8-3.9" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span style="font-size:12.5px;font-weight:600;color:#3D4D69;margin-left:8px">EU-DSS Sign · Configuration initiale</span></div>
+            <div style="padding:24px 30px 28px">
+              <div style="display:flex;align-items:center;gap:0;margin-bottom:26px">
+                <div style="display:flex;align-items:center;gap:8px"><span style="width:24px;height:24px;border-radius:50%;background:#E7F6EE;color:#18794E;display:flex;align-items:center;justify-content:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="m6.5 12.4 3.2 3.2L18 7.2" stroke="#18794E" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span style="font-size:12.5px;font-weight:600;color:#18794E">Prérequis</span></div>
+                <div style="flex:1;height:2px;background:#2D63E8;margin:0 12px"></div>
+                <div style="display:flex;align-items:center;gap:8px"><span style="width:24px;height:24px;border-radius:50%;background:#2D63E8;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600">2</span><span style="font-size:12.5px;font-weight:600;color:#2D63E8">Test du PIN</span></div>
+                <div style="flex:1;height:2px;background:#E2E8F2;margin:0 12px"></div>
+                <div style="display:flex;align-items:center;gap:8px"><span style="width:24px;height:24px;border-radius:50%;background:#fff;border:1.5px solid #E2E8F2;color:#AEB9CC;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600">3</span><span style="font-size:12.5px;font-weight:600;color:#AEB9CC">Terminé</span></div>
+              </div>
+              <div style="text-align:center">
+                <span style="width:50px;height:50px;border-radius:14px;background:linear-gradient(135deg,#EEF3FE,#DDE7FE);display:inline-flex;align-items:center;justify-content:center;margin-bottom:14px"><svg width="23" height="23" viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="9" rx="2.2" stroke="#2D63E8" stroke-width="1.8"/><path d="M8 11V8a4 4 0 0 1 8 0v3" stroke="#2D63E8" stroke-width="1.8"/></svg></span>
+                <h3 style="font-size:19px;font-weight:600;margin:0">Testons la boucle de signature</h3>
+                <p style="font-size:13px;color:#7A89A3;margin:7px auto 0;line-height:1.55;max-width:420px">Pour valider que tout fonctionne de bout en bout, EU‑DSS va signer un <strong style="color:#16223A;font-weight:600">document de test interne</strong>. Saisissez votre code PIN.</p>
+                <div style="display:flex;justify-content:center;gap:14px;margin:22px 0 6px"><span style="width:14px;height:14px;border-radius:50%;background:#2D63E8"></span><span style="width:14px;height:14px;border-radius:50%;background:#2D63E8"></span><span style="width:14px;height:14px;border-radius:50%;border:2px solid #2D63E8;box-sizing:border-box"></span><span style="width:14px;height:14px;border-radius:50%;background:#E2E8F2"></span></div>
+              </div>
+              <button style="border:none;cursor:pointer;width:100%;margin-top:18px;background:#2D63E8;color:#fff;font-size:14px;font-weight:600;padding:13px;border-radius:11px;font-family:inherit">Tester la signature</button>
+              <div style="display:flex;align-items:center;justify-content:center;gap:7px;margin-top:14px;font-size:11px;color:#9AA7BE"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="9" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3" stroke="currentColor" stroke-width="1.5"/></svg>Aucun document conservé · test interne, PIN jamais enregistré</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- FRAME 3 · VERIFICATION -->
+        <div style="flex:none;width:720px"><div style="font-size:12px;font-weight:600;color:#16223A;margin-bottom:10px">Étape 2 · Vérification de la boucle</div>
+          <div style="background:#fff;border:1px solid #E7ECF4;border-radius:14px;overflow:hidden;box-shadow:0 10px 30px -16px rgba(20,34,58,.22)">
+            <div style="height:42px;display:flex;align-items:center;padding:0 16px;border-bottom:1px solid #EFF2F8"><span style="width:18px;height:18px;border-radius:6px;background:linear-gradient(135deg,#3A6DF0,#5B4FE0);display:flex;align-items:center;justify-content:center"><svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="m9.2 12.1 1.9 1.9 3.8-3.9" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span style="font-size:12.5px;font-weight:600;color:#3D4D69;margin-left:8px">EU-DSS Sign · Configuration initiale</span></div>
+            <div style="padding:34px 30px 30px;text-align:center">
+              <div style="width:58px;height:58px;margin:0 auto 18px;position:relative"><div style="position:absolute;inset:0;border-radius:50%;border:4px solid #EAF0FE"></div><div style="position:absolute;inset:0;border-radius:50%;border:4px solid #2D63E8;border-right-color:transparent;border-bottom-color:transparent;animation:spin 0.9s linear infinite"></div></div>
+              <h3 style="font-size:18px;font-weight:600;margin:0">Vérification de la boucle…</h3>
+              <p style="font-size:13px;color:#7A89A3;margin:7px 0 22px">Quelques secondes · ne retirez pas votre clé.</p>
+              <div style="max-width:420px;margin:0 auto;text-align:left">
+                <div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid #F4F6FB"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" style="flex:none"><circle cx="12" cy="12" r="9.2" fill="#E7F6EE"/><path d="m8.5 12.2 2.3 2.3 4.6-4.8" stroke="#18794E" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg><div style="flex:1;font-size:13px;font-weight:600">Carte déverrouillée (PIN correct)</div></div>
+                <div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid #F4F6FB"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" style="flex:none"><circle cx="12" cy="12" r="9.2" fill="#E7F6EE"/><path d="m8.5 12.2 2.3 2.3 4.6-4.8" stroke="#18794E" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg><div style="flex:1;font-size:13px;font-weight:600">Empreinte signée par la carte</div></div>
+                <div style="display:flex;align-items:center;gap:12px;padding:11px 0"><span style="width:19px;height:19px;flex:none;position:relative"><span style="position:absolute;inset:0;border-radius:50%;border:2.5px solid #EAF0FE"></span><span style="position:absolute;inset:0;border-radius:50%;border:2.5px solid #2D63E8;border-right-color:transparent;border-bottom-color:transparent;animation:spin 0.9s linear infinite"></span></span><div style="flex:1;font-size:13px;font-weight:600;color:#5A6B85">Validation eIDAS du test…</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- FRAME 4 · TERMINE -->
+        <div style="flex:none;width:720px"><div style="font-size:12px;font-weight:600;color:#16223A;margin-bottom:10px">Étape 3 · Configuration terminée</div>
+          <div style="background:#fff;border:1px solid #E7ECF4;border-radius:14px;overflow:hidden;box-shadow:0 10px 30px -16px rgba(20,34,58,.22)">
+            <div style="height:42px;display:flex;align-items:center;padding:0 16px;border-bottom:1px solid #EFF2F8"><span style="width:18px;height:18px;border-radius:6px;background:linear-gradient(135deg,#3A6DF0,#5B4FE0);display:flex;align-items:center;justify-content:center"><svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="m9.2 12.1 1.9 1.9 3.8-3.9" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span style="font-size:12.5px;font-weight:600;color:#3D4D69;margin-left:8px">EU-DSS Sign · Configuration initiale</span></div>
+            <div style="padding:24px 30px 28px">
+              <div style="display:flex;align-items:center;gap:0;margin-bottom:24px">
+                <div style="display:flex;align-items:center;gap:8px"><span style="width:24px;height:24px;border-radius:50%;background:#E7F6EE;color:#18794E;display:flex;align-items:center;justify-content:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="m6.5 12.4 3.2 3.2L18 7.2" stroke="#18794E" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span style="font-size:12.5px;font-weight:600;color:#18794E">Prérequis</span></div>
+                <div style="flex:1;height:2px;background:#1FA463;margin:0 12px"></div>
+                <div style="display:flex;align-items:center;gap:8px"><span style="width:24px;height:24px;border-radius:50%;background:#E7F6EE;color:#18794E;display:flex;align-items:center;justify-content:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="m6.5 12.4 3.2 3.2L18 7.2" stroke="#18794E" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span style="font-size:12.5px;font-weight:600;color:#18794E">Test du PIN</span></div>
+                <div style="flex:1;height:2px;background:#1FA463;margin:0 12px"></div>
+                <div style="display:flex;align-items:center;gap:8px"><span style="width:24px;height:24px;border-radius:50%;background:#2D63E8;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600">3</span><span style="font-size:12.5px;font-weight:600;color:#2D63E8">Terminé</span></div>
+              </div>
+              <div style="text-align:center">
+                <span style="width:66px;height:66px;border-radius:50%;background:#E7F6EE;border:1px solid #BCE3CC;display:inline-flex;align-items:center;justify-content:center;margin-bottom:16px;box-shadow:0 8px 20px -8px rgba(24,121,78,.45)"><svg width="34" height="34" viewBox="0 0 24 24" fill="none"><path d="m6.5 12.4 3.2 3.2L18 7.2" stroke="#18794E" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                <h3 style="font-size:21px;font-weight:600;letter-spacing:-.01em;margin:0">Tout fonctionne</h3>
+                <p style="font-size:13.5px;color:#7A89A3;margin:9px auto 0;line-height:1.55;max-width:430px">Votre clé, le middleware et la signature qualifiée ont été testés avec succès. Vous êtes prêt à signer.</p>
+              </div>
+              <div style="display:flex;align-items:center;gap:11px;background:#EEF3FE;border:1px solid #DDE7FE;border-radius:11px;padding:13px 15px;margin-top:20px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="flex:none"><circle cx="12" cy="12" r="9" stroke="#2D63E8" stroke-width="1.7"/><path d="M12 11.5v5" stroke="#2D63E8" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="8" r="1.1" fill="#2D63E8"/></svg><div style="font-size:12.5px;color:#2D63E8;line-height:1.5">Aux <strong style="font-weight:600">prochains lancements</strong>, vous arriverez directement sur l'écran principal. Ce wizard ne réapparaîtra qu'en cas de problème détecté.</div></div>
+              <button style="border:none;cursor:pointer;width:100%;margin-top:20px;background:#2D63E8;color:#fff;font-size:14.5px;font-weight:600;padding:14px;border-radius:12px;box-shadow:0 8px 18px -7px rgba(45,99,232,.6);font-family:inherit">Entrer dans EU‑DSS Sign</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </div>
+</div>
+</x-dc>
+</body>
+</html>
