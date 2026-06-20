@@ -194,7 +194,7 @@ export function KeyCertScreen() {
               <button type="button" className="kc-btn-ghost" disabled>
                 Changer le PIN
               </button>
-              <span className="kc-pin-caption">via le middleware ChamberSign</span>
+              <span className="kc-pin-caption">via le middleware PKCS#11 de votre clé</span>
             </div>
           </div>
         </div>

@@ -179,7 +179,7 @@ export function AgentProvider({ children }: { children: ReactNode }) {
               : e.code === 'pin_incorrect'
                 ? 'PIN incorrect.'
                 : e.code === 'token_unavailable'
-                  ? 'Token indisponible : carte non détectée, middleware ChamberSign manquant, ou une autre appli utilise déjà la carte (ferme-la). Voir la checklist Prérequis ci-dessous.'
+                  ? 'Token indisponible : carte non détectée, middleware PKCS#11 manquant, ou une autre appli utilise déjà la carte (ferme-la). Voir la checklist Prérequis ci-dessous.'
                   : (e.message || 'Échec du déverrouillage.'),
           );
         } else {

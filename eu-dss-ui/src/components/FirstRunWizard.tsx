@@ -53,7 +53,7 @@ type Step = 'prereq' | 'pin' | 'verifying' | 'done';
 type RowState = 'checking' | 'ok' | 'waiting';
 
 interface PrereqState {
-  module: RowState; // PKCS#11 middleware (ChamberSign / IDOPTE)
+  module: RowState; // PKCS#11 middleware
   token: RowState; // USB signing key
   backend: RowState; // hosted EU-DSS signing service
 }
@@ -271,7 +271,7 @@ export function FirstRunWizard({ onComplete }: FirstRunWizardProps) {
         if (e.code === 'pin_locked') {
           setLocked(true);
           setPinError(
-            "Carte bloquée (trop d'essais). Déblocage par PUK via le middleware ChamberSign nécessaire.",
+            "Carte bloquée (trop d'essais). Déblocage par PUK via le middleware PKCS#11 de votre clé nécessaire.",
           );
         } else if (e.code === 'pin_incorrect') {
           setPinError('Code PIN incorrect.');
@@ -402,7 +402,7 @@ function PrereqView({ prereq, certCn, tokenReady, docUrl, middlewareUrl, onConti
             <path d="M7 10v4M11 10v4M15 10h2M15 14h2" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
           </svg>
         }
-        title="Middleware PKCS#11 (ChamberSign / IDOPTE)"
+        title="Middleware PKCS#11 de votre clé"
         sub={prereq.module === 'ok' ? 'Pilote PKCS#11 détecté' : 'Pilote cryptographique requis'}
         state={prereq.module}
         okLabel="OK"

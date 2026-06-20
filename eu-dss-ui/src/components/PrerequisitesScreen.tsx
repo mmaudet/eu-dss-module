@@ -8,7 +8,7 @@
  * Architecture note: the design canvas still mentions "localhost:9795". That
  * agent no longer exists. The three rows are re-mapped exactly as the wizard
  * documents:
- *   1. Middleware PKCS#11 (ChamberSign / IDOPTE) — agentApi.isAvailable()
+ *   1. Middleware PKCS#11 — agentApi.isAvailable()
  *   2. Clé USB de signature              — same isAvailable() probe (token present)
  *   3. Service de signature (EU-DSS)     — backendApi.validate('') probe
  * The string "localhost:9795" never appears in this file.
@@ -22,7 +22,7 @@ import { detectOs, PREREQ_MANIFEST } from '../services/prerequisites';
 type RowState = 'checking' | 'ok' | 'waiting';
 
 interface PrereqState {
-  module: RowState;  // PKCS#11 middleware (ChamberSign / IDOPTE)
+  module: RowState;  // PKCS#11 middleware
   token: RowState;   // USB signing key
   backend: RowState; // hosted EU-DSS signing service
 }
@@ -213,10 +213,10 @@ export function PrerequisitesScreen({ onGoToSign }: PrerequisitesScreenProps) {
           <span>{checking ? 'Détection en cours…' : `${readyCount} / 3 prérequis prêts`}</span>
         </div>
 
-        {/* Row 1 — Middleware PKCS#11 (ChamberSign / IDOPTE) */}
+        {/* Row 1 — Middleware PKCS#11 */}
         <PrereqRow
           icon={<MiddlewareIcon />}
-          title="Middleware PKCS#11 (ChamberSign / IDOPTE)"
+          title="Middleware PKCS#11 de votre clé"
           sub={prereq.module === 'ok' ? 'Pilote PKCS#11 détecté' : 'Pilote cryptographique requis'}
           state={prereq.module}
           okLabel="OK"

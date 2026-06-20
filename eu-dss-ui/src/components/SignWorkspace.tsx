@@ -403,7 +403,7 @@ function AgentPanel() {
               <Icon.usb size={19} />
             </span>
             <div style={{ flex: 1 }}>
-              Carte branchée + middleware <b>ChamberSign</b> requis.{' '}
+              Carte branchée + middleware <b>PKCS#11</b> requis.{' '}
               <a className="linkbtn" href={prereq.middleware.url} target="_blank" rel="noreferrer">
                 {prereq.middleware.label}
               </a>{' '}
