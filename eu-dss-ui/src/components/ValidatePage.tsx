@@ -198,7 +198,6 @@ function CheckRow({ label, sub, passed, warn }: { label: string; sub: string; pa
 function ChecksCard({ s }: { s: SignatureSummary }) {
   const passed = s.indication === 'TOTAL_PASSED';
   const failed = s.indication === 'TOTAL_FAILED';
-  const warn = !passed && !failed; // INDETERMINATE
 
   return (
     <div className="vd-checks-card">
@@ -209,33 +208,54 @@ function ChecksCard({ s }: { s: SignatureSummary }) {
           {s.indication}
         </span>
       </div>
-      {/* These check rows reflect the overall per-signature outcome.
-          DSS SignatureSummary does not expose check-level breakdown, so
-          all checks reflect the aggregate indication — no individual checks invented. */}
-      <CheckRow
-        label="Intégrité du document"
-        sub={passed ? "L'empreinte signée correspond au contenu" : failed ? "L'empreinte ne correspond plus au contenu" : "Non vérifiable"}
-        passed={passed}
-        warn={warn}
-      />
-      <CheckRow
-        label="Chaîne de certification"
-        sub={passed ? "Remonte jusqu'à une AC racine de confiance" : failed ? "Chaîne non valide ou AC inconnue" : "Non vérifiable"}
-        passed={passed}
-        warn={warn}
-      />
-      <CheckRow
-        label="Statut de révocation"
-        sub={passed ? "Certificat non révoqué (OCSP / CRL)" : warn ? "OCSP/CRL injoignable" : "Certificat révoqué ou invalide"}
-        passed={passed}
-        warn={warn}
-      />
-      <CheckRow
-        label="Format de signature"
-        sub={s.signatureFormat ? `Format : ${s.signatureFormat}` : "Format non reconnu"}
-        passed={passed}
-        warn={warn}
-      />
+      {passed ? (
+        <>
+          {/* PASS: DSS SignatureSummary does not expose individual check breakdown —
+              but TOTAL_PASSED means all checks passed, so these rows are accurate. */}
+          <CheckRow
+            label="Intégrité du document"
+            sub="L'empreinte signée correspond au contenu"
+            passed={true}
+          />
+          <CheckRow
+            label="Chaîne de certification"
+            sub="Remonte jusqu'à une AC racine de confiance"
+            passed={true}
+          />
+          <CheckRow
+            label="Statut de révocation"
+            sub="Certificat non révoqué (OCSP / CRL)"
+            passed={true}
+          />
+          <CheckRow
+            label="Format de signature"
+            sub={s.signatureFormat ? `Format : ${s.signatureFormat}` : 'Format non reconnu'}
+            passed={true}
+          />
+        </>
+      ) : (
+        /* FAILED / INDETERMINATE: DSS does not expose per-check breakdown in SignatureSummary.
+           Do not assert which specific check failed — show a neutral referral instead. */
+        <div className="vd-check-row">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{ flex: 'none' }}>
+            <circle cx="12" cy="12" r="9.4" fill={failed ? '#FDEEEE' : '#FBF0DA'} />
+            {failed
+              ? <path d="M9 9l6 6M15 9l-6 6" stroke="#C2362F" strokeWidth="1.9" strokeLinecap="round" />
+              : <path d="M12 8.5v4M12 15.5h.01" stroke="#9A6213" strokeWidth="1.9" strokeLinecap="round" />
+            }
+          </svg>
+          <div style={{ flex: 1 }}>
+            <div className="vd-check-title">
+              {failed ? 'Signature invalide' : 'Validité indéterminée'}
+            </div>
+            <div className="vd-check-sub">
+              {failed
+                ? 'Signature invalide — consultez le rapport XML pour le détail.'
+                : 'Validité indéterminée — consultez le rapport XML pour le détail.'}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

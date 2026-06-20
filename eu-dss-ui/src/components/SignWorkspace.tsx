@@ -207,7 +207,7 @@ export function SignWorkspace({ onGoVerify }: SignWorkspaceProps) {
             <path d="M12 3.5 5.5 6v5c0 4 2.7 7.3 6.5 8.5 3.8-1.2 6.5-4.5 6.5-8.5V6L12 3.5Z" stroke="#2D63E8" strokeWidth="1.6" strokeLinejoin="round"/>
             <path d="m9.5 11.8 1.7 1.7 3.4-3.5" stroke="#2D63E8" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
-          Signature qualifiée · eIDAS
+          Signature avancée · eIDAS
         </div>
       </div>
 
@@ -233,7 +233,7 @@ export function SignWorkspace({ onGoVerify }: SignWorkspaceProps) {
             </div>
             <div className="sig-param-row">
               <span className="sig-param-label">Horodatage (TSA)</span>
-              <span className="sig-toggle on" aria-label="Activé">
+              <span className="sig-toggle on" role="img" aria-label="Activé">
                 <span className="sig-toggle-knob" />
               </span>
             </div>
@@ -305,11 +305,24 @@ export function SignWorkspace({ onGoVerify }: SignWorkspaceProps) {
               : 'Signer'}
           </button>
 
-          {/* Agent unavailable banner (compact, below button) */}
-          {status === 'unavailable' && (
-            <AgentPanel />
+          {/* Bulk ZIP download — shown when some docs are signed but not all (partial batch) */}
+          {signedDocs.length > 0 && (
+            <Btn
+              variant="ghost"
+              icon={<Icon.download />}
+              onClick={() =>
+                downloadZip(
+                  signedDocs.map((d) => ({ name: d.signed!.fileName, base64: d.signed!.base64 })),
+                  'documents-signes.zip',
+                )
+              }
+            >
+              Tout télécharger (ZIP)
+            </Btn>
           )}
-          {status === 'error' && (
+
+          {/* Agent unavailable banner (compact, below button) */}
+          {(status === 'checking' || status === 'unavailable' || status === 'error') && (
             <AgentPanel />
           )}
         </div>
@@ -583,7 +596,7 @@ function DocumentsPanel({ docs, addFiles, setDocs, busy }: DocumentsPanelProps) 
           <span className="doc-count-label">
             {docs.length} document{docs.length > 1 ? 's' : ''} prêt{docs.length > 1 ? 's' : ''}
           </span>
-          <span className="doc-count-hint">Format de signature réglable par document</span>
+          <span className="doc-count-hint">Format auto-détecté par type de fichier</span>
         </div>
       )}
 
@@ -638,9 +651,6 @@ function DocumentsPanel({ docs, addFiles, setDocs, busy }: DocumentsPanelProps) 
                 {/* Format pill */}
                 <div className="doc-format-pill">
                   <span className="mono">{isPdf ? 'PAdES‑B‑T' : 'ASiC‑E'}</span>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-                    <path d="m7 10 5 5 5-5" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
                 </div>
 
                 {/* Download if signed */}
@@ -810,7 +820,7 @@ function SuccessView({ signedDocs, cert, reason, location, signedAtIso, onReset,
             {signedDocs.length} document{signedDocs.length > 1 ? 's' : ''} signé{signedDocs.length > 1 ? 's' : ''}
           </h2>
           <p className="sv-hero-sub">
-            Signés avec votre certificat qualifié
+            Signés avec votre certificat
             {signer && <> <strong>{signer}</strong></>} · horodatés le {localStamp}.
           </p>
         </div>
