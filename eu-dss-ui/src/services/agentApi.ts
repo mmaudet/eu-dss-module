@@ -95,7 +95,7 @@ const tauriAgentApi = {
   isAvailable: () => invokeAgent<boolean>('is_available'),
   getStatus: () => invokeAgent<AgentSessionStatus>('status'),
   unlock: (pin: string) => invokeAgent<AgentSessionStatus>('unlock', { pin }),
-  lock: () => invokeAgent<{ status: string }>('lock').then(() => ({ status: 'locked' })),
+  lock: () => invokeAgent<void>('lock').then(() => ({ status: 'locked' })),
   listCertificates: () =>
     invokeAgent<AgentCertificate[]>('list_certificates').then((certificates) => ({ certificates })),
   signDigest: (keyId: string, digestBase64: string, digestAlgorithm: 'SHA256' | 'SHA384' | 'SHA512') =>
