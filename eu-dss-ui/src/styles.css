@@ -212,6 +212,8 @@ body{
   position:relative;
   z-index:30;
 }
+/* macOS: leave room for the native traffic lights (titleBarStyle:Overlay) */
+.titlebar--mac{ padding-left:80px; }
 .titlebar-brand{display:flex;align-items:center;gap:8px;flex:none;}
 .titlebar-mark{
   width:18px;height:18px;border-radius:6px;flex:none;
@@ -325,6 +327,8 @@ body{
   font-size:11px;font-weight:600;color:var(--ink-4);
   padding:3px 9px;border-radius:6px;
   white-space:nowrap;
+  appearance:none;-webkit-appearance:none;
+  background:none;border:none;cursor:pointer;font-family:inherit;line-height:1.45;
 }
 .sb-toggle-opt--active{
   color:#fff;background:var(--brand);
