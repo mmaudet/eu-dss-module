@@ -2,4 +2,5 @@
 
 pub mod digest;
 pub mod error;
+pub mod keyid;
 pub mod mechanism;
