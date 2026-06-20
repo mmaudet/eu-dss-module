@@ -47,11 +47,11 @@ function monthsRemaining(iso: string): number {
   return Math.max(0, months);
 }
 
-/** Format bytes into human-readable size string (Ko / Mo). */
-function fmtSize(bytes: number): string {
-  if (bytes >= 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} Mo`;
-  if (bytes >= 1024) return `${Math.round(bytes / 1024)} Ko`;
-  return `${bytes} o`;
+/** Format bytes into a human-readable size string with a localised unit. */
+function fmtSize(bytes: number, t: TFunction): string {
+  if (bytes >= 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} ${t('size.mega')}`;
+  if (bytes >= 1024) return `${Math.round(bytes / 1024)} ${t('size.kilo')}`;
+  return `${bytes} ${t('size.bytes')}`;
 }
 
 /** Relative time from an ISO timestamp, localised via `t`. */
@@ -85,7 +85,7 @@ function ActivityRow({ entry, last }: { entry: HistoryEntry; last: boolean }) {
   const isVerifyWarn = entry.kind === 'verify' && !isVerifyOk && !isVerifyFail;
 
   const verb = isSigned ? t('accueil.activity.signed') : t('accueil.activity.verified');
-  const subLine = `${verb} ${relativeTime(entry.atIso, t)} · ${fmtSize(entry.sizeBytes)}`;
+  const subLine = `${verb} ${relativeTime(entry.atIso, t)} · ${fmtSize(entry.sizeBytes, t)}`;
 
   return (
     <div

@@ -84,6 +84,12 @@ export const fr = {
   'time.hoursAgo': 'il y a {n} h',
   'time.yesterday': 'hier',
 
+  // Byte-size units (localised per locale)
+  'size.bytes': 'o',
+  'size.kilo': 'Ko',
+  'size.mega': 'Mo',
+  'size.giga': 'Go',
+
   // ── Signer (SignWorkspace) ──────────────────────────────────────────────────
   'sign.title': 'Signer',
   'sign.subtitle': 'Vos documents, signés avec votre clé USB.',
@@ -100,7 +106,7 @@ export const fr = {
   'sign.cert.notConnected': 'Non connectée',
   'sign.cert.awaiting': 'En attente de connexion',
   'sign.cert.insertKey': 'Insérez votre clé USB',
-  'sign.cert.connectAgent': 'Connectez l’agent pour signer.',
+  'sign.cert.connectAgent': 'Insérez votre clé USB pour signer.',
   'sign.cert.lockedPinPrompt': 'Carte verrouillée · votre <strong>code PIN</strong> sera demandé au moment de signer.',
   'sign.cert.unlockedSession': 'Carte déverrouillée · session active ({clock}).',
 
@@ -138,17 +144,16 @@ export const fr = {
   'sign.progress.dontRemove': 'Ne retirez pas votre clé USB',
 
   // Agent panel (within signer)
-  'sign.agent.cardTitle': 'Agent local (clé USB)',
-  'sign.agent.cardDesc': 'Pont sécurisé entre le navigateur et votre carte cryptographique.',
-  'sign.agent.notDetectedTitle': 'Agent local non détecté',
-  'sign.agent.installGuide': 'Guide d\'installation (macOS / Windows)',
+  'sign.agent.cardTitle': 'Clé USB de signature',
+  'sign.agent.cardDesc': 'L\'application accède directement à votre clé via le middleware PKCS#11.',
+  'sign.agent.notDetectedTitle': 'Clé non détectée',
   'sign.agent.recheck': 'Revérifier',
-  'sign.agent.notDetectedBody': 'L\'agent n\'est pas lancé, pas installé, ou son certificat n\'a pas encore été accepté. Il expose',
-  'sign.agent.cardMiddleware': 'Carte branchée + middleware <b>PKCS#11</b> requis.',
-  'sign.agent.drivers': 'Pilotes / PKCS#11',
+  'sign.agent.notDetectedBody': 'Insérez votre clé USB et vérifiez que son middleware PKCS#11 est installé.',
+  'sign.agent.cardMiddleware': 'Middleware <b>PKCS#11</b> de votre clé requis.',
+  'sign.agent.drivers': 'Installer le middleware PKCS#11',
   'sign.agent.detectingTitle': 'Détection en cours…',
-  'sign.agent.detectingBody': 'Contrôle de l\'agent, de la carte et du middleware PKCS#11.',
-  'sign.agent.busyTitle': 'Carte indisponible — token occupé',
+  'sign.agent.detectingBody': 'Détection de la clé et du middleware PKCS#11 de votre clé.',
+  'sign.agent.busyTitle': 'Clé non disponible — token occupé',
   'sign.agent.busyBody': 'Une autre application monopolise la carte (par ex. {app}), ou le token n\'est pas inséré. Fermez l\'autre application puis réessayez.',
   'sign.agent.okHead': 'Agent connecté · carte reconnue',
   'sign.agent.okSub': 'middleware PKCS#11 actif · mode {mode}',
@@ -427,6 +432,12 @@ export const en: Record<TKey, string> = {
   'time.hoursAgo': '{n} h ago',
   'time.yesterday': 'yesterday',
 
+  // Byte-size units
+  'size.bytes': 'B',
+  'size.kilo': 'KB',
+  'size.mega': 'MB',
+  'size.giga': 'GB',
+
   // ── Signer ────────────────────────────────────────────────────────────────────
   'sign.title': 'Sign',
   'sign.subtitle': 'Your documents, signed with your USB key.',
@@ -443,7 +454,7 @@ export const en: Record<TKey, string> = {
   'sign.cert.notConnected': 'Not connected',
   'sign.cert.awaiting': 'Waiting for connection',
   'sign.cert.insertKey': 'Insert your USB key',
-  'sign.cert.connectAgent': 'Connect the agent to sign.',
+  'sign.cert.connectAgent': 'Insert your USB key to sign.',
   'sign.cert.lockedPinPrompt': 'Card locked · your <strong>PIN code</strong> will be requested when you sign.',
   'sign.cert.unlockedSession': 'Card unlocked · session active ({clock}).',
 
@@ -477,17 +488,16 @@ export const en: Record<TKey, string> = {
   'sign.progress.failTag': 'failed',
   'sign.progress.dontRemove': 'Do not remove your USB key',
 
-  'sign.agent.cardTitle': 'Local agent (USB key)',
-  'sign.agent.cardDesc': 'Secure bridge between the browser and your cryptographic card.',
-  'sign.agent.notDetectedTitle': 'Local agent not detected',
-  'sign.agent.installGuide': 'Installation guide (macOS / Windows)',
+  'sign.agent.cardTitle': 'USB signing key',
+  'sign.agent.cardDesc': 'The application accesses your key directly via the PKCS#11 middleware.',
+  'sign.agent.notDetectedTitle': 'Key not detected',
   'sign.agent.recheck': 'Re-check',
-  'sign.agent.notDetectedBody': 'The agent is not running, not installed, or its certificate has not been accepted yet. It is exposed at',
-  'sign.agent.cardMiddleware': 'Card plugged in + <b>PKCS#11</b> middleware required.',
-  'sign.agent.drivers': 'Drivers / PKCS#11',
+  'sign.agent.notDetectedBody': 'Insert your USB key and make sure its PKCS#11 middleware is installed.',
+  'sign.agent.cardMiddleware': '<b>PKCS#11</b> middleware for your key required.',
+  'sign.agent.drivers': 'Install the PKCS#11 middleware',
   'sign.agent.detectingTitle': 'Detecting…',
-  'sign.agent.detectingBody': 'Checking the agent, the card and the PKCS#11 middleware.',
-  'sign.agent.busyTitle': 'Card unavailable — token busy',
+  'sign.agent.detectingBody': 'Detecting your key and its PKCS#11 middleware.',
+  'sign.agent.busyTitle': 'Key unavailable — token busy',
   'sign.agent.busyBody': 'Another application is monopolising the card (e.g. {app}), or the token is not inserted. Close the other application and try again.',
   'sign.agent.okHead': 'Agent connected · card recognised',
   'sign.agent.okSub': 'PKCS#11 middleware active · {mode} mode',

@@ -414,26 +414,12 @@ function AgentPanel() {
             icon={<Icon.alert size={20} />}
             title={t('sign.agent.notDetectedTitle')}
             links={
-              <>
-                <a className="linkbtn" href={prereq.docUrl} target="_blank" rel="noreferrer">
-                  {t('sign.agent.installGuide')}
-                </a>
-                <span className="dot-sep">·</span>
-                <a className="linkbtn" href={prereq.agentInstaller.url} target="_blank" rel="noreferrer">
-                  {prereq.agentInstaller.label}
-                </a>
-                <span className="dot-sep">·</span>
-                <Btn variant="ghost" size="sm" onClick={() => void recheck()} icon={<Icon.refresh size={14} />}>
-                  {t('sign.agent.recheck')}
-                </Btn>
-              </>
+              <Btn variant="ghost" size="sm" onClick={() => void recheck()} icon={<Icon.refresh size={14} />}>
+                {t('sign.agent.recheck')}
+              </Btn>
             }
           >
-            {t('sign.agent.notDetectedBody')}{' '}
-            <span className="mono" style={{ fontSize: 12 }}>
-              https://localhost:9795
-            </span>
-            .
+            {t('sign.agent.notDetectedBody')}
           </Banner>
 
           <div className="banner info" style={{ marginTop: 12 }}>
@@ -443,10 +429,6 @@ function AgentPanel() {
             <div style={{ flex: 1 }}>
               <span dangerouslySetInnerHTML={{ __html: t('sign.agent.cardMiddleware') }} />{' '}
               <a className="linkbtn" href={prereq.middleware.url} target="_blank" rel="noreferrer">
-                {prereq.middleware.label}
-              </a>{' '}
-              <span className="dot-sep">·</span>{' '}
-              <a className="linkbtn" href={prereq.docUrl} target="_blank" rel="noreferrer">
                 {t('sign.agent.drivers')}
               </a>
             </div>
@@ -654,8 +636,8 @@ function DocumentsPanel({ docs, addFiles, setDocs, busy }: DocumentsPanelProps) 
             const k = fileKind(doc.file.name);
             const isPdf = !k.asic;
             const sizeFmt = doc.file.size >= 1024 * 1024
-              ? `${(doc.file.size / (1024 * 1024)).toFixed(1)} Mo`
-              : `${(doc.file.size / 1024).toFixed(0)} Ko`;
+              ? `${(doc.file.size / (1024 * 1024)).toFixed(1)} ${t('size.mega')}`
+              : `${(doc.file.size / 1024).toFixed(0)} ${t('size.kilo')}`;
             const typeLabel = isPdf ? t('sign.docs.typePdf') : t('sign.docs.typeOther', { ext: k.ext });
             return (
               <div className="doc-row" key={doc.id}>
@@ -914,8 +896,8 @@ function SuccessView({ signedDocs, cert, reason, location, signedAtIso, onReset,
             const k = fileKind(d.file.name);
             const isPdf = !k.asic;
             const sizeFmt = d.file.size >= 1024 * 1024
-              ? `${(d.file.size / (1024 * 1024)).toFixed(1)} Mo`
-              : `${(d.file.size / 1024).toFixed(0)} Ko`;
+              ? `${(d.file.size / (1024 * 1024)).toFixed(1)} ${t('size.mega')}`
+              : `${(d.file.size / 1024).toFixed(0)} ${t('size.kilo')}`;
             return (
               <div className="sv-file-row" key={d.id}>
                 <span className={`sv-file-icon ${isPdf ? 'sv-file-icon--pdf' : 'sv-file-icon--office'}`}>
