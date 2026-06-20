@@ -1,4 +1,15 @@
-const BASE = '/api';
+const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
+// In the app, call the hosted backend directly (default: local dev backend; override via VITE_BACKEND_URL).
+const BASE = isTauri ? (import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:8080/api') : '/api';
+
+// In Tauri, use the plugin's fetch (Rust-side request, no browser CORS). In the browser, native fetch.
+async function appFetch(input: string, init?: RequestInit): Promise<Response> {
+  if (isTauri) {
+    const { fetch: tauriFetch } = await import('@tauri-apps/plugin-http');
+    return tauriFetch(input, init);
+  }
+  return fetch(input, init);
+}
 
 export type DigestAlgo = 'SHA256' | 'SHA384' | 'SHA512';
 export type SignatureLevel = 'BASELINE_B' | 'BASELINE_T' | 'BASELINE_LT' | 'BASELINE_LTA';
@@ -40,7 +51,7 @@ export interface ValidationResponse {
 }
 
 async function postJson<T>(path: string, body: unknown): Promise<T> {
-  const res = await fetch(`${BASE}${path}`, {
+  const res = await appFetch(`${BASE}${path}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
