@@ -21,7 +21,10 @@ mod tests {
     #[test]
     fn round_trips_back_to_bytes() {
         let id = key_id_from_cka_id(&[0xde, 0xad, 0xbe, 0xef]);
-        assert_eq!(cka_id_from_key_id(&id).unwrap(), vec![0xde, 0xad, 0xbe, 0xef]);
+        assert_eq!(
+            cka_id_from_key_id(&id).unwrap(),
+            vec![0xde, 0xad, 0xbe, 0xef]
+        );
     }
 
     #[test]

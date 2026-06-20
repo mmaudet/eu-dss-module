@@ -32,7 +32,11 @@ mod tests {
     fn parses_subject_and_issuer() {
         let der = include_bytes!("../tests/fixtures/test-cert.der");
         let info = parse(der).expect("fixture must parse");
-        assert!(info.subject_dn.contains("EUDSS Test"), "subject was {}", info.subject_dn);
+        assert!(
+            info.subject_dn.contains("EUDSS Test"),
+            "subject was {}",
+            info.subject_dn
+        );
         assert!(info.subject_dn.contains("Linagora"));
         // self-signed: issuer == subject
         assert_eq!(info.issuer_dn, info.subject_dn);

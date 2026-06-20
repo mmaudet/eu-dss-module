@@ -74,7 +74,10 @@ mod tests {
         assert_eq!(SignerError::PinLocked.code(), "pin_locked");
         assert_eq!(SignerError::TokenUnavailable.code(), "token_unavailable");
         assert_eq!(SignerError::Locked.code(), "locked");
-        assert_eq!(SignerError::UnknownKeyId("x".into()).code(), "unknown_key_id");
+        assert_eq!(
+            SignerError::UnknownKeyId("x".into()).code(),
+            "unknown_key_id"
+        );
     }
 
     #[test]
@@ -86,8 +89,7 @@ mod tests {
 
     #[test]
     fn maps_pin_locked_from_pkcs11() {
-        let mapped =
-            SignerError::from_pkcs11(CkError::Pkcs11(RvError::PinLocked, Function::Login));
+        let mapped = SignerError::from_pkcs11(CkError::Pkcs11(RvError::PinLocked, Function::Login));
         assert!(matches!(mapped, SignerError::PinLocked));
     }
 
