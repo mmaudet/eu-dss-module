@@ -14,7 +14,9 @@ hex = "0.4"
 
 [dev-dependencies]
 rsa = "0.9"
-sha2 = "0.10"
+sha2 = { version = "0.10", features = ["oid"] }
+x509-parser = "0.16"
+base64 = "0.22"
 
 [[bin]]
 name = "eudss-signer-cli"

@@ -28,19 +28,21 @@ done
 
 PIN=1234
 SOPIN=5678
-softhsm2-util --init-token --free --label eudss-test --pin "$PIN" --so-pin "$SOPIN"
+softhsm2-util --init-token --free --label eudss-test --pin "$PIN" --so-pin "$SOPIN" >&2
 
-# Build a key + self-signed cert outside, bundle to PKCS#12, import the key, then the cert.
+# Build a key + self-signed cert, then import via pkcs11-tool (works with OpenSSL 3+).
 TMP="$(mktemp -d)"
 openssl req -x509 -newkey rsa:2048 -keyout "$TMP/key.pem" -nodes \
-  -out "$TMP/cert.pem" -days 3650 -subj "/CN=EUDSS SoftHSM/O=Linagora"
-openssl pkcs12 -export -inkey "$TMP/key.pem" -in "$TMP/cert.pem" \
-  -out "$TMP/bundle.p12" -passout pass:
-softhsm2-util --import "$TMP/bundle.p12" --token eudss-test \
-  --label eudss-key --id 01 --pin "$PIN" --file-pin ""
+  -out "$TMP/cert.pem" -days 3650 -subj "/CN=EUDSS SoftHSM/O=Linagora" 1>&2 2>&1
+# Convert key to PKCS#8 DER (compatible with pkcs11-tool --write-object --type privkey)
+openssl pkcs8 -topk8 -inform PEM -outform DER -in "$TMP/key.pem" -nocrypt -out "$TMP/key.p8"
 openssl x509 -in "$TMP/cert.pem" -outform DER -out "$TMP/cert.der"
+# Import private key first
 pkcs11-tool --module "$MODULE" --login --pin "$PIN" \
-  --write-object "$TMP/cert.der" --type cert --id 01 --label eudss-cert
+  --write-object "$TMP/key.p8" --type privkey --id 01 --label eudss-key >&2
+# Import certificate
+pkcs11-tool --module "$MODULE" --login --pin "$PIN" \
+  --write-object "$TMP/cert.der" --type cert --id 01 --label eudss-cert >&2
 rm -rf "$TMP"
 
 echo "export SOFTHSM2_CONF=$SOFTHSM2_CONF"

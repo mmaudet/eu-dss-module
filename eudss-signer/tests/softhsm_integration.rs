@@ -1,8 +1,14 @@
 //! Integration tests against a SoftHSM2 token. Skipped unless EUDSS_TEST_PKCS11_MODULE is set
 //! (run `eval "$(tests/setup_softhsm.sh)"` first).
+//!
+//! Tests run under a global Mutex to prevent concurrent PKCS#11 C_Initialize calls
+//! (SoftHSM2 is not safe to initialize from multiple threads simultaneously).
 
 use eudss_signer::Signer;
+use std::sync::Mutex;
 use std::time::Duration;
+
+static TOKEN_LOCK: Mutex<()> = Mutex::new(());
 
 fn test_signer() -> Option<Signer> {
     let module = std::env::var("EUDSS_TEST_PKCS11_MODULE").ok()?;
@@ -11,6 +17,7 @@ fn test_signer() -> Option<Signer> {
 
 #[test]
 fn lists_the_imported_certificate() {
+    let _guard = TOKEN_LOCK.lock().unwrap();
     let Some(signer) = test_signer() else {
         eprintln!("SKIP: EUDSS_TEST_PKCS11_MODULE not set");
         return;
@@ -23,17 +30,24 @@ fn lists_the_imported_certificate() {
 
 #[test]
 fn unlock_with_correct_pin_succeeds() {
+    let _guard = TOKEN_LOCK.lock().unwrap();
     let Some(mut signer) = test_signer() else {
         return;
     };
     let pin = std::env::var("EUDSS_TEST_PKCS11_PIN").unwrap();
     let status = signer.unlock(&pin).expect("unlock");
     assert!(status.unlocked);
-    assert_eq!(status.expires_in_seconds, Some(300));
+    // Allow for sub-second elapsed since unlock; expires_in should be near 300.
+    let secs = status.expires_in_seconds.expect("must have expiry");
+    assert!(
+        (298..=300).contains(&secs),
+        "expected ~300 seconds remaining, got {secs}"
+    );
 }
 
 #[test]
 fn unlock_with_wrong_pin_is_pin_incorrect() {
+    let _guard = TOKEN_LOCK.lock().unwrap();
     let Some(mut signer) = test_signer() else {
         return;
     };
@@ -44,8 +58,8 @@ fn unlock_with_wrong_pin_is_pin_incorrect() {
 }
 
 use base64::{engine::general_purpose::STANDARD, Engine};
-use rsa::pkcs8::DecodePublicKey;
 use rsa::pkcs1v15::{Signature, VerifyingKey};
+use rsa::pkcs8::DecodePublicKey;
 use rsa::signature::Verifier;
 use rsa::RsaPublicKey;
 use sha2::{Digest, Sha256};
@@ -53,6 +67,7 @@ use x509_parser::prelude::*;
 
 #[test]
 fn sign_rsa_digest_verifies_against_cert_public_key() {
+    let _guard = TOKEN_LOCK.lock().unwrap();
     let Some(mut signer) = test_signer() else {
         return;
     };
@@ -75,11 +90,13 @@ fn sign_rsa_digest_verifies_against_cert_public_key() {
 
     let vk = VerifyingKey::<Sha256>::new(rsa_pub);
     let sig = Signature::try_from(sig_bytes.as_slice()).unwrap();
-    vk.verify(message, &sig).expect("signature must verify against the cert key");
+    vk.verify(message, &sig)
+        .expect("signature must verify against the cert key");
 }
 
 #[test]
 fn sign_while_locked_returns_locked() {
+    let _guard = TOKEN_LOCK.lock().unwrap();
     let Some(mut signer) = test_signer() else {
         return;
     };
@@ -93,6 +110,7 @@ fn sign_while_locked_returns_locked() {
 
 #[test]
 fn relocks_after_ttl() {
+    let _guard = TOKEN_LOCK.lock().unwrap();
     let module = match std::env::var("EUDSS_TEST_PKCS11_MODULE") {
         Ok(m) => m,
         Err(_) => return,
@@ -106,10 +124,7 @@ fn relocks_after_ttl() {
     assert!(!signer.status().unlocked);
     let digest_b64 = STANDARD.encode([0u8; 32]);
     assert_eq!(
-        signer
-            .sign("01", &digest_b64, "SHA256")
-            .unwrap_err()
-            .code(),
+        signer.sign("01", &digest_b64, "SHA256").unwrap_err().code(),
         "locked"
     );
 }
