@@ -129,7 +129,7 @@ export function PinModal() {
                   style={{
                     padding: '13px 0',
                     fontSize: k === 'del' ? 14 : 18,
-                    fontFamily: k === 'del' ? 'inherit' : '"JetBrains Mono",monospace',
+                    fontFamily: k === 'del' ? 'inherit' : 'var(--mono)',
                   }}
                   onClick={() => press(k)}
                 >
