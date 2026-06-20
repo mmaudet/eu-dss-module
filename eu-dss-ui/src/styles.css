@@ -472,6 +472,119 @@ body{
 @keyframes shake{0%,100%{transform:translateX(0);}20%,60%{transform:translateX(-7px);}40%,80%{transform:translateX(7px);}}
 .shake{animation:shake .4s;}
 
+/* ── PIN modal (refonte) ── */
+.pm-scrim{
+  position:fixed;inset:0;z-index:60;
+  background:rgba(13,22,42,.5);
+  backdrop-filter:blur(3px);
+  display:flex;align-items:center;justify-content:center;
+  padding:24px;
+  animation:fade .2s both;
+}
+.pm-card{
+  width:min(412px,100%);
+  background:var(--card);
+  border-radius:20px;
+  padding:30px 30px 24px;
+  box-shadow:0 30px 80px -20px rgba(0,0,0,.5);
+  text-align:center;
+  animation:pop .26s cubic-bezier(.2,.8,.3,1) both;
+}
+/* lock icon tile */
+.pm-icon-tile{
+  width:54px;height:54px;border-radius:15px;
+  background:linear-gradient(135deg,var(--brand-soft),var(--brand-ring));
+  display:inline-flex;align-items:center;justify-content:center;
+  margin-bottom:16px;
+}
+.pm-icon-tile--err{
+  background:var(--danger-soft);
+}
+/* title */
+.pm-title{
+  font-size:19px;font-weight:600;letter-spacing:-.01em;
+  margin:0;color:var(--ink);
+}
+/* subtitle */
+.pm-sub{
+  font-size:13px;color:var(--ink-4);
+  margin:7px 0 0;line-height:1.5;
+}
+.pm-sub--err{
+  color:var(--danger);font-weight:500;
+}
+/* PIN dot row */
+.pm-dots{
+  display:flex;justify-content:center;gap:14px;
+  margin:22px 0 4px;
+}
+.pm-dot{
+  width:14px;height:14px;border-radius:50%;
+  border:2px solid var(--brand-ring);
+  box-sizing:border-box;
+  transition:background .12s, border-color .12s;
+}
+.pm-dot--filled{
+  background:var(--brand);
+  border-color:var(--brand);
+}
+.pm-dot--err{
+  border-color:var(--danger-line);
+  background:transparent;
+}
+/* keypad */
+.pm-keypad{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:10px;margin:22px 0 18px;
+}
+.pm-key{
+  height:48px;border-radius:11px;
+  border:1px solid var(--line);
+  background:var(--card);
+  display:flex;align-items:center;justify-content:center;
+  font:inherit;font-size:18px;font-weight:500;color:var(--ink);
+  cursor:pointer;
+  transition:background .12s, border-color .12s;
+}
+.pm-key:not(:disabled):hover{
+  background:var(--main);
+  border-color:var(--ink-6);
+}
+.pm-key:not(:disabled):active{transform:translateY(1px);}
+.pm-key:disabled{opacity:.45;cursor:not-allowed;}
+/* unlock button */
+.pm-unlock-btn{
+  border:none;cursor:pointer;
+  width:100%;
+  display:flex;align-items:center;justify-content:center;gap:9px;
+  background:var(--brand);color:#fff;
+  font-size:14.5px;font-weight:600;
+  padding:14px;border-radius:12px;
+  box-shadow:0 8px 18px -7px rgba(45,99,232,.65);
+  font-family:inherit;
+  margin-bottom:10px;
+  transition:background .12s, box-shadow .12s, transform .04s;
+}
+.pm-unlock-btn:not(:disabled):hover{background:var(--brand-strong);}
+.pm-unlock-btn:not(:disabled):active{transform:translateY(1px);}
+.pm-unlock-btn:disabled{opacity:.5;cursor:not-allowed;box-shadow:none;}
+/* cancel link-style button */
+.pm-cancel-btn{
+  border:none;background:none;cursor:pointer;
+  font-size:13px;color:var(--ink-4);font-weight:500;
+  font-family:inherit;padding:6px;
+  transition:color .12s;
+}
+.pm-cancel-btn:hover:not(:disabled){color:var(--ink-2);}
+.pm-cancel-btn:disabled{opacity:.45;cursor:not-allowed;}
+/* footer note */
+.pm-footer-note{
+  display:flex;align-items:center;justify-content:center;gap:7px;
+  margin-top:14px;padding-top:14px;
+  border-top:1px solid var(--line-3);
+  font-size:11px;color:var(--ink-5);
+}
+
 /* signing overlay progress */
 .sign-prog{display:flex;flex-direction:column;gap:11px;margin-top:4px;}
 .sp-row{display:flex;align-items:center;gap:12px;font-size:13.5px;font-weight:600;}

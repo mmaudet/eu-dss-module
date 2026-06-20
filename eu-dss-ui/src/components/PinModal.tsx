@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAgent } from '../agent/AgentContext';
-import { Btn, Icon } from './ui';
+import { Icon } from './ui';
 
 const KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', 'del'] as const;
 
@@ -57,115 +57,123 @@ export function PinModal() {
 
   return (
     <div
-      className="scrim"
+      className="pm-scrim"
       onClick={(e) => {
         if (e.target === e.currentTarget && !pinBusy) cancelPin();
       }}
     >
-      <div className="modal" role="dialog" aria-modal="true" aria-label="Code PIN de la carte">
-        <div className="modal-h">
-          <div className="mi">
-            <Icon.key size={20} />
-          </div>
-          <div>
-            <h3>Code PIN de la carte</h3>
-            <p>Saisissez le code PIN pour déverrouiller votre certificat qualifié et signer.</p>
-          </div>
+      <div className="pm-card" role="dialog" aria-modal="true" aria-label="Code PIN de la carte">
+
+        {/* Lock icon */}
+        <span className={'pm-icon-tile' + (pinError ? ' pm-icon-tile--err' : '')}>
+          <svg width="25" height="25" viewBox="0 0 24 24" fill="none">
+            <rect x="5" y="11" width="14" height="9" rx="2.2"
+              stroke={pinError ? 'var(--danger)' : 'var(--brand)'} strokeWidth="1.8" />
+            <path d="M8 11V8a4 4 0 0 1 8 0v3"
+              stroke={pinError ? 'var(--danger)' : 'var(--brand)'} strokeWidth="1.8" />
+            <circle cx="12" cy="15.5" r="1.3"
+              fill={pinError ? 'var(--danger)' : 'var(--brand)'} />
+          </svg>
+        </span>
+
+        {/* Title + subtitle */}
+        <h3 className="pm-title">
+          {pinError ? 'Code PIN incorrect' : 'Déverrouiller la carte'}
+        </h3>
+        {pinError ? (
+          <p className="pm-sub pm-sub--err">{pinError}</p>
+        ) : (
+          <p className="pm-sub">
+            Saisissez le code PIN de votre clé.<br />
+            Il n'est jamais enregistré ni transmis.
+          </p>
+        )}
+
+        {/* PIN dots */}
+        <div className={'pm-dots' + (shake ? ' shake' : '')}>
+          {Array.from({ length: 6 }).map((_, i) => {
+            const filled = !!pin[i];
+            const isErr = !!pinError;
+            return (
+              <span
+                key={i}
+                className={
+                  'pm-dot' +
+                  (isErr ? ' pm-dot--err' : filled ? ' pm-dot--filled' : '')
+                }
+              />
+            );
+          })}
         </div>
 
-        <div className="modal-b">
-          <div className={'pin-grid' + (shake ? ' shake' : '')}>
-            {Array.from({ length: 6 }).map((_, i) => {
-              const cls = pinError
-                ? ' err'
-                : pin.length === i
-                  ? ' active'
-                  : pin[i]
-                    ? ' filled'
-                    : '';
-              return (
-                <div key={i} className={'pin-cell' + cls}>
-                  {pin[i] ? '•' : ''}
-                </div>
-              );
-            })}
-          </div>
-
-          {pinError && (
-            <div
-              style={{
-                color: 'var(--danger)',
-                fontSize: 12.5,
-                fontWeight: 700,
-                textAlign: 'center',
-                marginTop: 12,
-                display: 'flex',
-                gap: 6,
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
-            >
-              <Icon.alert size={14} /> {pinError}
-            </div>
+        {/* Numeric keypad */}
+        <div className="pm-keypad">
+          {KEYS.map((k, i) =>
+            k === '' ? (
+              <div key={i} />
+            ) : (
+              <button
+                key={i}
+                type="button"
+                className="pm-key"
+                disabled={pinBusy}
+                onClick={() => press(k)}
+                aria-label={k === 'del' ? 'Effacer' : k}
+              >
+                {k === 'del' ? (
+                  /* Backspace / erase icon matching the design canvas */
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                    <path
+                      d="M20 6H9L4 12l5 6h11a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1Z"
+                      stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round"
+                    />
+                    <path
+                      d="m13 10 4 4m0-4-4 4"
+                      stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"
+                    />
+                  </svg>
+                ) : (
+                  k
+                )}
+              </button>
+            ),
           )}
-
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(3,1fr)',
-              gap: 9,
-              marginTop: 16,
-            }}
-          >
-            {KEYS.map((k, i) =>
-              k === '' ? (
-                <div key={i} />
-              ) : (
-                <button
-                  key={i}
-                  type="button"
-                  className="btn btn-ghost"
-                  disabled={pinBusy}
-                  style={{
-                    padding: '13px 0',
-                    fontSize: k === 'del' ? 14 : 18,
-                    fontFamily: k === 'del' ? 'inherit' : 'var(--mono)',
-                  }}
-                  onClick={() => press(k)}
-                >
-                  {k === 'del' ? <Icon.x size={18} /> : k}
-                </button>
-              ),
-            )}
-          </div>
-
-          <div
-            className="help"
-            style={{
-              marginTop: 14,
-              textAlign: 'center',
-              display: 'flex',
-              gap: 6,
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}
-          >
-            <Icon.shield size={13} /> Le PIN n'est jamais stocké ni transmis. La clé privée ne quitte
-            pas la carte.
-          </div>
         </div>
 
-        <div className="modal-f">
-          <Btn variant="ghost" onClick={cancelPin} disabled={pinBusy}>
-            Annuler
-          </Btn>
-          <Btn
-            onClick={() => void submitPin(pin)}
-            disabled={!canSubmit}
-            icon={<Icon.key size={18} />}
-          >
-            {pinBusy ? 'Déverrouillage…' : 'Déverrouiller'}
-          </Btn>
+        {/* Primary action — Unlock */}
+        <button
+          type="button"
+          className="pm-unlock-btn"
+          disabled={!canSubmit}
+          onClick={() => void submitPin(pin)}
+        >
+          {pinBusy ? (
+            <>
+              <span className="spinner" style={{ width: 16, height: 16 }} />
+              Déverrouillage…
+            </>
+          ) : (
+            <>
+              <Icon.lock size={17} />
+              Déverrouiller &amp; signer
+            </>
+          )}
+        </button>
+
+        {/* Cancel link */}
+        <button
+          type="button"
+          className="pm-cancel-btn"
+          disabled={pinBusy}
+          onClick={cancelPin}
+        >
+          Annuler
+        </button>
+
+        {/* Footer note */}
+        <div className="pm-footer-note">
+          <Icon.clock size={13} />
+          Session active 5 min, puis re‑verrouillage automatique
         </div>
       </div>
     </div>
