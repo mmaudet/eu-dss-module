@@ -16,7 +16,10 @@ public class CorsConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/api/**")
-                .allowedOrigins(props.cors().allowedOrigins().toArray(String[]::new))
+                // allowedOriginPatterns (not allowedOrigins) so Tauri webview origins
+                // (tauri://localhost, http(s)://tauri.localhost) are accepted — the app
+                // talks to its local sidecar backend, not a browser same-origin.
+                .allowedOriginPatterns(props.cors().allowedOrigins().toArray(String[]::new))
                 .allowedMethods("GET", "POST", "OPTIONS")
                 .allowedHeaders("*")
                 .maxAge(3600);

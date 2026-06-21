@@ -18,6 +18,10 @@ eudss:
     allowed-origins:
       - http://localhost:5173
       - http://localhost:3000
+      # Tauri desktop webview origins (the app -> its local sidecar backend)
+      - tauri://localhost
+      - http://tauri.localhost
+      - https://tauri.localhost
 
 logging:
   level:
