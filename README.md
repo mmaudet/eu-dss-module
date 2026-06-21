@@ -94,7 +94,7 @@ L'application se présente à l'utilisateur comme un **installeur unique** qui n
 L'installeur Windows est **signé via Azure Artifact Signing** (pas de blocage SmartScreen). L'UI de l'installeur est en français.
 
 1. Installer le middleware PKCS#11 du fabricant et brancher le token.
-2. Télécharger le `.msi` (ou `.exe` NSIS) depuis les [Artefacts du dernier run CI réussi](#téléchargements--releases).
+2. Télécharger l'installeur depuis la [dernière Release](https://github.com/mmaudet/eu-dss-module/releases/latest) : le `.exe` (NSIS, sans invite UAC) est **recommandé** pour les postes utilisateur ; le `.msi` (signé) convient aux déploiements administrateur. Voir [Téléchargements / Releases](#téléchargements--releases).
 3. Double-cliquer et suivre l'assistant d'installation.
 4. Lancer **EU-DSS Sign** depuis le menu Démarrer, puis suivre l'assistant de première utilisation (prérequis → test du PIN → prêt à signer).
 
@@ -112,7 +112,7 @@ Installer le middleware PKCS#11 du fabricant, brancher le token, puis lancer **E
 
 ### macOS (arm64, Apple Silicon)
 
-1. Télécharger le `.dmg` depuis les [Artefacts du dernier run CI réussi](#téléchargements--releases).
+1. Télécharger le `.dmg` depuis la [dernière Release](https://github.com/mmaudet/eu-dss-module/releases/latest) (voir [Téléchargements / Releases](#téléchargements--releases)).
 2. Ouvrir le `.dmg` et glisser **EU-DSS Sign** dans Applications.
 3. Double-cliquer sur **EU-DSS Sign** : l'app est signée Developer ID **et notarisée par Apple**, Gatekeeper l'ouvre directement.
 4. Installer le middleware PKCS#11 du fabricant, brancher le token, suivre l'assistant.
@@ -175,7 +175,7 @@ eu-dss/
 ├── eu-dss-server/      # Backend Spring Boot (embarqué dans l'app via jpackage)
 ├── eudss-signer/       # Crate Rust PKCS#11
 ├── .github/workflows/
-│   └── tauri-app.yml   # Build CI (Windows/Linux/macOS), déclenché sur feat/ui-refonte
+│   └── tauri-app.yml   # Build CI (Windows/Linux/macOS), déclenché sur main + tags v*
 ├── bin/                # Scripts de développement (serveur, UI dev) — pas pour l'utilisateur final
 ├── packaging/          # Artefacts d'anciens installeurs (eu-dss-agent, obsolètes pour l'utilisateur final)
 └── docs/               # INSTALL.md + specs/plans
@@ -195,17 +195,21 @@ eu-dss/
 
 ## Téléchargements / Releases
 
-Les installeurs sont produits par le workflow CI [`.github/workflows/tauri-app.yml`](.github/workflows/tauri-app.yml), déclenché sur la branche `feat/ui-refonte` ou manuellement.
+**Dernière version : [EU-DSS Sign v1.0.0](https://github.com/mmaudet/eu-dss-module/releases/tag/v1.0.0).**
 
-Pour récupérer les installeurs : aller dans l'onglet **Actions → Tauri app** du dépôt, ouvrir le dernier run réussi, et télécharger les **Artifacts** correspondant à votre OS :
+Téléchargez directement l'installeur correspondant à votre système :
 
-| OS | Artefact | Notes |
+| OS | Installeur | Téléchargement |
 |---|---|---|
-| **Windows** | `.msi` (WiX) ou `.exe` (NSIS) | Signé Azure Artifact Signing ; UI installeur en français |
-| **Linux** | `.deb` + `.rpm` | Debian/Ubuntu : `sudo apt install ./<fichier>.deb` |
-| **macOS** | `.dmg` (arm64 / Apple Silicon) | Developer ID signé **et notarisé Apple** (Gatekeeper l'ouvre directement) |
+| **Windows** (utilisateur, **recommandé**) | `.exe` (NSIS) — installation par utilisateur, **sans invite UAC** | [EU-DSS.Sign_1.0.0_x64-setup.exe](https://github.com/mmaudet/eu-dss-module/releases/download/v1.0.0/EU-DSS.Sign_1.0.0_x64-setup.exe) |
+| **Windows** (administrateur / entreprise) | `.msi` (signé) — déploiement administrateur | [EU-DSS.Sign_1.0.0_x64_fr-FR.msi](https://github.com/mmaudet/eu-dss-module/releases/download/v1.0.0/EU-DSS.Sign_1.0.0_x64_fr-FR.msi) |
+| **macOS** (arm64 / Apple Silicon) | `.dmg` | [EU-DSS.Sign_1.0.0_aarch64.dmg](https://github.com/mmaudet/eu-dss-module/releases/download/v1.0.0/EU-DSS.Sign_1.0.0_aarch64.dmg) |
+| **Linux** (Debian / Ubuntu) | `.deb` | [EU-DSS.Sign_1.0.0_amd64.deb](https://github.com/mmaudet/eu-dss-module/releases/download/v1.0.0/EU-DSS.Sign_1.0.0_amd64.deb) |
+| **Linux** (Fedora / RHEL) | `.rpm` | [EU-DSS.Sign-1.0.0-1.x86_64.rpm](https://github.com/mmaudet/eu-dss-module/releases/download/v1.0.0/EU-DSS.Sign-1.0.0-1.x86_64.rpm) |
 
-> Des GitHub Releases seront publiées prochainement ; en attendant, utiliser les artefacts des runs CI.
+Les installeurs sont **signés** (Windows : Azure Artifact Signing ; macOS : Developer ID + notarisation Apple) et produits automatiquement par le workflow CI [`.github/workflows/tauri-app.yml`](.github/workflows/tauri-app.yml) à chaque tag `v*`.
+
+> Pour les builds de développement (nightly), récupérez les **Artifacts** du dernier run réussi dans l'onglet **Actions → Tauri app** du dépôt.
 
 ---
 

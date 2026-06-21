@@ -19,15 +19,12 @@ serveur à lancer).
 L'installeur Windows est **signé via Azure Artifact Signing** (pas de blocage SmartScreen) et
 l'UI est en français.
 
-1. Ouvrir l'onglet **Actions → Tauri app** du dépôt GitHub.
-2. Cliquer sur le dernier run réussi (coche verte).
-3. Dans la section **Artifacts**, télécharger `eudss-windows-latest`.
-4. Décompresser l'archive : vous obtenez un `.msi` (installeur WiX) et/ou un `.exe` (NSIS).
-   Les deux installent la même application ; le `.msi` est recommandé pour les déploiements en
-   entreprise.
+Téléchargez l'installeur depuis la [Release v1.0.0](https://github.com/mmaudet/eu-dss-module/releases/tag/v1.0.0) :
 
-> Une fois les GitHub Releases publiées, les installeurs seront directement téléchargeables
-> depuis la page Releases — sans passer par les artefacts CI.
+- **Recommandé (poste utilisateur)** : [`EU-DSS.Sign_1.0.0_x64-setup.exe`](https://github.com/mmaudet/eu-dss-module/releases/download/v1.0.0/EU-DSS.Sign_1.0.0_x64-setup.exe) — installeur NSIS, installation **par utilisateur, sans invite UAC**.
+- **Alternative (administrateur / entreprise)** : [`EU-DSS.Sign_1.0.0_x64_fr-FR.msi`](https://github.com/mmaudet/eu-dss-module/releases/download/v1.0.0/EU-DSS.Sign_1.0.0_x64_fr-FR.msi) — installeur MSI signé, adapté aux déploiements administrateur.
+
+Les deux installent la même application.
 
 ### 1.2 Installer le middleware PKCS#11
 
@@ -95,9 +92,10 @@ ni transmis au réseau) :
 
 ### 2.1 Récupérer le paquet
 
-1. Ouvrir l'onglet **Actions → Tauri app** du dépôt GitHub.
-2. Cliquer sur le dernier run réussi.
-3. Télécharger `eudss-ubuntu-22.04` et décompresser : vous obtenez un `.deb` et un `.rpm`.
+Téléchargez le paquet correspondant à votre distribution depuis la [Release v1.0.0](https://github.com/mmaudet/eu-dss-module/releases/tag/v1.0.0) :
+
+- **Debian / Ubuntu** : [`EU-DSS.Sign_1.0.0_amd64.deb`](https://github.com/mmaudet/eu-dss-module/releases/download/v1.0.0/EU-DSS.Sign_1.0.0_amd64.deb)
+- **Fedora / RHEL** : [`EU-DSS.Sign-1.0.0-1.x86_64.rpm`](https://github.com/mmaudet/eu-dss-module/releases/download/v1.0.0/EU-DSS.Sign-1.0.0-1.x86_64.rpm)
 
 ### 2.2 Installer le middleware PKCS#11
 
@@ -140,9 +138,9 @@ sudo apt remove eu-dss-sign     # Debian/Ubuntu
 
 ### 3.1 Récupérer le .dmg
 
-1. Ouvrir l'onglet **Actions → Tauri app** du dépôt GitHub.
-2. Cliquer sur le dernier run réussi.
-3. Télécharger `eudss-macos-latest` et décompresser : vous obtenez un `.dmg`.
+Téléchargez le `.dmg` depuis la [Release v1.0.0](https://github.com/mmaudet/eu-dss-module/releases/tag/v1.0.0) : [`EU-DSS.Sign_1.0.0_aarch64.dmg`](https://github.com/mmaudet/eu-dss-module/releases/download/v1.0.0/EU-DSS.Sign_1.0.0_aarch64.dmg).
+
+Il est **signé Developer ID et notarisé par Apple** : un simple double-clic suffit, aucun contournement Gatekeeper n'est nécessaire.
 
 ### 3.2 Installer le middleware PKCS#11
 
@@ -159,16 +157,9 @@ Branchez votre token USB.
 
 ### 3.4 Premier lancement — Gatekeeper
 
-L'application est **signée Developer ID** (Linagora). La notarisation Apple est en cours de
-finalisation : jusqu'à ce qu'elle soit complète, Gatekeeper peut afficher un avertissement au
-premier lancement.
-
-**Contournement** : **clic droit → Ouvrir** sur l'icône EU-DSS Sign dans Applications, puis
-confirmer dans la boîte de dialogue.
-
-Ou via les réglages système : Réglages Système → Confidentialité et sécurité → « Ouvrir quand même ».
-
-> Une fois la notarisation finalisée, ce contournement ne sera plus nécessaire.
+L'application est **signée Developer ID** (Linagora) **et notarisée par Apple**. Gatekeeper
+l'ouvre donc directement : un simple **double-clic** sur l'icône EU-DSS Sign dans Applications
+suffit, aucun contournement n'est nécessaire.
 
 ### 3.5 Assistant de prérequis
 
@@ -197,7 +188,6 @@ Suivre l'assistant au premier lancement (middleware → token → test PIN → p
 | **Token non détecté** | Token non branché, ou une autre application monopolise la carte. | Brancher le token, fermer les autres applis de carte à puce, cliquer **« Revérifier »**. |
 | **Bouton « Signer » indisponible** | Backend embarqué en cours de démarrage (quelques secondes au premier lancement). | Attendre quelques secondes que l'indicateur de statut passe au vert. |
 | **« PIN incorrect »** | Mauvais code PIN. | Ressaisir. ⚠️ **Après ~3 essais erronés, la carte se bloque** (déblocage auprès de l'émetteur). |
-| **macOS : « application endommagée » / Gatekeeper** | Notarisation en cours de finalisation. | Clic droit → Ouvrir (voir §3.4). |
 
 ---
 
