@@ -116,6 +116,7 @@ jobs:
             security list-keychains -d user -s "$KEYCHAIN" $(security list-keychains -d user | sed 's/"//g')
             "$JAVA_HOME/bin/jpackage" \
               --type app-image --name eu-dss-server --app-version 1.0.0 --vendor LINAGORA \
+              --java-options "-Djava.awt.headless=true" \
               --input "$JAR_DIR" --main-jar eu-dss-server-0.1.0-SNAPSHOT.jar --dest "$OUT_DIR" \
               --mac-sign --mac-signing-key-user-name "Linagora (KUT463DS29)"
             cp -R "$OUT_DIR/eu-dss-server.app" "$DEST/eu-dss-server.app"
@@ -123,6 +124,7 @@ jobs:
           else
             "$JAVA_HOME/bin/jpackage" \
               --type app-image --name eu-dss-server --app-version 1.0.0 --vendor LINAGORA \
+              --java-options "-Djava.awt.headless=true" \
               --input "$JAR_DIR" --main-jar eu-dss-server-0.1.0-SNAPSHOT.jar --dest "$OUT_DIR"
             cp -R "$OUT_DIR/eu-dss-server/." "$DEST/"
           fi
@@ -141,6 +143,7 @@ jobs:
             --name eu-dss-server `
             --app-version 1.0.0 `
             --vendor LINAGORA `
+            --java-options "-Djava.awt.headless=true" `
             --input "$jarDir" `
             --main-jar eu-dss-server-0.1.0-SNAPSHOT.jar `
             --dest "$outDir"

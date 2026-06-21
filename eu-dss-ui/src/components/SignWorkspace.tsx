@@ -39,6 +39,12 @@ function fmtClock(s: number): string {
   return `${m}:${ss.toString().padStart(2, '0')}`;
 }
 
+/** Pre-select the most appropriate signature form based on file name/type.
+ *  PDF → PAdES; everything else → ASiC-E (matches backend auto-detect logic). */
+function defaultForm(name: string): SignatureForm {
+  return fileKind(name).asic ? 'ASIC_E' : 'PADES';
+}
+
 /** The form actually applied to a doc, resolving "auto" to the backend default. */
 function effectiveForm(doc: SignDoc): SignatureForm {
   if (doc.signatureForm) return doc.signatureForm;
@@ -115,6 +121,7 @@ export function SignWorkspace({ onGoVerify }: SignWorkspaceProps) {
       file,
       status: 'pending',
       existingSignatures: null,
+      signatureForm: defaultForm(file.name),
     }));
     if (added.length === 0) return;
     setDocs((d) => [...d, ...added]);
