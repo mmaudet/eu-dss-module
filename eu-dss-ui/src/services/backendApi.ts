@@ -1,6 +1,32 @@
 const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
-// In the app, call the hosted backend directly (default: local dev backend; override via VITE_BACKEND_URL).
-const BASE = isTauri ? (import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:8080/api') : '/api';
+
+/**
+ * Resolve the backend API base URL.
+ *  - In Tauri: the embedded Java backend runs as a local sidecar on a
+ *    dynamically-chosen 127.0.0.1 port. We ask Rust once (`backend_base`) and
+ *    cache the Promise so every request reuses the same resolved base.
+ *    `VITE_BACKEND_URL` still overrides (e.g. to point at a hosted backend).
+ *  - In the browser (dev/preview): same-origin `/api`.
+ */
+let basePromise: Promise<string> | null = null;
+
+export function resolveBase(): Promise<string> {
+  if (basePromise) return basePromise;
+  if (!isTauri) {
+    basePromise = Promise.resolve('/api');
+    return basePromise;
+  }
+  const override = import.meta.env.VITE_BACKEND_URL;
+  if (override) {
+    basePromise = Promise.resolve(override);
+    return basePromise;
+  }
+  basePromise = (async () => {
+    const { invoke } = await import('@tauri-apps/api/core');
+    return invoke<string>('backend_base');
+  })();
+  return basePromise;
+}
 
 // In Tauri, use the plugin's fetch (Rust-side request, no browser CORS). In the browser, native fetch.
 async function appFetch(input: string, init?: RequestInit): Promise<Response> {
@@ -61,7 +87,8 @@ export interface ValidationResponse {
 }
 
 async function postJson<T>(path: string, body: unknown): Promise<T> {
-  const res = await appFetch(`${BASE}${path}`, {
+  const base = await resolveBase();
+  const res = await appFetch(`${base}${path}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
@@ -73,7 +100,36 @@ async function postJson<T>(path: string, body: unknown): Promise<T> {
   return res.json() as Promise<T>;
 }
 
+/**
+ * Is the backend ready to serve requests?
+ *  - In Tauri: ask Rust for the embedded sidecar's readiness flag, which is
+ *    flipped once its `GET /api/health` returns 200 (so the prereq row shows
+ *    "En attente" → "OK" as the sidecar boots). Falls back to a live health GET
+ *    if the command is unavailable.
+ *  - In the browser: a direct `GET <base>/health` (any 2xx = ready).
+ */
+async function isReady(): Promise<boolean> {
+  if (isTauri && !import.meta.env.VITE_BACKEND_URL) {
+    try {
+      const { invoke } = await import('@tauri-apps/api/core');
+      return await invoke<boolean>('backend_ready');
+    } catch {
+      /* fall through to a live health probe */
+    }
+  }
+  try {
+    const base = await resolveBase();
+    const res = await appFetch(`${base}/health`, { method: 'GET' });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
 export const backendApi = {
+  /** True once the (embedded, in Tauri) backend can serve requests. */
+  ready: isReady,
+
   prepare: (documentBase64: string, documentName: string, params: SignatureParams) =>
     postJson<PrepareResponse>('/sign/prepare', { documentBase64, documentName, params }),
 

@@ -81,6 +81,59 @@ jobs:
         working-directory: eu-dss-ui
         run: npm ci
 
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Build + stage embedded backend (Unix)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mvn -B -f pom.xml -pl eu-dss-server -am -DskipTests package
+          JAR_DIR="$(mktemp -d)"
+          OUT_DIR="$(mktemp -d)"
+          cp eu-dss-server/target/eu-dss-server-0.1.0-SNAPSHOT.jar "$JAR_DIR/"
+          "$JAVA_HOME/bin/jpackage" \
+            --type app-image \
+            --name eu-dss-server \
+            --app-version 1.0.0 \
+            --vendor LINAGORA \
+            --input "$JAR_DIR" \
+            --main-jar eu-dss-server-0.1.0-SNAPSHOT.jar \
+            --dest "$OUT_DIR"
+          DEST="eu-dss-ui/src-tauri/resources/eu-dss-server"
+          mkdir -p "$DEST"
+          if [ "$RUNNER_OS" = "macOS" ]; then
+            cp -R "$OUT_DIR/eu-dss-server.app/Contents" "$DEST/Contents"
+          else
+            cp -R "$OUT_DIR/eu-dss-server/." "$DEST/"
+          fi
+          ls -la "$DEST"
+
+      - name: Build + stage embedded backend (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          mvn -B -f pom.xml -pl eu-dss-server -am -DskipTests package
+          $jarDir = New-TemporaryFile | ForEach-Object { Remove-Item $_; New-Item -ItemType Directory -Path $_ }
+          $outDir = New-TemporaryFile | ForEach-Object { Remove-Item $_; New-Item -ItemType Directory -Path $_ }
+          Copy-Item eu-dss-server\target\eu-dss-server-0.1.0-SNAPSHOT.jar $jarDir\
+          & "$env:JAVA_HOME\bin\jpackage.exe" `
+            --type app-image `
+            --name eu-dss-server `
+            --app-version 1.0.0 `
+            --vendor LINAGORA `
+            --input "$jarDir" `
+            --main-jar eu-dss-server-0.1.0-SNAPSHOT.jar `
+            --dest "$outDir"
+          $dest = "eu-dss-ui\src-tauri\resources\eu-dss-server"
+          New-Item -ItemType Directory -Force -Path $dest | Out-Null
+          Copy-Item -Recurse -Force "$outDir\eu-dss-server\*" $dest
+          Get-ChildItem $dest
+
       - name: Build Tauri app (unsigned)
         uses: tauri-apps/tauri-action@v0
         with:

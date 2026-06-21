@@ -168,21 +168,13 @@ export function FirstRunWizard({ onComplete }: FirstRunWizardProps) {
       .then((ok) => (ok ? 'ok' : 'waiting') as RowState)
       .catch(() => 'waiting' as RowState);
 
-    // (3) backend reachable: any HTTP response (even an error status) means
-    //     reachable; a thrown network error means unreachable. validate('')
-    //     is a cheap probe.
+    // (3) backend ready: the embedded EU-DSS sidecar's readiness flag, which
+    //     flips true once its /api/health answers 200. ready() never throws,
+    //     but we guard defensively.
     const backendPromise = backendApi
-      .validate('')
-      .then(() => 'ok' as RowState)
-      .catch((e: unknown) => {
-        // A thrown Error from postJson means the request failed at the network
-        // layer OR the server answered with a non-2xx (which still proves
-        // reachability). We distinguish: our postJson throws "path → HTTP nnn:"
-        // for HTTP responses, and a bare TypeError ("Failed to fetch") for
-        // network failures.
-        const msg = (e as Error).message || '';
-        return /HTTP \d{3}/.test(msg) ? ('ok' as RowState) : ('waiting' as RowState);
-      });
+      .ready()
+      .then((ok) => (ok ? 'ok' : 'waiting') as RowState)
+      .catch(() => 'waiting' as RowState);
 
     const [tokenState, backendState] = await Promise.all([tokenPromise, backendPromise]);
     setPrereq({ module: tokenState, token: tokenState, backend: backendState });
@@ -192,6 +184,17 @@ export function FirstRunWizard({ onComplete }: FirstRunWizardProps) {
   useEffect(() => {
     if (step === 'prereq') void detect();
   }, [step, detect]);
+
+  // Light polling while on the prereq step: the embedded backend boots
+  // asynchronously, so re-probe every 1.5s until the backend row is OK (the
+  // token/middleware rows also benefit from rechecking as the user plugs the
+  // key in). The interval clears when we leave the prereq step.
+  useEffect(() => {
+    if (step !== 'prereq') return;
+    if (prereq.backend === 'ok' && prereq.token === 'ok') return;
+    const id = setInterval(() => void detect(), 1500);
+    return () => clearInterval(id);
+  }, [step, prereq.backend, prereq.token, detect]);
 
   const tokenReady = prereq.token === 'ok';
 

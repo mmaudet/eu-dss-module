@@ -10,11 +10,11 @@
  * documents:
  *   1. Middleware PKCS#11 — agentApi.isAvailable()
  *   2. Clé USB de signature              — same isAvailable() probe (token present)
- *   3. Service de signature (EU-DSS)     — backendApi.validate('') probe
+ *   3. Service de signature (EU-DSS)     — backendApi.ready() (embedded sidecar)
  * The string "localhost:9795" never appears in this file.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { agentApi } from '../services/agentApi';
 import { backendApi } from '../services/backendApi';
 import { detectOs, PREREQ_MANIFEST } from '../services/prerequisites';
@@ -157,7 +157,8 @@ export function PrerequisitesScreen({ onGoToSign }: PrerequisitesScreenProps) {
    * Detection mirrors FirstRunWizard.detect() exactly:
    * - module + token both derive from the same agentApi.isAvailable() probe
    *   (we surface two honest rows; we never invent a state we cannot detect).
-   * - backend: any HTTP response (even non-2xx) = reachable; TypeError = not.
+   * - backend: the embedded EU-DSS sidecar's readiness (backendApi.ready()),
+   *   which flips true once its /api/health answers 200.
    */
   const detect = useCallback(async () => {
     setPrereq({ module: 'checking', token: 'checking', backend: 'checking' });
@@ -168,12 +169,9 @@ export function PrerequisitesScreen({ onGoToSign }: PrerequisitesScreenProps) {
       .catch(() => 'waiting' as RowState);
 
     const backendPromise = backendApi
-      .validate('')
-      .then(() => 'ok' as RowState)
-      .catch((e: unknown) => {
-        const msg = (e as Error).message || '';
-        return /HTTP \d{3}/.test(msg) ? ('ok' as RowState) : ('waiting' as RowState);
-      });
+      .ready()
+      .then((ok) => (ok ? 'ok' : 'waiting') as RowState)
+      .catch(() => 'waiting' as RowState);
 
     const [tokenState, backendState] = await Promise.all([tokenPromise, backendPromise]);
     setPrereq({ module: tokenState, token: tokenState, backend: backendState });
@@ -181,6 +179,20 @@ export function PrerequisitesScreen({ onGoToSign }: PrerequisitesScreenProps) {
 
   useEffect(() => {
     void detect();
+  }, [detect]);
+
+  // Light polling: the embedded backend boots asynchronously, so re-probe every
+  // 1.5s until all three rows are OK (then stop). Mirrors the sidecar going
+  // "En attente" → "OK" without forcing a manual retry.
+  const allOkRef = useRef(false);
+  allOkRef.current = prereq.module === 'ok' && prereq.token === 'ok' && prereq.backend === 'ok';
+  useEffect(() => {
+    if (allOkRef.current) return;
+    const id = setInterval(() => {
+      if (allOkRef.current) return;
+      void detect();
+    }, 1500);
+    return () => clearInterval(id);
   }, [detect]);
 
   const checking =

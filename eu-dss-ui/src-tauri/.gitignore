@@ -2,3 +2,8 @@
 # will have compiled files and executables
 /target/
 /gen/schemas
+
+# Backend app-image is staged here by CI/build; keep the dir (via .gitkeep) but
+# never commit the bundled jpackage payload.
+/resources/eu-dss-server/*
+!/resources/eu-dss-server/.gitkeep

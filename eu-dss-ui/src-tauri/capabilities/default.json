@@ -13,7 +13,11 @@
     "core:window:allow-close",
     {
       "identifier": "http:default",
-      "allow": [{ "url": "http://localhost:8080/*" }, { "url": "https://*/*" }]
+      "allow": [
+        { "url": "http://127.0.0.1:*/*" },
+        { "url": "http://localhost:*/*" },
+        { "url": "https://*/*" }
+      ]
     }
   ]
 }
