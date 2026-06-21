@@ -345,6 +345,7 @@ export const fr = {
   'prereq.row.backendOk': 'Service de signature joignable',
   'prereq.row.backendWait': 'Connexion au service requise',
   'prereq.continue': 'Continuer vers Signer',
+  'prereq.relaunchWizard': 'Relancer l\'assistant de configuration',
 
   // ── FirstRunWizard ──────────────────────────────────────────────────────────
   'wizard.dialogLabel': 'Configuration initiale',
@@ -739,6 +740,7 @@ export const en: Record<TKey, string> = {
   'prereq.row.backendOk': 'Signing service reachable',
   'prereq.row.backendWait': 'Connection to the service required',
   'prereq.continue': 'Continue to Sign',
+  'prereq.relaunchWizard': 'Relaunch the setup assistant',
 
   // ── FirstRunWizard ──────────────────────────────────────────────────────────────
   'wizard.dialogLabel': 'Initial setup',

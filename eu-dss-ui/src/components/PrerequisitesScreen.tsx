@@ -30,6 +30,8 @@ interface PrereqState {
 
 interface PrerequisitesScreenProps {
   onGoToSign: () => void;
+  /** Resets onboarding and re-shows the first-run wizard (setup again / demos / testing). */
+  onRelaunchWizard: () => void;
 }
 
 /* ── icon atoms ────────────────────────────────────────────────────────────── */
@@ -67,6 +69,16 @@ function RetryIcon() {
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
       <path d="M20 11a8 8 0 10-2 5.3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
       <path d="M20 5v5h-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function WizardIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+      <path d="M20 11a8 8 0 10-2 5.3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <path d="M20 5v5h-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M12 8v4l2.5 1.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
@@ -143,7 +155,7 @@ function PrereqRow({ icon, title, sub, state, okLabel, helpHref, onRetry }: Prer
 
 /* ── component ────────────────────────────────────────────────────────────── */
 
-export function PrerequisitesScreen({ onGoToSign }: PrerequisitesScreenProps) {
+export function PrerequisitesScreen({ onGoToSign, onRelaunchWizard }: PrerequisitesScreenProps) {
   const t = useT();
   const [prereq, setPrereq] = useState<PrereqState>({
     module: 'checking',
@@ -267,6 +279,18 @@ export function PrerequisitesScreen({ onGoToSign }: PrerequisitesScreenProps) {
         >
           {t('prereq.continue')}
           <ArrowRightIcon />
+        </button>
+
+        {/* Replay the first-run wizard (setup again / demos / testing).
+            Low-emphasis: the onboarding "done" flag persists across reinstalls,
+            so this is the only way to bring the wizard back on demand. */}
+        <button
+          type="button"
+          className="prq-relaunch-btn"
+          onClick={onRelaunchWizard}
+        >
+          <WizardIcon />
+          {t('prereq.relaunchWizard')}
         </button>
       </div>
     </div>

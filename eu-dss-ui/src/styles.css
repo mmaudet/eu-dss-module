@@ -1887,6 +1887,18 @@ body{
   cursor:not-allowed;box-shadow:none;
 }
 
+/* Secondary, low-emphasis action: replay the first-run wizard */
+.prq-relaunch-btn{
+  border:none;background:none;cursor:pointer;font-family:inherit;
+  display:flex;align-items:center;justify-content:center;gap:7px;
+  width:100%;margin-top:14px;padding:9px;
+  font-size:12.5px;font-weight:500;color:var(--ink-5);
+  border-radius:9px;
+  transition:color .12s, background .12s;
+}
+.prq-relaunch-btn:hover{color:var(--ink-4);background:var(--line-3);}
+.prq-relaunch-btn:active{color:var(--brand);}
+
 /* ════════════════════════════════════════════════════════════════════════
    Accueil / tableau de bord (AccueilScreen.tsx)
    ════════════════════════════════════════════════════════════════════════ */

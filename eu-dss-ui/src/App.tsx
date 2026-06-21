@@ -283,7 +283,11 @@ function Sidebar({ tab, setTab, theme, setTheme }: SidebarProps) {
 
 // ── Shell ───────────────────────────────────────────────────────────────────
 
-function Shell() {
+interface ShellProps {
+  onRelaunchWizard: () => void;
+}
+
+function Shell({ onRelaunchWizard }: ShellProps) {
   const [tab, setTab] = useState<Tab>('accueil');
   const [theme, setTheme] = useState<ThemePref>(() => store.getTheme());
 
@@ -300,7 +304,7 @@ function Shell() {
           ) : tab === 'verify' ? (
             <ValidatePage />
           ) : tab === 'prerequis' ? (
-            <PrerequisitesScreen onGoToSign={() => setTab('sign')} />
+            <PrerequisitesScreen onGoToSign={() => setTab('sign')} onRelaunchWizard={onRelaunchWizard} />
           ) : (
             <KeyCertScreen />
           )}
@@ -397,11 +401,19 @@ function DeepLinkHandler() {
 export function App() {
   const [onboarded, setOnboarded] = useState(() => store.getOnboarding().passed);
 
+  // Replay the first-run wizard on demand (e.g. setup again after a reinstall,
+  // demos, testing). Clearing the persisted "passed" flag and flipping
+  // `onboarded` back to false re-renders App into the wizard branch immediately.
+  const relaunchWizard = () => {
+    store.resetOnboarding();
+    setOnboarded(false);
+  };
+
   return (
     <AgentProvider>
       <ToastProvider>
         {onboarded ? (
-          <Shell />
+          <Shell onRelaunchWizard={relaunchWizard} />
         ) : (
           <div className="shell">
             <TitleBar />
