@@ -32,5 +32,8 @@ logs/
 .superpowers/
 docs/superpowers/
 
+# Test client runtime output (signed docs received on the callback)
+test-client/received/
+
 # TS build cache
 *.tsbuildinfo
