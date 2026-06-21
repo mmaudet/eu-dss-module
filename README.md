@@ -114,7 +114,7 @@ Installer le middleware PKCS#11 du fabricant, brancher le token, puis lancer **E
 
 1. Télécharger le `.dmg` depuis les [Artefacts du dernier run CI réussi](#téléchargements--releases).
 2. Ouvrir le `.dmg` et glisser **EU-DSS Sign** dans Applications.
-3. Au premier lancement : **clic droit → Ouvrir** (la notarisation Apple est en cours de finalisation ; Gatekeeper peut demander une confirmation).
+3. Double-cliquer sur **EU-DSS Sign** : l'app est signée Developer ID **et notarisée par Apple**, Gatekeeper l'ouvre directement.
 4. Installer le middleware PKCS#11 du fabricant, brancher le token, suivre l'assistant.
 
 Détails et captures d'écran → **[`docs/INSTALL.md`](docs/INSTALL.md)**.
@@ -203,7 +203,7 @@ Pour récupérer les installeurs : aller dans l'onglet **Actions → Tauri app**
 |---|---|---|
 | **Windows** | `.msi` (WiX) ou `.exe` (NSIS) | Signé Azure Artifact Signing ; UI installeur en français |
 | **Linux** | `.deb` + `.rpm` | Debian/Ubuntu : `sudo apt install ./<fichier>.deb` |
-| **macOS** | `.dmg` (arm64 / Apple Silicon) | Developer ID signé ; notarisation en cours de finalisation — au premier lancement, clic droit → Ouvrir |
+| **macOS** | `.dmg` (arm64 / Apple Silicon) | Developer ID signé **et notarisé Apple** (Gatekeeper l'ouvre directement) |
 
 > Des GitHub Releases seront publiées prochainement ; en attendant, utiliser les artefacts des runs CI.
 
@@ -212,7 +212,7 @@ Pour récupérer les installeurs : aller dans l'onglet **Actions → Tauri app**
 ## Documentation
 
 - **[`docs/INSTALL.md`](docs/INSTALL.md)** : guide d'installation et de premiers pas (Windows, macOS, Linux), avec captures d'écran.
-- **[`docs/superpowers/`](docs/superpowers)** : specs et plans d'implémentation des incréments.
+- **[`docs/deeplink-integration.md`](docs/deeplink-integration.md)** : intégration `eudss://` — signer / valider un document depuis une application web externe, avec exemples JavaScript.
 
 ---
 
@@ -222,12 +222,13 @@ Disponible et vérifié :
 
 - **Signature PAdES-B-T (PDF) et XAdES-B-T / ASiC** (autres formats) ; niveaux B / T / LT / LTA, empreintes SHA-256/384/512.
 - **Vérification** de documents signés (avec trust list FR via LOTL).
+- **Intégration par deep-link** `eudss://` : signer ou valider un document depuis une application web externe (voir [`docs/deeplink-integration.md`](docs/deeplink-integration.md)).
 - **PIN saisi au moment de signer** (session PIN avec reverrouillage automatique après inactivité).
 - **Assistant de prérequis** dans l'UI (détecte le middleware, la carte, et guide l'utilisateur).
-- **Installeurs autonomes** (JRE + backend embarqués, aucun prérequis Java côté utilisateur) : **Windows** (`.msi` / `.exe`, signé) · **Linux** (`.deb` / `.rpm`) · **macOS arm64** (`.dmg`, Developer ID signé, notarisation en cours).
+- **Installeurs autonomes** (JRE + backend embarqués, aucun prérequis Java côté utilisateur) : **Windows** (`.msi` / `.exe`, signé Azure) · **Linux** (`.deb` / `.rpm`) · **macOS arm64** (`.dmg`, Developer ID signé **et notarisé Apple**).
 - Vérifiés de bout en bout (signature + vérification avec une clé ChamberSign) sur **Windows**, **macOS** et **Linux** (Ubuntu 24.04).
 
-En cours : notarisation Apple complète pour macOS, Firefox/NSS, multi-utilisateur.
+En cours : Firefox/NSS (trust list dans NSS), multi-utilisateur.
 
 ---
 

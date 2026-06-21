@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { AgentProvider, useAgent } from './agent/AgentContext';
 import { AccueilScreen } from './components/AccueilScreen';
 import { DeepLinkSignModal } from './components/DeepLinkSignModal';
+import { DeepLinkVerifyModal } from './components/DeepLinkVerifyModal';
 import { FirstRunWizard } from './components/FirstRunWizard';
 import { KeyCertScreen } from './components/KeyCertScreen';
 import { PinModal } from './components/PinModal';
@@ -312,17 +313,24 @@ function Shell() {
 
 // ── Deep-link handler (eudss://) ──────────────────────────────────────────────
 // Mounts both onOpenUrl (link opened while running) and getCurrent (cold start)
-// so external `eudss://sign?…` requests work in every case. Only the `sign`
-// action is handled; other actions are ignored with a warning.
+// so external `eudss://…` requests work in every case. The `sign` action opens
+// the signing overlay and `verify` opens the validation overlay; any other
+// action is ignored with a warning. Each overlay has its own busy guard so a
+// second request of the same kind is ignored while one is in flight.
 
 function DeepLinkHandler() {
-  const [activeUrl, setActiveUrl] = useState<string | null>(null);
-  // Avoid handling a second link while one is already in flight.
-  const busyRef = useRef(false);
+  const [signUrl, setSignUrl] = useState<string | null>(null);
+  const [verifyUrl, setVerifyUrl] = useState<string | null>(null);
+  // Avoid handling a second link (of the same kind) while one is in flight.
+  const signBusyRef = useRef(false);
+  const verifyBusyRef = useRef(false);
 
   useEffect(() => {
-    busyRef.current = activeUrl !== null;
-  }, [activeUrl]);
+    signBusyRef.current = signUrl !== null;
+  }, [signUrl]);
+  useEffect(() => {
+    verifyBusyRef.current = verifyUrl !== null;
+  }, [verifyUrl]);
 
   useEffect(() => {
     if (!('__TAURI_INTERNALS__' in window)) return; // deep links are Tauri-only
@@ -339,15 +347,23 @@ function DeepLinkHandler() {
       } catch {
         host = '';
       }
-      if (host !== 'sign') {
-        console.warn('[deep-link] ignoring unsupported eudss:// action:', url);
+      if (host === 'sign') {
+        if (signBusyRef.current) {
+          console.warn('[deep-link] a signing request is already in progress; ignoring:', url);
+          return;
+        }
+        setSignUrl(url);
         return;
       }
-      if (busyRef.current) {
-        console.warn('[deep-link] a signing request is already in progress; ignoring:', url);
+      if (host === 'verify') {
+        if (verifyBusyRef.current) {
+          console.warn('[deep-link] a validation request is already in progress; ignoring:', url);
+          return;
+        }
+        setVerifyUrl(url);
         return;
       }
-      setActiveUrl(url);
+      console.warn('[deep-link] ignoring unsupported eudss:// action:', url);
     };
 
     void (async () => {
@@ -368,7 +384,12 @@ function DeepLinkHandler() {
     };
   }, []);
 
-  return <DeepLinkSignModal url={activeUrl} onClose={() => setActiveUrl(null)} />;
+  return (
+    <>
+      <DeepLinkSignModal url={signUrl} onClose={() => setSignUrl(null)} />
+      <DeepLinkVerifyModal url={verifyUrl} onClose={() => setVerifyUrl(null)} />
+    </>
+  );
 }
 
 // ── App root ────────────────────────────────────────────────────────────────

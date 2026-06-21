@@ -2,9 +2,10 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAgent } from '../agent/AgentContext';
 import type { AgentCertificate } from '../services/agentApi';
 import { backendApi, type SignatureParams } from '../services/backendApi';
-import { arrayBufferToBase64, downloadBase64 } from '../services/fileUtils';
+import { downloadBase64 } from '../services/fileUtils';
 import { defaultSignatureForm, signDocumentToBase64 } from '../services/signFlow';
 import { useT, type TFunction } from '../i18n';
+import { appFetch, fetchDoc, type FetchedDoc } from './deepLinkShared';
 import { Btn, Icon } from './ui';
 import { useToast } from './Toast';
 
@@ -22,18 +23,6 @@ import { useToast } from './Toast';
  * touch the normal multi-doc workspace.
  */
 
-const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
-
-/** Same CORS-free transport backendApi uses: in Tauri go through the http
- *  plugin (Rust-side request), in the browser use native fetch. */
-async function appFetch(input: string, init?: RequestInit): Promise<Response> {
-  if (isTauri) {
-    const { fetch: tauriFetch } = await import('@tauri-apps/plugin-http');
-    return tauriFetch(input, init);
-  }
-  return fetch(input, init);
-}
-
 type Phase = 'loading' | 'starting' | 'confirm' | 'signing' | 'sending' | 'success' | 'error';
 
 interface ParsedRequest {
@@ -43,69 +32,6 @@ interface ParsedRequest {
   callbackHost: string;
   /** Opaque, echoed verbatim in the callback; never interpreted. */
   state: string | null;
-}
-
-interface FetchedDoc {
-  documentBase64: string;
-  fileName: string;
-  mediaType: string;
-}
-
-/** Guess a media type from a file name extension (best-effort, for the POST body). */
-function mediaTypeFor(fileName: string): string {
-  const ext = (fileName.split('.').pop() || '').toLowerCase();
-  switch (ext) {
-    case 'pdf':
-      return 'application/pdf';
-    case 'xml':
-      return 'application/xml';
-    case 'txt':
-      return 'text/plain';
-    case 'docx':
-      return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
-    case 'xlsx':
-      return 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-    case 'pptx':
-      return 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
-    case 'odt':
-      return 'application/vnd.oasis.opendocument.text';
-    case 'ods':
-      return 'application/vnd.oasis.opendocument.spreadsheet';
-    case 'odp':
-      return 'application/vnd.oasis.opendocument.presentation';
-    case 'asice':
-      return 'application/vnd.etsi.asic-e+zip';
-    default:
-      return 'application/octet-stream';
-  }
-}
-
-/** Derive a filename from the URL path's last segment (URL-decoded). */
-function fileNameFromUrl(rawUrl: string): string {
-  try {
-    const u = new URL(rawUrl);
-    const last = u.pathname.split('/').filter(Boolean).pop();
-    if (last) return decodeURIComponent(last);
-  } catch {
-    /* fall through */
-  }
-  return 'document';
-}
-
-/** Extract a filename from a Content-Disposition header, if present. */
-function fileNameFromContentDisposition(header: string | null): string | null {
-  if (!header) return null;
-  // filename*=UTF-8''encoded  takes precedence over  filename="plain"
-  const star = /filename\*=(?:UTF-8'')?([^;]+)/i.exec(header);
-  if (star?.[1]) {
-    try {
-      return decodeURIComponent(star[1].trim().replace(/^"|"$/g, ''));
-    } catch {
-      /* ignore */
-    }
-  }
-  const plain = /filename="?([^";]+)"?/i.exec(header);
-  return plain?.[1]?.trim() || null;
 }
 
 /** Parse + validate an eudss:// URL. Returns null for anything that isn't a
@@ -216,21 +142,9 @@ export function DeepLinkSignModal({ url, onClose }: DeepLinkSignModalProps) {
 
       setPhase('loading');
       try {
-        const res = await appFetch(parsed.docUrl);
-        if (!res.ok) {
-          fail(t('deeplink.error.fetchFailed'), runId);
-          return;
-        }
-        const buf = await res.arrayBuffer();
-        const fileName =
-          fileNameFromContentDisposition(res.headers.get('content-disposition')) ||
-          fileNameFromUrl(parsed.docUrl);
+        const fetched = await fetchDoc(parsed.docUrl);
         if (runId !== runIdRef.current) return;
-        setDoc({
-          documentBase64: arrayBufferToBase64(buf),
-          fileName,
-          mediaType: mediaTypeFor(fileName),
-        });
+        setDoc(fetched);
         setPhase('confirm');
       } catch {
         fail(t('deeplink.error.fetchFailed'), runId);

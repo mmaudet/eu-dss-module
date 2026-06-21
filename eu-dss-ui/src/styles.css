@@ -708,6 +708,25 @@ body{
   margin-bottom:18px;
   color:var(--ok-ink);
 }
+/* deep-link verify — verdict hero (re-uses ok/danger/warn tokens, both themes) */
+.dl-verdict-hero{
+  width:66px;height:66px;border-radius:50%;
+  display:inline-flex;align-items:center;justify-content:center;
+}
+.dl-verdict-hero--ok{
+  background:var(--ok-soft);border:1px solid var(--ok-line);color:var(--ok-ink);
+  box-shadow:0 8px 20px -8px rgba(24,121,78,.45);
+}
+.dl-verdict-hero--danger{
+  background:var(--danger-soft);border:1px solid var(--danger-line);color:var(--danger);
+  box-shadow:0 8px 20px -8px rgba(194,54,47,.40);
+}
+.dl-verdict-hero--warn{
+  background:var(--warn-soft);border:1px solid var(--warn-line);color:var(--warn);
+  box-shadow:0 8px 20px -8px rgba(154,98,19,.40);
+}
+.dl-sig-date{color:var(--ink-4);}
+
 .sv-hero h2{
   font-size:24px;font-weight:600;letter-spacing:-.02em;margin:0;color:var(--ink);
 }
