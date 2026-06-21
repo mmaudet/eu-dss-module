@@ -68,7 +68,7 @@ interface SidebarProps {
 function Sidebar({ tab, setTab, theme, setTheme }: SidebarProps) {
   const t = useT();
   const { lang, setLang } = useLang();
-  const [version, setVersion] = useState('1.0.0');
+  const [version, setVersion] = useState('1.1.0');
 
   // Read the app version from Tauri at runtime; fall back to the constant
   // above when running in the browser/dev or if the call fails.
