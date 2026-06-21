@@ -198,6 +198,22 @@ jobs:
           if [ -z "$APP" ]; then echo "::error::no .app found"; exit 1; fi
           echo "Signing: $APP"
 
+          # ── 2b. Re-sign the embedded JRE inside-out BEFORE sealing the outer app.
+          #        jpackage's own signatures on its generated launcher + libjli.dylib
+          #        are rejected by notarization ("the signature of the binary is
+          #        invalid"); overwrite the whole embedded app tree with valid
+          #        Developer-ID + hardened-runtime + timestamped signatures (--deep,
+          #        deepest-first), using the JRE entitlements (JIT / unsigned-exec-mem /
+          #        disable-library-validation, which the JVM needs under hardened runtime).
+          EMB="$APP/Contents/Resources/eu-dss-server/eu-dss-server.app"
+          if [ ! -d "$EMB" ]; then echo "::error::embedded server app not found: $EMB"; exit 1; fi
+          codesign --force --deep --timestamp --options runtime \
+            --entitlements eu-dss-ui/src-tauri/macos-app.entitlements \
+            --sign "Developer ID Application: Linagora (KUT463DS29)" \
+            "$EMB"
+          # the two binaries notarization flagged before must now verify strictly
+          codesign --verify --deep --strict --verbose=2 "$EMB"
+
           # ── 3. Sign the OUTER .app WITHOUT --deep (preserves nested jpackage sigs) ──
           codesign --force --timestamp --options runtime \
             --entitlements eu-dss-ui/src-tauri/macos-app.entitlements \
