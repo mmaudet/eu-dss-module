@@ -24,8 +24,10 @@ import eu.europa.esig.dss.tsl.source.LOTLSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.event.EventListener;
 
 import java.io.File;
 
@@ -39,6 +41,10 @@ public class DssConfig {
     private static final char[] OJ_KEYSTORE_PWD = "dss-password".toCharArray();
     // ChamberSign is a French QTSP -> only the FR trusted list is needed (much faster than the full LOTL).
     private static final String[] TL_COUNTRIES = {"FR"};
+
+    /** Retained after bean creation so the post-startup listener can trigger the refresh. */
+    private TLValidationJob tlValidationJobRef;
+    private boolean lotlEnabledFlag;
 
     @Bean
     public CommonsDataLoader commonsDataLoader() {
@@ -80,18 +86,38 @@ public class DssConfig {
         lotl.setTlPredicate(TLPredicateFactory.createEUTLCountryCodePredicate(TL_COUNTRIES));
         job.setListOfTrustedListSources(lotl);
 
+        // Store references for the post-startup background refresh (see refreshLotlAsync below).
+        this.tlValidationJobRef = job;
+        this.lotlEnabledFlag = lotlEnabled;
+
         if (!lotlEnabled) {
-            LOG.info("eudss.lotl.enabled=false -> skipping EU LOTL refresh (no trust anchors; validation stays INDETERMINATE)");
-            return job;
-        }
-        try {
-            LOG.info("Refreshing EU LOTL (countries={}) ...", (Object) TL_COUNTRIES);
-            job.onlineRefresh();
-            LOG.info("Trusted lists loaded: {} trusted certificates", trustedListSource.getCertificates().size());
-        } catch (Exception e) {
-            LOG.warn("LOTL refresh failed: {} -> validation will be INDETERMINATE (no trust anchors)", e.toString());
+            LOG.info("eudss.lotl.enabled=false -> EU LOTL refresh disabled (validation stays INDETERMINATE)");
         }
         return job;
+    }
+
+    /**
+     * Triggers the EU LOTL online refresh on a background thread AFTER the Spring context is
+     * fully started (ApplicationReadyEvent), so the HTTP server (including /api/health) is
+     * available immediately and does not block on the network fetch.
+     * Graceful degradation: if the refresh fails the validator continues with INDETERMINATE results.
+     */
+    @EventListener(ApplicationReadyEvent.class)
+    public void refreshLotlAsync() {
+        if (!lotlEnabledFlag) {
+            return;
+        }
+        Thread t = new Thread(() -> {
+            try {
+                LOG.info("Background LOTL refresh started (countries={}) ...", (Object) TL_COUNTRIES);
+                tlValidationJobRef.onlineRefresh();
+                LOG.info("Background LOTL refresh complete.");
+            } catch (Exception e) {
+                LOG.warn("Background LOTL refresh failed: {} -> validation will be INDETERMINATE (no trust anchors)", e.toString());
+            }
+        }, "lotl-refresh");
+        t.setDaemon(true);
+        t.start();
     }
 
     @Bean
