@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useAgent } from '../agent/AgentContext';
 import { downloadBase64 } from '../services/fileUtils';
 import { Btn, Icon } from './ui';
+import { useToast } from './Toast';
 import { useLang, useT } from '../i18n';
 
 // ── DN parsing (same helpers as SignWorkspace) ───────────────────────────────
@@ -58,6 +59,7 @@ async function sha256Hex(base64: string): Promise<string> {
 export function KeyCertScreen() {
   const agent = useAgent();
   const t = useT();
+  const toast = useToast();
   const { lang } = useLang();
   const { status, locked, secondsLeft, selectedCert, ensureUnlocked } = agent;
 
@@ -116,11 +118,13 @@ export function KeyCertScreen() {
 
   function handleExport() {
     if (!selectedCert) return;
-    downloadBase64(
-      selectedCert.certificateBase64,
-      'certificat.cer',
-      'application/x-x509-ca-cert',
-    );
+    const filename = 'certificat.cer';
+    try {
+      downloadBase64(selectedCert.certificateBase64, filename, 'application/x-x509-ca-cert');
+      toast.success(t('cert.exportOk', { filename }));
+    } catch {
+      toast.error(t('download.error'));
+    }
   }
 
   return (

@@ -6,6 +6,7 @@ import { arrayBufferToBase64, downloadBase64 } from '../services/fileUtils';
 import { defaultSignatureForm, signDocumentToBase64 } from '../services/signFlow';
 import { useT, type TFunction } from '../i18n';
 import { Btn, Icon } from './ui';
+import { useToast } from './Toast';
 
 /**
  * DeepLinkSignModal — single-shot overlay that handles an external
@@ -504,6 +505,7 @@ function ErrorBlock({
   fallback: { base64: string; fileName: string; mediaType: string } | null;
   onClose: () => void;
 }) {
+  const toast = useToast();
   return (
     <>
       <span className="pm-icon-tile pm-icon-tile--err" style={{ marginBottom: 16 }}>
@@ -525,7 +527,14 @@ function ErrorBlock({
         {fallback && (
           <Btn
             icon={<Icon.download size={16} />}
-            onClick={() => downloadBase64(fallback.base64, fallback.fileName, fallback.mediaType)}
+            onClick={() => {
+              try {
+                downloadBase64(fallback.base64, fallback.fileName, fallback.mediaType);
+                toast.success(t('download.ok', { filename: fallback.fileName }));
+              } catch {
+                toast.error(t('download.error'));
+              }
+            }}
           >
             {t('common.download')}
           </Btn>

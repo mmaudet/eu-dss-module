@@ -7,6 +7,7 @@ import { detectOs, PREREQ_MANIFEST } from '../services/prerequisites';
 import { downloadBase64, downloadZip, fileToBase64 } from '../services/fileUtils';
 import { history } from '../services/history';
 import { Banner, Btn, Card, CertGrid, fileKind, Icon, Tag } from './ui';
+import { useToast } from './Toast';
 import { useLang, useT, type TFunction, type TKey } from '../i18n';
 
 type DocStatus = 'pending' | 'signing' | 'signed' | 'error';
@@ -101,6 +102,7 @@ interface SignWorkspaceProps {
 export function SignWorkspace({ onGoVerify }: SignWorkspaceProps) {
   const agent = useAgent();
   const t = useT();
+  const toast = useToast();
   const { status, selectedKeyId, selectedCert } = agent;
 
   const [docs, setDocs] = useState<SignDoc[]>([]);
@@ -368,12 +370,17 @@ export function SignWorkspace({ onGoVerify }: SignWorkspaceProps) {
             <Btn
               variant="ghost"
               icon={<Icon.download />}
-              onClick={() =>
-                downloadZip(
-                  signedDocs.map((d) => ({ name: d.signed!.fileName, base64: d.signed!.base64 })),
-                  'documents-signes.zip',
-                )
-              }
+              onClick={() => {
+                try {
+                  downloadZip(
+                    signedDocs.map((d) => ({ name: d.signed!.fileName, base64: d.signed!.base64 })),
+                    'documents-signes.zip',
+                  );
+                  toast.success(t('download.zipOk', { n: signedDocs.length }));
+                } catch {
+                  toast.error(t('download.error'));
+                }
+              }}
             >
               {t('common.downloadAllZip')}
             </Btn>
@@ -575,6 +582,7 @@ interface DocumentsPanelProps {
 
 function DocumentsPanel({ docs, addFiles, setDocs, busy }: DocumentsPanelProps) {
   const t = useT();
+  const toast = useToast();
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
 
@@ -721,9 +729,14 @@ function DocumentsPanel({ docs, addFiles, setDocs, busy }: DocumentsPanelProps) 
                     variant="soft"
                     size="sm"
                     icon={<Icon.download size={15} />}
-                    onClick={() =>
-                      downloadBase64(doc.signed!.base64, doc.signed!.fileName, doc.signed!.mediaType)
-                    }
+                    onClick={() => {
+                      try {
+                        downloadBase64(doc.signed!.base64, doc.signed!.fileName, doc.signed!.mediaType);
+                        toast.success(t('download.ok', { filename: doc.signed!.fileName }));
+                      } catch {
+                        toast.error(t('download.error'));
+                      }
+                    }}
                   >
                     {t('common.download')}
                   </Btn>
@@ -864,6 +877,7 @@ interface SuccessViewProps {
 
 function SuccessView({ signedDocs, cert, reason, location, signedAtIso, onReset, onGoVerify }: SuccessViewProps) {
   const t = useT();
+  const toast = useToast();
   const { lang } = useLang();
   const signer = cnOf(cert?.subjectDn);
   const issuer = issuerOf(cert?.issuerDn);
@@ -935,7 +949,14 @@ function SuccessView({ signedDocs, cert, reason, location, signedAtIso, onReset,
                   variant="soft"
                   size="sm"
                   icon={<Icon.download size={14} />}
-                  onClick={() => downloadBase64(d.signed!.base64, d.signed!.fileName, d.signed!.mediaType)}
+                  onClick={() => {
+                    try {
+                      downloadBase64(d.signed!.base64, d.signed!.fileName, d.signed!.mediaType);
+                      toast.success(t('download.ok', { filename: d.signed!.fileName }));
+                    } catch {
+                      toast.error(t('download.error'));
+                    }
+                  }}
                 >
                   {t('common.download')}
                 </Btn>
@@ -950,12 +971,17 @@ function SuccessView({ signedDocs, cert, reason, location, signedAtIso, onReset,
             size="lg"
             icon={<Icon.download size={16} />}
             disabled={signedDocs.length === 0}
-            onClick={() =>
-              downloadZip(
-                signedDocs.map((d) => ({ name: d.signed!.fileName, base64: d.signed!.base64 })),
-                'documents-signes.zip',
-              )
-            }
+            onClick={() => {
+              try {
+                downloadZip(
+                  signedDocs.map((d) => ({ name: d.signed!.fileName, base64: d.signed!.base64 })),
+                  'documents-signes.zip',
+                );
+                toast.success(t('download.zipOk', { n: signedDocs.length }));
+              } catch {
+                toast.error(t('download.error'));
+              }
+            }}
           >
             {t('common.downloadAllZip')}
           </Btn>

@@ -33,6 +33,12 @@ export const fr = {
   'common.ok': 'OK',
   'common.unknownError': 'Erreur inconnue',
 
+  // ── Downloads (toast feedback) ──────────────────────────────────────────────
+  'download.ok': '✓ Document téléchargé : {filename} (dossier Téléchargements)',
+  'download.zipOk': '✓ Archive ZIP téléchargée ({n} documents)',
+  'download.error': 'Échec du téléchargement du document.',
+  'cert.exportOk': '✓ Certificat exporté : {filename}',
+
   // ── Sidebar / navigation ────────────────────────────────────────────────────
   'nav.brandSub': 'Signature électronique',
   'nav.groupSignature': 'SIGNATURE',
@@ -405,6 +411,12 @@ export const en: Record<TKey, string> = {
   'common.waiting': 'Waiting',
   'common.ok': 'OK',
   'common.unknownError': 'Unknown error',
+
+  // ── Downloads (toast feedback) ──────────────────────────────────────────────
+  'download.ok': '✓ Document downloaded: {filename} (Downloads folder)',
+  'download.zipOk': '✓ ZIP archive downloaded ({n} documents)',
+  'download.error': 'Failed to download the document.',
+  'cert.exportOk': '✓ Certificate exported: {filename}',
 
   // ── Sidebar / navigation ────────────────────────────────────────────────────
   'nav.brandSub': 'Electronic signature',

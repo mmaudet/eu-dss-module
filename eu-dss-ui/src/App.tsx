@@ -8,6 +8,7 @@ import { PinModal } from './components/PinModal';
 import { PrerequisitesScreen } from './components/PrerequisitesScreen';
 import { SignWorkspace } from './components/SignWorkspace';
 import { TitleBar } from './components/TitleBar';
+import { ToastProvider } from './components/Toast';
 import { ValidatePage } from './components/ValidatePage';
 import { store } from './services/store';
 import type { ThemePref } from './services/store';
@@ -377,15 +378,17 @@ export function App() {
 
   return (
     <AgentProvider>
-      {onboarded ? (
-        <Shell />
-      ) : (
-        <div className="shell">
-          <TitleBar />
-          <FirstRunWizard onComplete={() => setOnboarded(true)} />
-        </div>
-      )}
-      <DeepLinkHandler />
+      <ToastProvider>
+        {onboarded ? (
+          <Shell />
+        ) : (
+          <div className="shell">
+            <TitleBar />
+            <FirstRunWizard onComplete={() => setOnboarded(true)} />
+          </div>
+        )}
+        <DeepLinkHandler />
+      </ToastProvider>
     </AgentProvider>
   );
 }
