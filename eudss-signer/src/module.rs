@@ -25,7 +25,10 @@ impl std::fmt::Display for ModuleResolutionError {
              to the absolute path of the module library"
         )?;
         if let Some(ref p) = self.env_override {
-            write!(f, " (EUDSS_PKCS11_MODULE={p:?} was set but the file does not exist)")?;
+            write!(
+                f,
+                " (EUDSS_PKCS11_MODULE={p:?} was set but the file does not exist)"
+            )?;
         }
         if !self.candidates_tried.is_empty() {
             write!(f, "; tried candidates:")?;
