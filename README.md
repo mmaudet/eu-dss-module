@@ -1,24 +1,24 @@
-# eu-dss
+# EU-DSS Sign
 
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](LICENSE)
 ![Java 21](https://img.shields.io/badge/Java-21-007396?logo=openjdk&logoColor=white)
 ![React 19](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
 ![EU DSS 6.4](https://img.shields.io/badge/EU_DSS-6.4-003399)
 
-> Application web pour **signer et vérifier des documents** (PAdES / ASiC) à l'aide d'une **clé USB cryptographique** (carte à puce / token PKCS#11), construite sur la bibliothèque **EU DSS** (Digital Signature Services, v6.4).
+> Application de bureau pour **signer et vérifier des documents** (PAdES / XAdES / ASiC) à l'aide d'une **clé USB cryptographique** (carte à puce / token PKCS#11), construite sur la bibliothèque **EU DSS** (Digital Signature Services, v6.4). L'application est autonome : elle embarque son propre backend Java — aucun serveur séparé à installer ni à lancer.
 
-Public visé : utilisateurs disposant d'un token de signature qualifiée (ex. **ChamberSign**, middleware **IDOPTE**) qui souhaitent signer des PDF ou d'autres documents en PAdES-B-T / ASiC depuis leur poste, ainsi que les développeurs qui font tourner ou étendent la plateforme.
+Public visé : utilisateurs disposant d'un token de signature (ex. **ChamberSign**, middleware **IDOPTE**) qui souhaitent signer des PDF ou d'autres documents en **PAdES-B-T** / **XAdES-B-T** / **ASiC** depuis leur poste (Windows, macOS, Linux), ainsi que les développeurs qui font évoluer la plateforme.
 
 - **Installation utilisateur (Windows, macOS & Linux)** : voir le guide pas-à-pas [`docs/INSTALL.md`](docs/INSTALL.md).
-- **Téléchargements** : voir [Releases](#téléchargements--releases).
+- **Téléchargements** : voir [Téléchargements / Releases](#téléchargements--releases).
 
 ---
 
 ## Aperçu
 
-**Signer** : agent local connecté, certificat de signature qualifié détaillé, puis flux de signature :
+**Signer** : token connecté, certificat de signature affiché, puis flux de signature :
 
-![EU-DSS Sign, Signer : agent connecté + certificat qualifié](docs/images/app/02-signer-connecte.png)
+![EU-DSS Sign, Signer : agent connecté + certificat](docs/images/app/02-signer-connecte.png)
 
 **Vérifier** : verdict eIDAS (TOTAL_PASSED) et rapport DSS détaillé :
 
@@ -30,209 +30,189 @@ Public visé : utilisateurs disposant d'un token de signature qualifiée (ex. **
 
 ## Comment ça marche
 
+**EU-DSS Sign** est une application de bureau Tauri (Rust + React). Elle **embarque le backend EU DSS** (Spring Boot, jpackagé en app-image avec son propre JRE) : au démarrage, l'application le lance sur un port local `127.0.0.1:<port>` choisi automatiquement et attend qu'il réponde. L'utilisateur n'a rien à installer ni démarrer manuellement.
+
 Le **modèle de sécurité** repose sur trois principes :
 
-1. **La clé privée reste sur le token.** L'agent ne reçoit jamais la clé ni ne l'exporte. Le serveur lui transmet une **empreinte (digest)** à signer, et l'agent renvoie la **valeur de signature calculée par la carte**.
-2. **Agent local en HTTPS sur `https://localhost:9795`**, avec un certificat auto-signé `CN=localhost` (SAN `localhost` / `127.0.0.1`) généré **par poste**. Les installeurs **Windows MSI** et **macOS `.pkg`** rendent ce certificat de confiance automatiquement ; par la voie « jar » (développement) il est accepté une fois dans le navigateur.
-3. **PIN au moment de signer.** L'agent démarre **verrouillé**. Le PIN est saisi dans l'application au moment de signer (`/rest/unlock`), n'est jamais mis en cache, et la session se reverrouille après un délai d'inactivité (5 min par défaut).
+1. **La clé privée reste sur le token.** L'app ne reçoit jamais la clé ni ne l'exporte. Le backend lui transmet une **empreinte (digest)** à signer, et le token renvoie la **valeur de signature calculée par la carte**.
+2. **PKCS#11 directement depuis l'app (Rust, crate `eudss-signer`).** L'accès à la carte se fait via la bibliothèque PKCS#11 du middleware fourni par le fabricant (IDOPTE, etc.) ; la clé privée ne transite pas sur le réseau.
+3. **PIN au moment de signer.** Le PIN est saisi dans l'application au moment de signer, jamais mis en cache, et la session se reverrouille après un délai d'inactivité (5 min par défaut).
 
 ### Flux de signature (3 allers-retours)
 
 ```
-  Navigateur (UI :5173)        Serveur (:8080, EU DSS)        Agent (:9795, token PKCS#11)
-        │                              │                               │
-        │ 1. /api/sign/prepare ───────▶│                               │
-        │    (document + paramètres)   │  getDataToSign + digest       │
-        │◀──── empreinte (digest) ─────│                               │
-        │                              │                               │
-        │ 2. /rest/sign (digest) ──────┼──────────────────────────────▶│  la CARTE signe l'empreinte
-        │◀──── valeur de signature ────┼───────────────────────────────│  (clé privée jamais exposée)
-        │                              │                               │
-        │ 3. /api/sign/assemble ──────▶│  embarque la signature        │
-        │    (document + signature)    │  (PAdES / ASiC)               │
-        │◀──── document signé ─────────│                               │
-        ▼                              ▼                               ▼
+  Application (UI Tauri)       Backend embarqué (:port local, EU DSS)   Token PKCS#11
+        │                              │                                       │
+        │ 1. /api/sign/prepare ───────▶│                                       │
+        │    (document + paramètres)   │  getDataToSign + digest               │
+        │◀──── empreinte (digest) ─────│                                       │
+        │                              │                                       │
+        │ 2. PKCS#11 (Rust) ──────────┼──────────────────────────────────────▶│  la CARTE signe l'empreinte
+        │◀──── valeur de signature ───────────────────────────────────────────│  (clé privée jamais exposée)
+        │                              │                                       │
+        │ 3. /api/sign/assemble ──────▶│  embarque la signature                │
+        │    (document + signature)    │  (PAdES / ASiC)                       │
+        │◀──── document signé ─────────│                                       │
+        ▼                              ▼                                       ▼
 ```
 
-L'agent expose en plus `/rest/unlock` (saisie du PIN), `/rest/lock`, `/rest/status` et `/rest/certificates` (pour afficher le certificat de signature dans l'UI). Niveau de signature par défaut : **PAdES-B-T** (les conteneurs ASiC sont en **XAdES-B-T**) ; les niveaux **B / T / LT / LTA** et les empreintes **SHA-256 / 384 / 512** sont également pris en charge. L'horodatage (niveau T) utilise une TSA en ligne (par défaut `https://freetsa.org/tsr`).
+Niveau de signature par défaut : **PAdES-B-T** (PDF) / **XAdES-B-T** (ASiC, autres formats) ; les niveaux **B / T / LT / LTA** et les empreintes **SHA-256 / 384 / 512** sont pris en charge. L'horodatage (niveau T) utilise une TSA en ligne (par défaut `https://freetsa.org/tsr`).
+
+> Les signatures produites sont des **signatures électroniques avancées** (eIDAS). L'application ne peut pas certifier qu'elles sont qualifiées — cela dépend du certificat porté par le token.
 
 ---
 
 ## Architecture / modules
 
-| Module | Rôle | Stack | Port |
-|---|---|---|---|
-| [`eu-dss-agent`](eu-dss-agent) | Agent local : pont PKCS#11 vers le token, signe une empreinte, gère la session PIN (verrou/déverrou) | Java 21, Javalin 6.7, DSS `dss-token`, BouncyCastle (TLS auto-signé), jar « shaded » | **9795** (HTTPS) |
-| [`eu-dss-server`](eu-dss-server) | Backend de signature/vérification : workflow PAdES/ASiC (préparer l'empreinte → assembler la signature), validation, trust list (LOTL FR) | Java 21, Spring Boot 3.4, EU DSS 6.4 (`dss-pades-pdfbox`, `dss-asic-xades`, `dss-validation`, `dss-tsl-validation`…) | **8080** |
-| [`eu-dss-ui`](eu-dss-ui) | Interface web : onglets **Signer** / **Vérifier**, assistant de prérequis (agent / carte / middleware), modale PIN | Vite 6, React 19, TypeScript 5.7 ; proxy `/api` → `:8080` | **5173** (dev) |
+L'application se présente à l'utilisateur comme un **installeur unique** qui ne nécessite rien d'autre. En interne, le dépôt contient plusieurs modules :
 
-`eu-dss-server` et `eu-dss-agent` sont des modules Maven (parent `com.linagora.eudss:eu-dss-parent`, version `0.1.0-SNAPSHOT`). `eu-dss-ui` est un projet Node/npm indépendant.
+| Module | Rôle | Stack |
+|---|---|---|
+| [`eu-dss-ui`](eu-dss-ui) | Application de bureau Tauri : UI React (onglets **Signer** / **Vérifier**, assistant de prérequis, modale PIN) + shell Rust (gestion du backend embarqué, accès PKCS#11 via `eudss-signer`) | Rust (Tauri 2), Vite 6, React 19, TypeScript 5.7 |
+| [`eu-dss-server`](eu-dss-server) | Backend de signature/vérification, **embarqué dans l'app** (jpackage app-image, JRE inclus) : workflow PAdES/ASiC (préparer l'empreinte → assembler la signature), validation, trust list (LOTL FR) | Java 21, Spring Boot 3.4, EU DSS 6.4 |
+| [`eudss-signer`](eudss-signer) | Crate Rust : accès PKCS#11 bas niveau (lister les slots, signer un digest, gérer la session PIN) | Rust, crate `cryptoki` |
+
+> Les modules `eu-dss-agent` (ancien agent Java local) et les scripts `bin/` / `packaging/linux/` sont des reliques de l'architecture précédente (agent localhost séparé). Ils ne sont **pas utilisés par l'application Tauri** et sont conservés pour référence.
 
 ---
 
-## Prérequis
+## Prérequis utilisateur
 
 | Élément | Détail |
 |---|---|
 | **Token USB branché** | Carte à puce / clé cryptographique de signature, insérée. |
-| **Middleware ChamberSign / IDOPTE** | Le pilote PKCS#11 de la carte (l'agent ne le fournit pas). Voir [`docs/INSTALL.md`](docs/INSTALL.md) pour le lien de téléchargement. |
-| **Java 21** | Requis pour exécuter ou compiler l'agent et le serveur (sauf l'installeur MSI Windows, qui embarque son propre runtime Java). Sous macOS/Linux : Temurin JDK 21. |
-| **Node.js + npm** | Uniquement pour le développement de l'UI (`eu-dss-ui`). |
+| **Middleware PKCS#11 du fabricant** | Le pilote de la carte (ex. IDOPTE pour ChamberSign). L'application ne le fournit pas. Voir [`docs/INSTALL.md`](docs/INSTALL.md) pour le lien de téléchargement. |
 
-Le guide d'installation détaillé pour les utilisateurs finaux est dans **[`docs/INSTALL.md`](docs/INSTALL.md)** (Windows MSI, macOS, Linux) ; il n'est pas dupliqué ici.
+**C'est tout.** Aucun Java, aucun serveur, aucune configuration à faire : le JRE et le backend EU DSS sont embarqués dans l'installeur.
 
 ---
 
-## Installation / démarrage rapide
+## Installation rapide
 
-### Windows (installeur MSI, recommandé)
+### Windows (recommandé)
 
-L'installeur fait tout automatiquement (certificat de confiance + démarrage à l'ouverture de session, aucun PIN au démarrage, aucun certificat à accepter) :
+L'installeur Windows est **signé via Azure Artifact Signing** (pas de blocage SmartScreen). L'UI de l'installeur est en français.
 
-1. Installer le middleware ChamberSign et brancher le token.
-2. Télécharger et exécuter **[`EU-DSS-Agent-0.1.0.msi`](https://github.com/mmaudet/eu-dss-module/releases/download/eu-dss-agent-v0.1.0/EU-DSS-Agent-0.1.0.msi)**.
-3. Ouvrir l'application de signature dans le navigateur.
+1. Installer le middleware PKCS#11 du fabricant et brancher le token.
+2. Télécharger le `.msi` (ou `.exe` NSIS) depuis les [Artefacts du dernier run CI réussi](#téléchargements--releases).
+3. Double-cliquer et suivre l'assistant d'installation.
+4. Lancer **EU-DSS Sign** depuis le menu Démarrer, puis suivre l'assistant de première utilisation (prérequis → test du PIN → prêt à signer).
 
-Détails et captures d'écran : [`docs/INSTALL.md`](docs/INSTALL.md).
+### Linux (.deb / .rpm)
 
-### macOS (installeur .pkg, recommandé)
+```bash
+# Debian/Ubuntu
+sudo apt install ./<eu-dss-sign_version>.deb
 
-Comme le MSI Windows, le `.pkg` fait tout automatiquement (certificat de confiance dans le trousseau Système + démarrage à l'ouverture de session, aucun certificat à accepter) :
+# Fedora/RHEL
+sudo rpm -i <eu-dss-sign_version>.rpm
+```
 
-1. Installer le middleware ChamberSign et brancher le token.
-2. Télécharger **`EU-DSS-Agent-0.1.0.pkg`** ([Releases](https://github.com/mmaudet/eu-dss-module/releases/tag/eu-dss-agent-v0.1.0)) ; non signé → premier lancement par **clic droit → Ouvrir**.
-3. Installer (mot de passe administrateur), puis ouvrir l'application de signature.
+Installer le middleware PKCS#11 du fabricant, brancher le token, puis lancer **EU-DSS Sign**.
 
-Détails + désinstallation : [`docs/INSTALL.md`](docs/INSTALL.md). (Firefox garde son propre magasin NSS, suivi séparé.)
+### macOS (arm64, Apple Silicon)
 
-### Linux (paquet .deb)
+1. Télécharger le `.dmg` depuis les [Artefacts du dernier run CI réussi](#téléchargements--releases).
+2. Ouvrir le `.dmg` et glisser **EU-DSS Sign** dans Applications.
+3. Au premier lancement : **clic droit → Ouvrir** (la notarisation Apple est en cours de finalisation ; Gatekeeper peut demander une confirmation).
+4. Installer le middleware PKCS#11 du fabricant, brancher le token, suivre l'assistant.
 
-Le `.deb` (amd64) fait tout automatiquement, comme le MSI / le `.pkg` (certificat de confiance **système** + magasin **NSS** de Chrome/Chromium, `.deb` **et** snap + démarrage à l'ouverture de session graphique). Construit par l'intégration continue ([`linux-installer.yml`](.github/workflows/linux-installer.yml)) ; confiance système + navigateur + autostart au login vérifiés sur un bureau Ubuntu 24.04. Publication en Release et validation de la signature réelle sur amd64 : en cours.
+Détails et captures d'écran → **[`docs/INSTALL.md`](docs/INSTALL.md)**.
 
-1. Installer le middleware ChamberSign (amd64) et brancher le token.
-2. Récupérer **`eu-dss-agent_0.1.0_amd64.deb`** (artefact de CI, ou le construire avec `packaging/linux/build-agent-deb.sh`), puis l'installer : `sudo apt install ./eu-dss-agent_0.1.0_amd64.deb`.
-3. Ouvrir l'application de signature dans le navigateur.
+---
 
-Détails + désinstallation (`apt remove`) : [`docs/INSTALL.md`](docs/INSTALL.md). **amd64 uniquement** pour la signature (middleware ChamberSign). La confiance navigateur couvre **Chrome/Chromium en `.deb`** (`~/.pki/nssdb`) **et le Chromium snap** d'Ubuntu (sa base NSS confinée) ; **Firefox** garde son propre magasin par profil (acceptation manuelle, suivi séparé).
+## Développement (monorepo)
 
-### macOS / Linux (exécuter le jar, pour le développement)
+### Prérequis développeur
 
-Compiler l'agent et le serveur, puis lancer l'agent avec le script adapté à votre OS :
+- **Java 21** (Temurin recommandé) — pour compiler et jpackager `eu-dss-server`.
+- **Rust stable** + `cargo` — pour `eu-dss-ui/src-tauri` et `eudss-signer`.
+- **Node.js 20 + npm** — pour l'UI React (`eu-dss-ui`).
+
+### Compiler le backend embarqué
 
 ```bash
 mvn -DskipTests package
-
-# Agent local (token PKCS#11), choisir le script de votre OS :
-./bin/eu-dss-agent-macos.sh       # macOS
-./bin/eu-dss-agent-linux.sh       # Linux
-# Windows (PowerShell, hors MSI) :  ./bin/eu-dss-agent-windows.ps1
 ```
 
-L'agent démarre **verrouillé** et écoute sur `https://localhost:9795`. Le PIN est saisi dans l'application au moment de signer. Les scripts positionnent des valeurs par défaut (pilote PKCS#11, slot, port, hôtes CORS) que vous pouvez surcharger via les variables `EUDSS_*` (voir [Développement](#développement)).
+Génère `eu-dss-server/target/eu-dss-server-*.jar`. En CI (`tauri-app.yml`), `jpackage` transforme ce jar en app-image (avec JRE) avant la build Tauri.
 
-Par cette voie « jar » sous macOS/Linux, vous acceptez le certificat `localhost` **une fois** dans le navigateur (l'auto-confiance est gérée par les installeurs MSI / `.pkg` / `.deb`).
-
-### Stack de développement (serveur + UI)
-
-Dans trois terminaux (agent ci-dessus, puis) :
-
-```bash
-# Backend Spring Boot (http://localhost:8080)
-./bin/eu-dss-server.sh
-
-# UI Vite + React (http://localhost:5173, proxy /api -> :8080)
-./bin/eu-dss-ui-dev.sh        # fait `npm install` au besoin puis `npm run dev`
-```
-
-Puis ouvrir **http://localhost:5173**.
-
----
-
-## Développement
-
-### Compiler & tester (Java)
-
-```bash
-mvn -DskipTests package    # compile l'agent + le serveur (jars dans */target)
-mvn test                   # exécute les tests JUnit 5 (agent + serveur, dont un test E2E avec agent stubbé)
-```
-
-### UI
+### Lancer en mode développement
 
 ```bash
 cd eu-dss-ui
 npm install
-npm run dev        # serveur de dev Vite (:5173)
-npm run build      # tsc -b && vite build (build de production)
+npm run tauri dev   # lance Vite + le shell Tauri (le backend embarqué n'est pas stagé en dev)
 ```
 
-### Variables d'environnement de l'agent (`EUDSS_*`)
+En mode dev, le backend peut être démarré séparément avec `./bin/eu-dss-server.sh` ; l'URL du backend est transmise via `VITE_BACKEND_URL`.
 
-Résolues dans [`eu-dss-agent/.../config/AgentConfig.java`](eu-dss-agent/src/main/java/com/linagora/eudss/agent/config/AgentConfig.java) (et [`AgentTls.java`](eu-dss-agent/src/main/java/com/linagora/eudss/agent/tls/AgentTls.java) pour le keystore) :
+### Tests Java
 
-| Variable | Défaut | Rôle |
-|---|---|---|
-| `EUDSS_PKCS11_DRIVER` | *selon l'OS* ¹ | Chemin de la bibliothèque PKCS#11 du middleware |
-| `EUDSS_PKCS11_SLOT` | `0` | Index du slot (`slotListIndex`) du certificat de signature |
-| `EUDSS_AGENT_PORT` | `9795` | Port d'écoute HTTPS |
-| `EUDSS_CORS_HOSTS` | *origines `localhost`* ² | Origines web autorisées (CORS, origine complète avec schéma) |
-| `EUDSS_AGENT_TLS` | `true` | HTTPS activé (`false` = HTTP en clair, pour le dev) |
-| `EUDSS_AGENT_TLS_PASSWORD` | `eudss-agent` | Mot de passe du keystore TLS auto-signé |
-| `EUDSS_AGENT_KEYSTORE` | *selon l'OS* ³ | Chemin du keystore TLS |
-| `EUDSS_PIN_SESSION_TTL` | `300` | Délai (s) d'inactivité avant reverrouillage de la session PIN |
-| `EUDSS_AGENT_PIN` | *(absent)* | Si défini → mode **headless** (déverrouillage auto au démarrage) ; sinon mode **interactif** (verrouillé jusqu'à `/rest/unlock`) |
+```bash
+mvn test    # tests JUnit 5 (eu-dss-server)
+```
 
-¹ macOS `/Library/SCMiddleware/libidop11.dylib` · Linux `/usr/lib/SCMiddleware/libidop11.so` · Windows `C:\Program Files\Smart Card Middleware\bin\idoPKCS.dll`
-² `http://localhost:5173,http://localhost:8080,http://localhost:4173`
-³ Windows `%ProgramData%\eudss-agent\agent-keystore.p12` · Linux `/var/lib/eudss-agent/agent-keystore.p12` (machine) · sinon macOS `~/.eudss-agent/agent-keystore.p12`
+### Tests Rust
+
+```bash
+cd eudss-signer && cargo test
+```
 
 ### Variables d'environnement du serveur
 
 Configuré via [`application.yml`](eu-dss-server/src/main/resources/application.yml) :
 
-- `EUDSS_LOTL_ENABLED` (`eudss.lotl.enabled`, défaut `true`) : télécharge la trust list de l'UE (liste FR) au démarrage. À `false`, la validation reste *INDETERMINATE* faute d'ancres de confiance (utile en dev hors-ligne).
+- `EUDSS_LOTL_ENABLED` (`eudss.lotl.enabled`, défaut `true`) : télécharge la trust list de l'UE au démarrage. À `false`, la validation reste *INDETERMINATE* (utile en dev hors-ligne).
 - TSA d'horodatage : `eudss.tsa.url` (défaut `https://freetsa.org/tsr`).
 
-### Disposition / API
+### Disposition du dépôt
 
 ```
 eu-dss/
-├── eu-dss-agent/   # Javalin :9795, /rest/{health,status,unlock,lock,certificates,sign}
-├── eu-dss-server/  # Spring Boot :8080, /api/sign/{prepare,assemble}, /api/validate
-├── eu-dss-ui/      # Vite + React :5173, onglets Signer / Vérifier
-├── bin/            # scripts de lancement (agent par OS, server, ui-dev)
-├── packaging/      # build de l'installeur MSI Windows (jpackage + WiX)
-├── macos/          # artefacts macOS (jar + script de lancement)
-└── docs/           # INSTALL.md (FR) + specs/plans (docs/superpowers)
+├── eu-dss-ui/          # Application Tauri (Rust + React)
+│   └── src-tauri/      # Shell Rust : backend.rs (sidecar), commands.rs, signer_state.rs
+├── eu-dss-server/      # Backend Spring Boot (embarqué dans l'app via jpackage)
+├── eudss-signer/       # Crate Rust PKCS#11
+├── .github/workflows/
+│   └── tauri-app.yml   # Build CI (Windows/Linux/macOS), déclenché sur feat/ui-refonte
+├── bin/                # Scripts de développement (serveur, UI dev) — pas pour l'utilisateur final
+├── packaging/          # Artefacts d'anciens installeurs (eu-dss-agent, obsolètes pour l'utilisateur final)
+└── docs/               # INSTALL.md + specs/plans
 ```
 
 ---
 
 ## Sécurité
 
-- **Signature de l'empreinte uniquement** : l'agent reçoit un digest, jamais le document complet ni la clé. La clé privée ne quitte pas le token.
-- **Certificat TLS auto-signé par poste** (`CN=localhost`, SAN `localhost`/`127.0.0.1`), généré sur chaque machine. Provisionné de confiance par les installeurs (Windows MSI ; macOS `.pkg` ; Linux `.deb` : magasin système **PEM** + NSS Chrome/Chromium) ; par la voie jar, accepté une fois dans le navigateur.
-- **PIN demandé au moment de signer** (`POST /rest/unlock`), jamais persisté ; il est effacé de la mémoire (`zeroize`) après ouverture de la session du token.
-- **TTL de session** : la session PIN se reverrouille après inactivité (défaut 300 s, `EUDSS_PIN_SESSION_TTL`). Les endpoints sensibles renvoient `401 locked` quand l'agent est verrouillé.
-- **Mapping d'erreurs PKCS#11** sans nouvelle tentative automatique : PIN incorrect (`401`), PIN bloqué (`423`), token indisponible (`503`).
+- **Clé privée jamais exposée** : l'app ne fait signer qu'un condensat par le token PKCS#11 ; la clé privée ne quitte pas la carte.
+- **Backend local uniquement** : le backend embarqué n'écoute que sur `127.0.0.1` ; aucun port n'est ouvert sur le réseau.
+- **PIN demandé au moment de signer**, jamais persisté ; effacé de la mémoire après usage.
+- **TTL de session** : la session PIN se reverrouille après inactivité (défaut 300 s). Les tentatives de signer en session expirée redemandent le PIN.
+- **Mapping d'erreurs PKCS#11** : PIN incorrect (`401`), PIN bloqué (`423`), token indisponible (`503`).
 
 ---
 
 ## Téléchargements / Releases
 
-| Release | Contenu |
-|---|---|
-| [`eu-dss-agent-v0.1.0`](https://github.com/mmaudet/eu-dss-module/releases/tag/eu-dss-agent-v0.1.0) | Installeurs de l'agent (runtime Java embarqué, certificat de confiance + démarrage automatique) : **Windows MSI** [`EU-DSS-Agent-0.1.0.msi`](https://github.com/mmaudet/eu-dss-module/releases/download/eu-dss-agent-v0.1.0/EU-DSS-Agent-0.1.0.msi) · **macOS pkg** [`EU-DSS-Agent-0.1.0.pkg`](https://github.com/mmaudet/eu-dss-module/releases/download/eu-dss-agent-v0.1.0/EU-DSS-Agent-0.1.0.pkg) (non signé) |
-| [`eu-dss-docs-v0.1.0`](https://github.com/mmaudet/eu-dss-module/releases/tag/eu-dss-docs-v0.1.0) | Guide d'installation : [PDF](https://github.com/mmaudet/eu-dss-module/releases/download/eu-dss-docs-v0.1.0/Guide-installation-eu-dss.pdf) · [HTML](https://github.com/mmaudet/eu-dss-module/releases/download/eu-dss-docs-v0.1.0/Guide-installation-eu-dss.html) |
+Les installeurs sont produits par le workflow CI [`.github/workflows/tauri-app.yml`](.github/workflows/tauri-app.yml), déclenché sur la branche `feat/ui-refonte` ou manuellement.
 
-Les installeurs sont construits par GitHub Actions via `jpackage` : Windows ([`windows-installer.yml`](.github/workflows/windows-installer.yml), + WiX), macOS ([`macos-installer.yml`](.github/workflows/macos-installer.yml), + `pkgbuild`/`productbuild`) et Linux ([`linux-installer.yml`](.github/workflows/linux-installer.yml), + `dpkg-deb`, amd64), sur tag `v*` ou déclenchement manuel.
+Pour récupérer les installeurs : aller dans l'onglet **Actions → Tauri app** du dépôt, ouvrir le dernier run réussi, et télécharger les **Artifacts** correspondant à votre OS :
+
+| OS | Artefact | Notes |
+|---|---|---|
+| **Windows** | `.msi` (WiX) ou `.exe` (NSIS) | Signé Azure Artifact Signing ; UI installeur en français |
+| **Linux** | `.deb` + `.rpm` | Debian/Ubuntu : `sudo apt install ./<fichier>.deb` |
+| **macOS** | `.dmg` (arm64 / Apple Silicon) | Developer ID signé ; notarisation en cours de finalisation — au premier lancement, clic droit → Ouvrir |
+
+> Des GitHub Releases seront publiées prochainement ; en attendant, utiliser les artefacts des runs CI.
 
 ---
 
 ## Documentation
 
-- **[`docs/INSTALL.md`](docs/INSTALL.md)** : guide d'installation et de premiers pas (Windows MSI, macOS, Linux), avec captures d'écran.
-- **[`docs/superpowers/`](docs/superpowers)** : specs et plans d'implémentation des incréments (signature multi-format, accès navigateur multiplateforme, PIN au moment de signer, assistant de prérequis, provisionnement Windows + macOS + Linux).
+- **[`docs/INSTALL.md`](docs/INSTALL.md)** : guide d'installation et de premiers pas (Windows, macOS, Linux), avec captures d'écran.
+- **[`docs/superpowers/`](docs/superpowers)** : specs et plans d'implémentation des incréments.
 
 ---
 
@@ -240,19 +220,20 @@ Les installeurs sont construits par GitHub Actions via `jpackage` : Windows ([`w
 
 Disponible et vérifié :
 
-- **Signature PAdES-B-T (PDF) et ASiC-E/XAdES** (autres formats) ; niveaux B / T / LT / LTA, empreintes SHA-256/384/512.
+- **Signature PAdES-B-T (PDF) et XAdES-B-T / ASiC** (autres formats) ; niveaux B / T / LT / LTA, empreintes SHA-256/384/512.
 - **Vérification** de documents signés (avec trust list FR via LOTL).
-- **PIN saisi au moment de signer** (l'agent démarre verrouillé, reverrouillage après inactivité).
-- **Assistant de prérequis** dans l'UI (détecte l'agent / la carte / le middleware et propose les téléchargements adaptés à l'OS).
-- **Installeurs auto-provisionnants** (certificat de confiance + démarrage automatique, sans étape « accepter le certificat ») : **Windows MSI** et **macOS `.pkg`** (tous deux vérifiés de bout en bout, signature + vérification avec une clé ChamberSign qualifiée). **Linux `.deb`** (amd64) : confiance système (PEM) + confiance navigateur (**Chrome/Chromium `.deb` et Chromium snap**) + autostart XDG au login, tous vérifiés sur un bureau Ubuntu 24.04 ; Firefox non couvert ; signature réelle sur amd64 à valider.
+- **PIN saisi au moment de signer** (session PIN avec reverrouillage automatique après inactivité).
+- **Assistant de prérequis** dans l'UI (détecte le middleware, la carte, et guide l'utilisateur).
+- **Installeurs autonomes** (JRE + backend embarqués, aucun prérequis Java côté utilisateur) : **Windows** (`.msi` / `.exe`, signé) · **Linux** (`.deb` / `.rpm`) · **macOS arm64** (`.dmg`, Developer ID signé, notarisation en cours).
+- Vérifiés de bout en bout (signature + vérification avec une clé ChamberSign) sur **Windows**, **macOS** et **Linux** (Ubuntu 24.04).
 
-En cours / conception : **validation de la signature réelle sur Linux amd64** + publication du `.deb` en Release, confiance **Firefox/NSS**, **signature/notarisation** du `.pkg` macOS, **multi-utilisateur / hébergement**.
+En cours : notarisation Apple complète pour macOS, Firefox/NSS, multi-utilisateur.
 
 ---
 
 ## Contribuer
 
-Les contributions sont les bienvenues ; ouvrez une **issue** ou une **pull request**. Pour démarrer, voir les sections **Installation / démarrage rapide** et **Développement** (build `mvn -DskipTests package`, tests `mvn test`, UI `npm run build`). Merci de garder des commits ciblés et de vérifier que `mvn test` et `npm run build` passent avant d'ouvrir une PR.
+Les contributions sont les bienvenues ; ouvrez une **issue** ou une **pull request**. Pour démarrer, voir la section **Développement** ci-dessus (`mvn -DskipTests package`, `npm run tauri dev`, `cargo test`). Merci de vérifier que `mvn test`, `cargo test` et `npm run build` passent avant d'ouvrir une PR.
 
 ---
 
