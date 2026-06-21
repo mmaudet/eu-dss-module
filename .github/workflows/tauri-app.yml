@@ -115,21 +115,21 @@ jobs:
           xcrun stapler validate "$DMG"
           spctl -a -t open --context context:primary-signature -vv "$DMG" || true
 
-      # ── Windows code signing via Azure Trusted Signing (enable later) ──────────
-      # Runs AFTER the build, signing the produced .msi/.exe before upload.
-      # - name: Sign Windows artifacts (Azure Trusted Signing)
-      #   if: runner.os == 'Windows'
-      #   uses: azure/trusted-signing-action@v0
-      #   with:
-      #     azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-      #     azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
-      #     azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
-      #     endpoint: ${{ secrets.AZURE_SIGNING_ENDPOINT }}
-      #     trusted-signing-account-name: ${{ secrets.AZURE_SIGNING_ACCOUNT }}
-      #     certificate-profile-name: ${{ secrets.AZURE_CERT_PROFILE }}
-      #     files-folder: eu-dss-ui/src-tauri/target/release/bundle
-      #     files-folder-filter: msi,exe
-      #     files-folder-recurse: true
+      # ── Windows code signing via Azure Artifact Signing (formerly Trusted Signing) ──
+      # Signs the produced .msi/.exe with the Linagora cert profile before upload.
+      - name: Sign Windows artifacts (Azure Artifact Signing)
+        if: runner.os == 'Windows'
+        uses: azure/artifact-signing-action@v2
+        with:
+          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+          endpoint: ${{ secrets.AZURE_SIGNING_ENDPOINT }}
+          signing-account-name: ${{ secrets.AZURE_SIGNING_ACCOUNT }}
+          certificate-profile-name: ${{ secrets.AZURE_CERT_PROFILE }}
+          files-folder: eu-dss-ui/src-tauri/target/release/bundle
+          files-folder-filter: msi,exe
+          files-folder-recurse: true
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
