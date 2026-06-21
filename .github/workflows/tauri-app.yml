@@ -97,6 +97,24 @@ jobs:
           APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}                  # app-specific password (notarization)
           APPLE_TEAM_ID: KUT463DS29
 
+      # tauri-action notarizes + staples the .app, but not the .dmg container itself.
+      # Notarize + staple the .dmg so the downloaded disk image is also Gatekeeper-clean.
+      - name: Notarize + staple the macOS .dmg
+        if: runner.os == 'macOS'
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: KUT463DS29
+        run: |
+          set -euo pipefail
+          DMG="$(find eu-dss-ui/src-tauri/target -path '*/release/bundle/dmg/*.dmg' | head -1)"
+          if [ -z "$DMG" ]; then echo "::error::no .dmg found to notarize"; exit 1; fi
+          echo "Notarizing: $DMG"
+          xcrun notarytool submit "$DMG" --apple-id "$APPLE_ID" --password "$APPLE_PASSWORD" --team-id "$APPLE_TEAM_ID" --wait
+          xcrun stapler staple "$DMG"
+          xcrun stapler validate "$DMG"
+          spctl -a -t open --context context:primary-signature -vv "$DMG" || true
+
       # ── Windows code signing via Azure Trusted Signing (enable later) ──────────
       # Runs AFTER the build, signing the produced .msi/.exe before upload.
       # - name: Sign Windows artifacts (Azure Trusted Signing)
