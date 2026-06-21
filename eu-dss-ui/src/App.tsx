@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AgentProvider, useAgent } from './agent/AgentContext';
 import { AccueilScreen } from './components/AccueilScreen';
+import { DeepLinkSignModal } from './components/DeepLinkSignModal';
 import { FirstRunWizard } from './components/FirstRunWizard';
 import { KeyCertScreen } from './components/KeyCertScreen';
 import { PinModal } from './components/PinModal';
@@ -308,6 +309,67 @@ function Shell() {
   );
 }
 
+// ── Deep-link handler (eudss://) ──────────────────────────────────────────────
+// Mounts both onOpenUrl (link opened while running) and getCurrent (cold start)
+// so external `eudss://sign?…` requests work in every case. Only the `sign`
+// action is handled; other actions are ignored with a warning.
+
+function DeepLinkHandler() {
+  const [activeUrl, setActiveUrl] = useState<string | null>(null);
+  // Avoid handling a second link while one is already in flight.
+  const busyRef = useRef(false);
+
+  useEffect(() => {
+    busyRef.current = activeUrl !== null;
+  }, [activeUrl]);
+
+  useEffect(() => {
+    if (!('__TAURI_INTERNALS__' in window)) return; // deep links are Tauri-only
+
+    let unlisten: (() => void) | undefined;
+    let cancelled = false;
+
+    const handle = (urls: string[] | null | undefined) => {
+      if (!urls || urls.length === 0) return;
+      const url = urls[0];
+      let host: string;
+      try {
+        host = new URL(url).host;
+      } catch {
+        host = '';
+      }
+      if (host !== 'sign') {
+        console.warn('[deep-link] ignoring unsupported eudss:// action:', url);
+        return;
+      }
+      if (busyRef.current) {
+        console.warn('[deep-link] a signing request is already in progress; ignoring:', url);
+        return;
+      }
+      setActiveUrl(url);
+    };
+
+    void (async () => {
+      try {
+        const { onOpenUrl, getCurrent } = await import('@tauri-apps/plugin-deep-link');
+        unlisten = await onOpenUrl((urls) => handle(urls));
+        if (cancelled) return;
+        // The link the app was cold-started with (call once on mount).
+        handle(await getCurrent());
+      } catch (e) {
+        console.warn('[deep-link] failed to initialise listener:', e);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+      unlisten?.();
+    };
+  }, []);
+
+  return <DeepLinkSignModal url={activeUrl} onClose={() => setActiveUrl(null)} />;
+}
+
 // ── App root ────────────────────────────────────────────────────────────────
 
 export function App() {
@@ -323,6 +385,7 @@ export function App() {
           <FirstRunWizard onComplete={() => setOnboarded(true)} />
         </div>
       )}
+      <DeepLinkHandler />
     </AgentProvider>
   );
 }

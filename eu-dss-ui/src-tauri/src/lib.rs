@@ -9,9 +9,28 @@ use tauri::{Manager, RunEvent, WindowEvent};
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        // single-instance MUST be the first plugin registered. With the
+        // `deep-link` feature it forwards eudss:// URLs to the already-running
+        // instance on Windows/Linux (where the OS would otherwise spawn a second
+        // process with the URL as a CLI arg). The callback focuses our window.
+        .plugin(tauri_plugin_single_instance::init(|app, _argv, _cwd| {
+            if let Some(window) = app.get_webview_window("main") {
+                let _ = window.set_focus();
+            }
+        }))
+        .plugin(tauri_plugin_deep_link::init())
         .plugin(tauri_plugin_http::init())
         .manage(SignerState::default())
         .setup(|app| {
+            // Register the eudss:// scheme at runtime on Windows/Linux so deep
+            // links work in dev too (release installers handle it; macOS uses the
+            // bundled Info.plist). Best-effort — ignore failures.
+            #[cfg(any(target_os = "windows", target_os = "linux"))]
+            {
+                use tauri_plugin_deep_link::DeepLinkExt;
+                let _ = app.deep_link().register_all();
+            }
+
             // Spawn the embedded Java backend sidecar and start its readiness
             // poller. In dev (no staged app-image) this logs a warning and skips
             // spawning so the app still runs.

@@ -178,9 +178,7 @@ fn poll_until_ready(app: AppHandle, port: u16) {
             return;
         }
         if Instant::now() >= deadline {
-            log::warn!(
-                "eu-dss-server did not become ready within 60s on 127.0.0.1:{port}"
-            );
+            log::warn!("eu-dss-server did not become ready within 60s on 127.0.0.1:{port}");
             return;
         }
         std::thread::sleep(Duration::from_millis(500));

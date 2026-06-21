@@ -1,7 +1,8 @@
 import { useRef, useState, type Dispatch, type SetStateAction } from 'react';
 import { useAgent } from '../agent/AgentContext';
-import { agentApi, AgentCertificate, AgentError } from '../services/agentApi';
+import { AgentCertificate, AgentError } from '../services/agentApi';
 import { backendApi, SignatureForm, SignatureParams } from '../services/backendApi';
+import { signDocumentToBase64 } from '../services/signFlow';
 import { detectOs, PREREQ_MANIFEST } from '../services/prerequisites';
 import { downloadBase64, downloadZip, fileToBase64 } from '../services/fileUtils';
 import { history } from '../services/history';
@@ -153,13 +154,12 @@ export function SignWorkspace({ onGoVerify }: SignWorkspaceProps) {
         signatureLocation: location || undefined,
         signerName: cert.subjectDn,
       };
-      const prepared = await backendApi.prepare(documentBase64, doc.file.name, params);
-      const { signatureValueBase64 } = await agentApi.signDigest(
-        cert.keyId,
-        prepared.dataToSignDigestBase64,
-        'SHA256',
-      );
-      const assembled = await backendApi.assemble(documentBase64, doc.file.name, params, signatureValueBase64);
+      const assembled = await signDocumentToBase64({
+        documentBase64,
+        fileName: doc.file.name,
+        params,
+        keyId: cert.keyId,
+      });
       patch(doc.id, {
         status: 'signed',
         signed: {
