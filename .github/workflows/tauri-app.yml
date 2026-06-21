@@ -118,8 +118,8 @@ jobs:
               --type app-image --name eu-dss-server --app-version 1.0.0 --vendor LINAGORA \
               --input "$JAR_DIR" --main-jar eu-dss-server-0.1.0-SNAPSHOT.jar --dest "$OUT_DIR" \
               --mac-sign --mac-signing-key-user-name "Linagora (KUT463DS29)"
-            cp -R "$OUT_DIR/eu-dss-server.app/Contents" "$DEST/Contents"
-            codesign -dvvv "$DEST/Contents/MacOS/eu-dss-server" 2>&1 | grep -iE "Authority|Runtime" | head -3 || true
+            cp -R "$OUT_DIR/eu-dss-server.app" "$DEST/eu-dss-server.app"
+            codesign -dvvv "$DEST/eu-dss-server.app/Contents/MacOS/eu-dss-server" 2>&1 | grep -iE "Authority|Runtime" | head -3 || true
           else
             "$JAVA_HOME/bin/jpackage" \
               --type app-image --name eu-dss-server --app-version 1.0.0 --vendor LINAGORA \

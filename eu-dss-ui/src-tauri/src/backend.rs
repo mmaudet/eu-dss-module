@@ -75,7 +75,10 @@ fn launcher_subpath() -> PathBuf {
     if cfg!(target_os = "windows") {
         PathBuf::from("eu-dss-server").join("eu-dss-server.exe")
     } else if cfg!(target_os = "macos") {
+        // Keep the jpackage .app bundle intact (stripping the wrapper invalidates the
+        // launcher + libjli code signatures, which are bundle-tied).
         PathBuf::from("eu-dss-server")
+            .join("eu-dss-server.app")
             .join("Contents")
             .join("MacOS")
             .join("eu-dss-server")
