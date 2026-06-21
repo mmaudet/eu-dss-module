@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "EU-DSS Sign",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "identifier": "com.linagora.eudss",
   "build": {
     "frontendDist": "../dist",
@@ -48,9 +48,13 @@
     ],
     "windows": {
       "wix": {
-        "language": "fr-FR"
+        "language": "fr-FR",
+        "bannerPath": "installer/banner.bmp",
+        "dialogImagePath": "installer/dialog.bmp"
       },
       "nsis": {
+        "installMode": "currentUser",
+        "installerIcon": "icons/icon.ico",
         "languages": ["French"],
         "displayLanguageSelector": false
       }

@@ -68,6 +68,25 @@ interface SidebarProps {
 function Sidebar({ tab, setTab, theme, setTheme }: SidebarProps) {
   const t = useT();
   const { lang, setLang } = useLang();
+  const [version, setVersion] = useState('1.0.0');
+
+  // Read the app version from Tauri at runtime; fall back to the constant
+  // above when running in the browser/dev or if the call fails.
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const { getVersion } = await import('@tauri-apps/api/app');
+        const v = await getVersion();
+        if (!cancelled && v) setVersion(v);
+      } catch {
+        // not in Tauri (web/dev) — keep the fallback version
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   function handleTheme(next: ThemePref) {
     store.setTheme(next);
@@ -277,6 +296,9 @@ function Sidebar({ tab, setTab, theme, setTheme }: SidebarProps) {
 
       {/* Agent status pill */}
       <AgentChip />
+
+      {/* App version — muted, low-emphasis */}
+      <div className="sb-version">v{version}</div>
     </aside>
   );
 }

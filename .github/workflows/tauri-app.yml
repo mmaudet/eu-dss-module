@@ -11,10 +11,12 @@ name: Tauri app (unsigned)
 on:
   workflow_dispatch:
   push:
-    branches: [feat/ui-refonte]
+    branches: [main]
     paths:
       - 'eu-dss-ui/**'
       - '.github/workflows/tauri-app.yml'
+    tags:
+      - 'v*.*.*'
 
 permissions:
   contents: read
@@ -252,7 +254,7 @@ jobs:
           # ── 5. Build the .dmg from the stapled .app ───────────────────────────────
           DMG_DIR="eu-dss-ui/src-tauri/target/release/bundle/dmg"
           mkdir -p "$DMG_DIR"
-          DMG="$DMG_DIR/EU-DSS Sign_0.1.0_aarch64.dmg"
+          DMG="$DMG_DIR/EU-DSS Sign_1.0.0_aarch64.dmg"
           hdiutil create -volname "EU-DSS Sign" -srcfolder "$APP" -ov -format UDZO "$DMG"
 
           # ── 6. Sign the .dmg ──────────────────────────────────────────────────────
@@ -295,3 +297,25 @@ jobs:
             eu-dss-ui/src-tauri/target/**/release/bundle/**/*.rpm
             eu-dss-ui/src-tauri/target/**/release/bundle/**/*.msi
             eu-dss-ui/src-tauri/target/**/release/bundle/**/*.exe
+
+  # ── Publish a GitHub Release with the signed installers when a v* tag is pushed ──
+  release:
+    name: GitHub Release
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+      - name: Publish release with installers
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: EU-DSS Sign ${{ github.ref_name }}
+          generate_release_notes: true
+          fail_on_unmatched_files: false
+          files: artifacts/**/*
