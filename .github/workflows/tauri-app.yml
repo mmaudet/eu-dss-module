@@ -89,13 +89,13 @@ jobs:
           # Backend URL baked in at build time. Falls back to the in-app localhost
           # default when the repo variable is unset (fine for unsigned test artifacts).
           VITE_BACKEND_URL: ${{ vars.VITE_BACKEND_URL }}
-          # ── macOS code signing + notarization (enable later) ───────────────────
-          # APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}            # base64 of the Developer ID .p12
-          # APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
-          # APPLE_SIGNING_IDENTITY: "Developer ID Application: Linagora (KUT463DS29)"
-          # APPLE_ID: ${{ secrets.APPLE_ID }}                              # mmaudet@linagora.com
-          # APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}                  # app-specific password
-          # APPLE_TEAM_ID: KUT463DS29
+          # ── macOS code signing + notarization (Developer ID; tauri-action applies these only on macOS) ──
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}            # base64 of the Developer ID .p12
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: "Developer ID Application: Linagora (KUT463DS29)"
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}                  # app-specific password (notarization)
+          APPLE_TEAM_ID: KUT463DS29
 
       # ── Windows code signing via Azure Trusted Signing (enable later) ──────────
       # Runs AFTER the build, signing the produced .msi/.exe before upload.
