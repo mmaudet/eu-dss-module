@@ -90,25 +90,40 @@ jobs:
       - name: Build + stage embedded backend (Unix)
         if: runner.os != 'Windows'
         shell: bash
+        env:
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
         run: |
           set -euo pipefail
           mvn -B -f pom.xml -pl eu-dss-server -am -DskipTests package
           JAR_DIR="$(mktemp -d)"
           OUT_DIR="$(mktemp -d)"
           cp eu-dss-server/target/eu-dss-server-0.1.0-SNAPSHOT.jar "$JAR_DIR/"
-          "$JAVA_HOME/bin/jpackage" \
-            --type app-image \
-            --name eu-dss-server \
-            --app-version 1.0.0 \
-            --vendor LINAGORA \
-            --input "$JAR_DIR" \
-            --main-jar eu-dss-server-0.1.0-SNAPSHOT.jar \
-            --dest "$OUT_DIR"
           DEST="eu-dss-ui/src-tauri/resources/eu-dss-server"
           mkdir -p "$DEST"
           if [ "$RUNNER_OS" = "macOS" ]; then
+            # The embedded JRE binaries (launcher + all .dylib + jspawnhelper) must be
+            # Developer-ID + hardened-runtime signed, or the outer .app fails notarization.
+            # Import the cert into a temp keychain and let jpackage sign the whole app-image.
+            KEYCHAIN="$RUNNER_TEMP/eudss-jpackage.keychain-db"
+            KCPASS="$(openssl rand -base64 18)"
+            security create-keychain -p "$KCPASS" "$KEYCHAIN"
+            security set-keychain-settings -lut 21600 "$KEYCHAIN"
+            security unlock-keychain -p "$KCPASS" "$KEYCHAIN"
+            echo "$APPLE_CERTIFICATE" | base64 --decode > "$RUNNER_TEMP/eudss-cert.p12"
+            security import "$RUNNER_TEMP/eudss-cert.p12" -P "$APPLE_CERTIFICATE_PASSWORD" -k "$KEYCHAIN" -T /usr/bin/codesign -T /usr/bin/jpackage
+            security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KCPASS" "$KEYCHAIN" >/dev/null
+            security list-keychains -d user -s "$KEYCHAIN" $(security list-keychains -d user | sed 's/"//g')
+            "$JAVA_HOME/bin/jpackage" \
+              --type app-image --name eu-dss-server --app-version 1.0.0 --vendor LINAGORA \
+              --input "$JAR_DIR" --main-jar eu-dss-server-0.1.0-SNAPSHOT.jar --dest "$OUT_DIR" \
+              --mac-sign --mac-signing-key-user-name "Linagora (KUT463DS29)"
             cp -R "$OUT_DIR/eu-dss-server.app/Contents" "$DEST/Contents"
+            codesign -dvvv "$DEST/Contents/MacOS/eu-dss-server" 2>&1 | grep -iE "Authority|Runtime" | head -3 || true
           else
+            "$JAVA_HOME/bin/jpackage" \
+              --type app-image --name eu-dss-server --app-version 1.0.0 --vendor LINAGORA \
+              --input "$JAR_DIR" --main-jar eu-dss-server-0.1.0-SNAPSHOT.jar --dest "$OUT_DIR"
             cp -R "$OUT_DIR/eu-dss-server/." "$DEST/"
           fi
           ls -la "$DEST"

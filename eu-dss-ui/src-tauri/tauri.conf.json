@@ -28,7 +28,7 @@
   },
   "bundle": {
     "active": true,
-    "targets": "all",
+    "targets": ["app", "dmg", "deb", "rpm", "msi", "nsis"],
     "resources": {
       "resources/eu-dss-server": "eu-dss-server"
     },
