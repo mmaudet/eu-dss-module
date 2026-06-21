@@ -5,7 +5,7 @@ import { backendApi, type SignatureParams } from '../services/backendApi';
 import { downloadBase64 } from '../services/fileUtils';
 import { defaultSignatureForm, signDocumentToBase64 } from '../services/signFlow';
 import { useT, type TFunction } from '../i18n';
-import { appFetch, fetchDoc, type FetchedDoc } from './deepLinkShared';
+import { fetchDoc, postSignResult, type FetchedDoc } from './deepLinkShared';
 import { Btn, Icon } from './ui';
 import { useToast } from './Toast';
 
@@ -201,16 +201,7 @@ export function DeepLinkSignModal({ url, onClose }: DeepLinkSignModalProps) {
     //    so a callback failure must offer the signed document for download. ──
     setPhase('sending');
     try {
-      const res = await appFetch(request.callbackUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          state: request.state, // echoed verbatim; never interpreted
-          signedFileName: signed.signedFileName,
-          mediaType: signed.mediaType,
-          signedDocumentBase64: signed.signedDocumentBase64,
-        }),
-      });
+      const res = await postSignResult(request.callbackUrl, request.state, signed);
       if (!res.ok) {
         setSignedFallback({
           base64: signed.signedDocumentBase64,

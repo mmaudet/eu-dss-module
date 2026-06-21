@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { backendApi, type ValidationResponse } from '../services/backendApi';
 import { useT, type TFunction } from '../i18n';
-import { appFetch, fetchDoc } from './deepLinkShared';
+import { fetchDoc, postVerifyResult } from './deepLinkShared';
 import { useToast } from './Toast';
 
 /**
@@ -189,16 +189,7 @@ export function DeepLinkVerifyModal({ url, onClose }: DeepLinkVerifyModalProps) 
     setPhase('sending');
     let ok = false;
     try {
-      const post = await appFetch(request.callbackUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          state: request.state, // echoed verbatim; never interpreted
-          signatureCount: res.signatureCount,
-          signatures: res.signatures,
-          simpleReportXml: res.simpleReportXml,
-        }),
-      });
+      const post = await postVerifyResult(request.callbackUrl, request.state, res);
       ok = post.ok;
     } catch {
       ok = false;

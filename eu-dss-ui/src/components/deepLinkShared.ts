@@ -7,7 +7,8 @@
  * transport. The sign flow's observable behaviour is unchanged.
  */
 
-import { arrayBufferToBase64 } from '../services/fileUtils';
+import { arrayBufferToBase64, base64ToBytes } from '../services/fileUtils';
+import type { ValidationResponse } from '../services/backendApi';
 
 const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
 
@@ -108,4 +109,113 @@ export async function fetchDoc(docUrl: string): Promise<FetchedDoc> {
     fileName,
     mediaType: mediaTypeFor(fileName),
   };
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
+ * Callback transport — two ways to POST the result back to the requesting site.
+ *
+ *  • Generic (default) — a JSON envelope: `state` plus the base64 document /
+ *    the full validation report. This is the contract documented for arbitrary
+ *    integrators in docs/deeplink-integration.md.
+ *
+ *  • Twake Drive — selected when `callback_url` carries a non-empty `token`
+ *    query param. The callback then points straight at the Twake Drive
+ *    (cozy-stack) write endpoint, which expects the RAW bytes (no JSON, no
+ *    base64), the document's media type as `Content-Type`, and a `Bearer`
+ *    credential taken from that `token` param (cozy-stack requires the header —
+ *    the query token alone is not enough). The target filename travels in the
+ *    URL (`Name=`), so it is NOT sent in the body, and the URL is POSTed
+ *    verbatim (its `Type`/`Name`/`token` params are preserved). `state` is
+ *    irrelevant here — the result is written directly into the drive.
+ * ──────────────────────────────────────────────────────────────────────────── */
+
+/**
+ * Twake Drive passthrough is selected by a non-empty `token` query param on the
+ * callback URL. Returns that token (used as the `Bearer` credential), or null
+ * for the generic JSON callback.
+ */
+export function twakeDriveToken(callbackUrl: string): string | null {
+  try {
+    const token = new URL(callbackUrl).searchParams.get('token');
+    return token ? token : null;
+  } catch {
+    return null;
+  }
+}
+
+export interface SignedResult {
+  signedDocumentBase64: string;
+  signedFileName: string;
+  mediaType: string;
+}
+
+/**
+ * POST a signed document back to the requesting site, picking the transport
+ * from the callback URL:
+ *  • Twake Drive (token present): raw bytes, `Content-Type` = the document's
+ *    media type, `Authorization: Bearer <token>` (filename is in the URL).
+ *  • Generic: JSON `{ state, signedFileName, mediaType, signedDocumentBase64 }`.
+ */
+export async function postSignResult(
+  callbackUrl: string,
+  state: string | null,
+  signed: SignedResult,
+): Promise<Response> {
+  const token = twakeDriveToken(callbackUrl);
+  if (token) {
+    return appFetch(callbackUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': signed.mediaType,
+        Authorization: `Bearer ${token}`,
+      },
+      body: base64ToBytes(signed.signedDocumentBase64),
+    });
+  }
+  return appFetch(callbackUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      state, // echoed verbatim; never interpreted
+      signedFileName: signed.signedFileName,
+      mediaType: signed.mediaType,
+      signedDocumentBase64: signed.signedDocumentBase64,
+    }),
+  });
+}
+
+/**
+ * POST a validation report back to the requesting site, picking the transport
+ * from the callback URL:
+ *  • Twake Drive (token present): the report XML as raw bytes,
+ *    `Content-Type: application/xml`, `Authorization: Bearer <token>`
+ *    (report filename is in the URL).
+ *  • Generic: JSON `{ state, signatureCount, signatures, simpleReportXml }`.
+ */
+export async function postVerifyResult(
+  callbackUrl: string,
+  state: string | null,
+  result: ValidationResponse,
+): Promise<Response> {
+  const token = twakeDriveToken(callbackUrl);
+  if (token) {
+    return appFetch(callbackUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/xml',
+        Authorization: `Bearer ${token}`,
+      },
+      body: new TextEncoder().encode(result.simpleReportXml ?? ''),
+    });
+  }
+  return appFetch(callbackUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      state, // echoed verbatim; never interpreted
+      signatureCount: result.signatureCount,
+      signatures: result.signatures,
+      simpleReportXml: result.simpleReportXml,
+    }),
+  });
 }

@@ -128,6 +128,54 @@ le rapport.
 
 ---
 
+## Mode Twake Drive
+
+Pour l'intégration **Twake Drive** (Cozy), l'app sait écrire le résultat
+**directement dans le Drive** via l'API `cozy-stack`, sans passer par le format
+JSON générique ci-dessus. Ce mode est **détecté automatiquement** : il s'active
+dès que le `callback_url` contient un paramètre **`token`** non vide.
+
+Twake Drive construit le deep-link normalement (`doc_url`, `callback_url`,
+`state`), mais le `callback_url` pointe sur l'endpoint d'écriture de `cozy-stack`
+et porte les paramètres `Type`, `Name` et `token` :
+
+```
+eudss://sign
+  ?doc_url=https%3A%2F%2F…%2Ffiles%2Fabc%2Fcontent
+  &callback_url=https%3A%2F%2Falice.mycozy.cloud%2Ffiles%2F<dir-id>%3FType%3Dfile%26Name%3Dcontrat.pdf%26token%3DeyJ…
+  &state=…
+```
+
+Quand un `token` est présent, le POST de retour change ainsi :
+
+| | Mode générique | **Mode Twake Drive** |
+|---|---|---|
+| **Corps** | JSON (`…Base64`) | **octets bruts** du document / rapport |
+| **`Content-Type`** | `application/json` | media type du résultat (`application/pdf`, `application/vnd.etsi.asic-e+zip`, ou `application/xml` pour un rapport) |
+| **Auth** | — | `Authorization: Bearer <token>` (valeur du param `token`) |
+| **Nom de fichier** | dans le corps | dans l'URL (`Name=`) — l'URL est POSTée **telle quelle** |
+| **`state`** | renvoyé | ignoré (écriture directe dans le Drive) |
+
+`cozy-stack` **exige le header `Bearer`** (le token en query ne suffit pas côté
+stack). La validation suit la même règle : `eudss://verify` POSTe le **rapport
+(`simpleReportXml`) en octets bruts** avec `Content-Type: application/xml`, le
+nom du fichier rapport étant lui aussi dans l'URL (`Name=`).
+
+**Réception côté `cozy-stack`** (ce que l'app envoie, simplifié) :
+
+```
+POST /files/<dir-id>?Type=file&Name=contrat.pdf&token=eyJ…
+Authorization: Bearer eyJ…
+Content-Type: application/pdf
+
+<octets du document signé>
+```
+
+> Le `Bearer` n'est envoyé qu'à l'hôte du `callback_url` — celui-là même qui a
+> fourni le `token` dans l'URL. Aucun secret stocké par l'app n'est transmis.
+
+---
+
 ## Exemple JavaScript — Signer
 
 **Côté serveur** (Node — sert le document et reçoit le résultat) :

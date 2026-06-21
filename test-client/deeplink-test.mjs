@@ -29,6 +29,7 @@ fs.mkdirSync(RECV_DIR, { recursive: true });
 const signResults = new Map();   // state -> { signedFileName, size, file }
 const verifyResults = new Map(); // state -> { signatureCount, signatures, ok }
 let lastSigned = null;           // { name, bytes } — most recent signed document
+const cozyResults = new Map();   // Name -> { size, file, contentType, bearerOk } — Twake Drive mode
 
 /* ── Generate a minimal but valid PDF (DSS must be able to parse it) ───────── */
 function makeMinimalPdf(title = 'EU-DSS deep-link test') {
@@ -87,19 +88,29 @@ const PAGE = `<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <pre id="verifyLink">—</pre>
 <div class="out" id="verifyOut">En attente d'une signature.</div>
 
+<h2>3. Mode Twake Drive (passthrough cozy-stack)</h2>
+<p class="muted">Le <code>callback_url</code> vise un récepteur <i>cozy-stack</i> simulé
+(<code>/cozy/files?Type=file&amp;Name=…&amp;token=…</code>) : l'app doit renvoyer les
+<b>octets bruts</b> du document signé + l'en-tête <code>Authorization: Bearer &lt;token&gt;</code>.</p>
+<p><button id="twake" class="alt">Signer en mode Twake Drive</button></p>
+<pre id="twakeLink">—</pre>
+<div class="out" id="twakeOut">En attente.</div>
+
 <p class="muted">Les documents signés sont enregistrés dans <code>test-client/received/</code>.</p>
 <script>
   const base = location.origin;
   const $ = (id) => document.getElementById(id);
 
-  function poll(url, state, onReady, onTimeout) {
+  function pollUrl(makeUrl, onReady, onTimeout) {
     const started = Date.now();
     const timer = setInterval(async () => {
-      let j; try { j = await (await fetch(url + '?state=' + encodeURIComponent(state))).json(); }
-      catch { return; }
+      let j; try { j = await (await fetch(makeUrl())).json(); } catch { return; }
       if (j.ready) { clearInterval(timer); onReady(j); }
       else if (Date.now() - started > 180000) { clearInterval(timer); onTimeout(); }
     }, 1000);
+  }
+  function poll(url, state, onReady, onTimeout) {
+    pollUrl(() => url + '?state=' + encodeURIComponent(state), onReady, onTimeout);
   }
 
   $('sign').onclick = () => {
@@ -138,6 +149,27 @@ const PAGE = `<!doctype html><html lang="fr"><head><meta charset="utf-8">
       },
       () => $('verifyOut').textContent = '⌛ Timeout : aucun callback de validation en 3 min.');
   };
+
+  $('twake').onclick = () => {
+    const token = 'tk_' + crypto.randomUUID().replace(/-/g, '');
+    const name = 'twake-' + Date.now() + '.pdf';
+    const cb = base + '/cozy/files?Type=file&Name=' + encodeURIComponent(name)
+      + '&token=' + encodeURIComponent(token);
+    const link = 'eudss://sign?doc_url=' + encodeURIComponent(base + '/doc.pdf')
+      + '&callback_url=' + encodeURIComponent(cb)
+      + '&state=' + encodeURIComponent(crypto.randomUUID());
+    $('twakeLink').textContent = link;
+    $('twakeOut').textContent = '⏳ Ouverture de EU-DSS Sign… confirmez + PIN dans l\\'app.';
+    location.href = link;
+    pollUrl(() => '/cozy-result?name=' + encodeURIComponent(name),
+      (j) => {
+        $('twakeOut').innerHTML = (j.bearerOk ? '✅' : '❌') + ' Reçu par le stack simulé : <b>' + name
+          + '</b> (' + j.size + ' octets, <code>' + j.contentType + '</code>)<br>Bearer : <b>'
+          + (j.bearerOk ? 'présent et valide' : 'MANQUANT / INVALIDE')
+          + '</b> — <a href="/received/' + encodeURIComponent(j.file) + '">télécharger</a>';
+      },
+      () => $('twakeOut').textContent = '⌛ Timeout : aucun POST cozy-stack en 3 min.');
+  };
 </script></body></html>`;
 
 /* ── Server ────────────────────────────────────────────────────────────────── */
@@ -145,6 +177,12 @@ function readBody(req, cb) {
   let body = '';
   req.on('data', (c) => { body += c; if (body.length > 60 * 1024 * 1024) req.destroy(); });
   req.on('end', () => cb(body));
+}
+// Collect a RAW binary body (Twake Drive mode posts bytes, not JSON).
+function readRawBody(req, cb) {
+  const chunks = []; let len = 0;
+  req.on('data', (c) => { chunks.push(c); len += c.length; if (len > 60 * 1024 * 1024) req.destroy(); });
+  req.on('end', () => cb(Buffer.concat(chunks)));
 }
 
 const server = http.createServer((req, res) => {
@@ -200,6 +238,27 @@ const server = http.createServer((req, res) => {
       } catch (e) { console.error('verify callback error:', e); res.writeHead(400); res.end(String(e)); }
     });
   }
+  // Twake Drive (cozy-stack) passthrough receiver — RAW bytes + Bearer + Name in the URL.
+  if (req.method === 'POST' && u.pathname === '/cozy/files') {
+    return readRawBody(req, (buf) => {
+      const name = u.searchParams.get('Name') || 'cozy.bin';
+      const token = u.searchParams.get('token') || '';
+      const bearerOk = token.length > 0 && (req.headers['authorization'] || '') === `Bearer ${token}`;
+      const ctype = req.headers['content-type'] || '';
+      const safe = name.replace(/[^\w.\-]/g, '_');
+      const fname = `${Date.now()}-cozy-${safe}`;
+      fs.writeFileSync(path.join(RECV_DIR, fname), buf);
+      cozyResults.set(name, { size: buf.length, file: fname, contentType: ctype, bearerOk });
+      console.log(`📥 cozy     Name=${name}  ${buf.length} octets  type=${ctype}  bearer=${bearerOk ? 'OK' : 'MANQUANT/INVALIDE'}  -> received/${fname}`);
+      if (!bearerOk) { res.writeHead(401); return res.end('missing/invalid Bearer'); }
+      res.writeHead(201, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ ok: true }));
+    });
+  }
+  if (req.method === 'GET' && u.pathname === '/cozy-result') {
+    const r = u.searchParams.get('name') && cozyResults.get(u.searchParams.get('name'));
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    return res.end(JSON.stringify(r ? { ready: true, ...r } : { ready: false }));
+  }
   if (req.method === 'GET' && u.pathname === '/result') {
     const r = u.searchParams.get('state') && signResults.get(u.searchParams.get('state'));
     res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -226,5 +285,6 @@ server.listen(PORT, () => {
   console.log(`  ▶  http://localhost:${PORT}\n`);
   console.log(`  sign:    doc_url=/doc.pdf        callback_url=/callback`);
   console.log(`  verify:  doc_url=/last-signed    callback_url=/verify-callback`);
+  console.log(`  twake:   doc_url=/doc.pdf        callback_url=/cozy/files?Type=file&Name=…&token=…  (octets bruts + Bearer)`);
   console.log(`  signed docs -> ${path.relative(process.cwd(), RECV_DIR)}/\n`);
 });
