@@ -153,32 +153,75 @@ jobs:
         uses: tauri-apps/tauri-action@v0
         with:
           projectPath: eu-dss-ui
+          # macOS: build only the .app bundle (we create + sign the .dmg ourselves below).
+          # Other OSes: empty string → tauri-action builds all default bundles.
+          args: ${{ runner.os == 'macOS' && '--bundles app' || '' }}
         env:
           # Backend URL baked in at build time. Falls back to the in-app localhost
           # default when the repo variable is unset (fine for unsigned test artifacts).
           VITE_BACKEND_URL: ${{ vars.VITE_BACKEND_URL }}
-          # ── macOS code signing + notarization (Developer ID; tauri-action applies these only on macOS) ──
-          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}            # base64 of the Developer ID .p12
-          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
-          APPLE_SIGNING_IDENTITY: "Developer ID Application: Linagora (KUT463DS29)"
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}                  # app-specific password (notarization)
-          APPLE_TEAM_ID: KUT463DS29
+          # macOS: NO APPLE_* vars here — tauri-action must NOT re-sign the outer app,
+          # as that would overwrite the jpackage-signed nested JRE and break notarization.
+          # Signing + notarization are handled in the custom step below.
 
-      # tauri-action notarizes + staples the .app, but not the .dmg container itself.
-      # Notarize + staple the .dmg so the downloaded disk image is also Gatekeeper-clean.
-      - name: Notarize + staple the macOS .dmg
+      # Sign the outer .app WITHOUT --deep (preserves the jpackage-signed nested JRE),
+      # notarize + staple it, build the .dmg from the stapled .app, then sign + notarize
+      # + staple the .dmg so the downloaded disk image is also Gatekeeper-clean.
+      - name: Sign + notarize macOS app + dmg (custom)
         if: runner.os == 'macOS'
+        shell: bash
         env:
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
           APPLE_TEAM_ID: KUT463DS29
         run: |
           set -euo pipefail
-          DMG="$(find eu-dss-ui/src-tauri/target -path '*/release/bundle/dmg/*.dmg' | head -1)"
-          if [ -z "$DMG" ]; then echo "::error::no .dmg found to notarize"; exit 1; fi
-          echo "Notarizing: $DMG"
-          xcrun notarytool submit "$DMG" --apple-id "$APPLE_ID" --password "$APPLE_PASSWORD" --team-id "$APPLE_TEAM_ID" --wait
+
+          # ── 1. Import the Developer ID cert into a temp keychain ──────────────────
+          KEYCHAIN="$RUNNER_TEMP/eudss-sign.keychain-db"
+          KCPASS="$(openssl rand -base64 18)"
+          security create-keychain -p "$KCPASS" "$KEYCHAIN"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN"
+          security unlock-keychain -p "$KCPASS" "$KEYCHAIN"
+          echo "$APPLE_CERTIFICATE" | base64 --decode > "$RUNNER_TEMP/eudss-sign.p12"
+          security import "$RUNNER_TEMP/eudss-sign.p12" -P "$APPLE_CERTIFICATE_PASSWORD" -k "$KEYCHAIN" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KCPASS" "$KEYCHAIN" >/dev/null
+          security list-keychains -d user -s "$KEYCHAIN" $(security list-keychains -d user | sed 's/"//g')
+
+          # ── 2. Locate the unsigned .app produced by tauri-action ──────────────────
+          APP="$(find eu-dss-ui/src-tauri/target/release/bundle/macos -maxdepth 1 -name '*.app' | head -1)"
+          if [ -z "$APP" ]; then echo "::error::no .app found"; exit 1; fi
+          echo "Signing: $APP"
+
+          # ── 3. Sign the OUTER .app WITHOUT --deep (preserves nested jpackage sigs) ──
+          codesign --force --timestamp --options runtime \
+            --entitlements eu-dss-ui/src-tauri/macos-app.entitlements \
+            --sign "Developer ID Application: Linagora (KUT463DS29)" \
+            "$APP"
+          codesign --verify --strict --verbose=2 "$APP"
+
+          # ── 4. Notarize + staple the .app ─────────────────────────────────────────
+          ditto -c -k --keepParent "$APP" "$RUNNER_TEMP/app.zip"
+          xcrun notarytool submit "$RUNNER_TEMP/app.zip" \
+            --apple-id "$APPLE_ID" --password "$APPLE_PASSWORD" --team-id "$APPLE_TEAM_ID" --wait
+          xcrun stapler staple "$APP"
+
+          # ── 5. Build the .dmg from the stapled .app ───────────────────────────────
+          DMG_DIR="eu-dss-ui/src-tauri/target/release/bundle/dmg"
+          mkdir -p "$DMG_DIR"
+          DMG="$DMG_DIR/EU-DSS Sign_0.1.0_aarch64.dmg"
+          hdiutil create -volname "EU-DSS Sign" -srcfolder "$APP" -ov -format UDZO "$DMG"
+
+          # ── 6. Sign the .dmg ──────────────────────────────────────────────────────
+          codesign --force --timestamp \
+            --sign "Developer ID Application: Linagora (KUT463DS29)" \
+            "$DMG"
+
+          # ── 7. Notarize + staple + validate the .dmg ──────────────────────────────
+          xcrun notarytool submit "$DMG" \
+            --apple-id "$APPLE_ID" --password "$APPLE_PASSWORD" --team-id "$APPLE_TEAM_ID" --wait
           xcrun stapler staple "$DMG"
           xcrun stapler validate "$DMG"
           spctl -a -t open --context context:primary-signature -vv "$DMG" || true
