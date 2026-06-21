@@ -205,10 +205,24 @@ jobs:
             "$APP"
           codesign --verify --strict --verbose=2 "$APP"
 
-          # ── 4. Notarize + staple the .app ─────────────────────────────────────────
+          # ── 4. Notarize the .app — capture the submission id and ALWAYS fetch the
+          #       detailed notarytool log (exact per-binary rejection reasons) ─────────
           ditto -c -k --keepParent "$APP" "$RUNNER_TEMP/app.zip"
-          xcrun notarytool submit "$RUNNER_TEMP/app.zip" \
-            --apple-id "$APPLE_ID" --password "$APPLE_PASSWORD" --team-id "$APPLE_TEAM_ID" --wait
+          set +e
+          SUBMIT_JSON="$(xcrun notarytool submit "$RUNNER_TEMP/app.zip" \
+            --apple-id "$APPLE_ID" --password "$APPLE_PASSWORD" --team-id "$APPLE_TEAM_ID" \
+            --output-format json --wait)"
+          SUBMIT_RC=$?
+          set -e
+          echo "submit: $SUBMIT_JSON"
+          SUBMIT_ID="$(printf '%s' "$SUBMIT_JSON" | python3 -c 'import sys,json;print(json.load(sys.stdin).get("id",""))' 2>/dev/null || true)"
+          if [ -n "$SUBMIT_ID" ]; then
+            echo "──────── notarytool log $SUBMIT_ID ────────"
+            xcrun notarytool log "$SUBMIT_ID" \
+              --apple-id "$APPLE_ID" --password "$APPLE_PASSWORD" --team-id "$APPLE_TEAM_ID" || true
+            echo "────────────────────────────────────────────"
+          fi
+          [ "$SUBMIT_RC" -eq 0 ] || { echo "::error::notarization Invalid (see notarytool log above)"; exit 1; }
           xcrun stapler staple "$APP"
 
           # ── 5. Build the .dmg from the stapled .app ───────────────────────────────
