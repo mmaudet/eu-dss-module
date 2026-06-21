@@ -195,17 +195,17 @@ eu-dss/
 
 ## Téléchargements / Releases
 
-**Dernière version : [EU-DSS Sign v1.0.0](https://github.com/mmaudet/eu-dss-module/releases/tag/v1.0.0).**
+**Dernière version : [EU-DSS Sign v1.1.0](https://github.com/mmaudet/eu-dss-module/releases/tag/v1.1.0).**
 
 Téléchargez directement l'installeur correspondant à votre système :
 
 | OS | Installeur | Téléchargement |
 |---|---|---|
-| **Windows** (utilisateur, **recommandé**) | `.exe` (NSIS) — installation par utilisateur, **sans invite UAC** | [EU-DSS.Sign_1.0.0_x64-setup.exe](https://github.com/mmaudet/eu-dss-module/releases/download/v1.0.0/EU-DSS.Sign_1.0.0_x64-setup.exe) |
-| **Windows** (administrateur / entreprise) | `.msi` (signé) — déploiement administrateur | [EU-DSS.Sign_1.0.0_x64_fr-FR.msi](https://github.com/mmaudet/eu-dss-module/releases/download/v1.0.0/EU-DSS.Sign_1.0.0_x64_fr-FR.msi) |
-| **macOS** (arm64 / Apple Silicon) | `.dmg` | [EU-DSS.Sign_1.0.0_aarch64.dmg](https://github.com/mmaudet/eu-dss-module/releases/download/v1.0.0/EU-DSS.Sign_1.0.0_aarch64.dmg) |
-| **Linux** (Debian / Ubuntu) | `.deb` | [EU-DSS.Sign_1.0.0_amd64.deb](https://github.com/mmaudet/eu-dss-module/releases/download/v1.0.0/EU-DSS.Sign_1.0.0_amd64.deb) |
-| **Linux** (Fedora / RHEL) | `.rpm` | [EU-DSS.Sign-1.0.0-1.x86_64.rpm](https://github.com/mmaudet/eu-dss-module/releases/download/v1.0.0/EU-DSS.Sign-1.0.0-1.x86_64.rpm) |
+| **Windows** (utilisateur, **recommandé**) | `.exe` (NSIS) — installation par utilisateur, **sans invite UAC** | [EU-DSS.Sign_1.1.0_x64-setup.exe](https://github.com/mmaudet/eu-dss-module/releases/download/v1.1.0/EU-DSS.Sign_1.1.0_x64-setup.exe) |
+| **Windows** (administrateur / entreprise) | `.msi` (signé) — déploiement administrateur | [EU-DSS.Sign_1.1.0_x64_fr-FR.msi](https://github.com/mmaudet/eu-dss-module/releases/download/v1.1.0/EU-DSS.Sign_1.1.0_x64_fr-FR.msi) |
+| **macOS** (arm64 / Apple Silicon) | `.dmg` | [EU-DSS.Sign_1.1.0_aarch64.dmg](https://github.com/mmaudet/eu-dss-module/releases/download/v1.1.0/EU-DSS.Sign_1.1.0_aarch64.dmg) |
+| **Linux** (Debian / Ubuntu) | `.deb` | [EU-DSS.Sign_1.1.0_amd64.deb](https://github.com/mmaudet/eu-dss-module/releases/download/v1.1.0/EU-DSS.Sign_1.1.0_amd64.deb) |
+| **Linux** (Fedora / RHEL) | `.rpm` | [EU-DSS.Sign-1.1.0-1.x86_64.rpm](https://github.com/mmaudet/eu-dss-module/releases/download/v1.1.0/EU-DSS.Sign-1.1.0-1.x86_64.rpm) |
 
 Les installeurs sont **signés** (Windows : Azure Artifact Signing ; macOS : Developer ID + notarisation Apple) et produits automatiquement par le workflow CI [`.github/workflows/tauri-app.yml`](.github/workflows/tauri-app.yml) à chaque tag `v*`.
 

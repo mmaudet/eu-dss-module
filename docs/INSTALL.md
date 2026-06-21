@@ -19,10 +19,10 @@ serveur à lancer).
 L'installeur Windows est **signé via Azure Artifact Signing** (pas de blocage SmartScreen) et
 l'UI est en français.
 
-Téléchargez l'installeur depuis la [Release v1.0.0](https://github.com/mmaudet/eu-dss-module/releases/tag/v1.0.0) :
+Téléchargez l'installeur depuis la [Release v1.1.0](https://github.com/mmaudet/eu-dss-module/releases/tag/v1.1.0) :
 
-- **Recommandé (poste utilisateur)** : [`EU-DSS.Sign_1.0.0_x64-setup.exe`](https://github.com/mmaudet/eu-dss-module/releases/download/v1.0.0/EU-DSS.Sign_1.0.0_x64-setup.exe) — installeur NSIS, installation **par utilisateur, sans invite UAC**.
-- **Alternative (administrateur / entreprise)** : [`EU-DSS.Sign_1.0.0_x64_fr-FR.msi`](https://github.com/mmaudet/eu-dss-module/releases/download/v1.0.0/EU-DSS.Sign_1.0.0_x64_fr-FR.msi) — installeur MSI signé, adapté aux déploiements administrateur.
+- **Recommandé (poste utilisateur)** : [`EU-DSS.Sign_1.1.0_x64-setup.exe`](https://github.com/mmaudet/eu-dss-module/releases/download/v1.1.0/EU-DSS.Sign_1.1.0_x64-setup.exe) — installeur NSIS, installation **par utilisateur, sans invite UAC**.
+- **Alternative (administrateur / entreprise)** : [`EU-DSS.Sign_1.1.0_x64_fr-FR.msi`](https://github.com/mmaudet/eu-dss-module/releases/download/v1.1.0/EU-DSS.Sign_1.1.0_x64_fr-FR.msi) — installeur MSI signé, adapté aux déploiements administrateur.
 
 Les deux installent la même application.
 
@@ -92,10 +92,10 @@ ni transmis au réseau) :
 
 ### 2.1 Récupérer le paquet
 
-Téléchargez le paquet correspondant à votre distribution depuis la [Release v1.0.0](https://github.com/mmaudet/eu-dss-module/releases/tag/v1.0.0) :
+Téléchargez le paquet correspondant à votre distribution depuis la [Release v1.1.0](https://github.com/mmaudet/eu-dss-module/releases/tag/v1.1.0) :
 
-- **Debian / Ubuntu** : [`EU-DSS.Sign_1.0.0_amd64.deb`](https://github.com/mmaudet/eu-dss-module/releases/download/v1.0.0/EU-DSS.Sign_1.0.0_amd64.deb)
-- **Fedora / RHEL** : [`EU-DSS.Sign-1.0.0-1.x86_64.rpm`](https://github.com/mmaudet/eu-dss-module/releases/download/v1.0.0/EU-DSS.Sign-1.0.0-1.x86_64.rpm)
+- **Debian / Ubuntu** : [`EU-DSS.Sign_1.1.0_amd64.deb`](https://github.com/mmaudet/eu-dss-module/releases/download/v1.1.0/EU-DSS.Sign_1.1.0_amd64.deb)
+- **Fedora / RHEL** : [`EU-DSS.Sign-1.1.0-1.x86_64.rpm`](https://github.com/mmaudet/eu-dss-module/releases/download/v1.1.0/EU-DSS.Sign-1.1.0-1.x86_64.rpm)
 
 ### 2.2 Installer le middleware PKCS#11
 
@@ -138,7 +138,7 @@ sudo apt remove eu-dss-sign     # Debian/Ubuntu
 
 ### 3.1 Récupérer le .dmg
 
-Téléchargez le `.dmg` depuis la [Release v1.0.0](https://github.com/mmaudet/eu-dss-module/releases/tag/v1.0.0) : [`EU-DSS.Sign_1.0.0_aarch64.dmg`](https://github.com/mmaudet/eu-dss-module/releases/download/v1.0.0/EU-DSS.Sign_1.0.0_aarch64.dmg).
+Téléchargez le `.dmg` depuis la [Release v1.1.0](https://github.com/mmaudet/eu-dss-module/releases/tag/v1.1.0) : [`EU-DSS.Sign_1.1.0_aarch64.dmg`](https://github.com/mmaudet/eu-dss-module/releases/download/v1.1.0/EU-DSS.Sign_1.1.0_aarch64.dmg).
 
 Il est **signé Developer ID et notarisé par Apple** : un simple double-clic suffit, aucun contournement Gatekeeper n'est nécessaire.
 
