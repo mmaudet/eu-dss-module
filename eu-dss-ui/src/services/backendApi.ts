@@ -80,10 +80,20 @@ export interface SignatureSummary {
   signingDate: string | null;
 }
 
+export type ValidationKind = 'VALIDATED' | 'DETACHED_CONTENT_REQUIRED' | 'NOT_A_SIGNATURE';
+
 export interface ValidationResponse {
+  kind: ValidationKind;
   signatureCount: number;
   signatures: SignatureSummary[];
   simpleReportXml: string | null;
+}
+
+/** Optional second document + names for validating a DETACHED signature. */
+export interface ValidateOptions {
+  documentName?: string;
+  detachedContentBase64?: string;
+  detachedContentName?: string;
 }
 
 async function postJson<T>(path: string, body: unknown): Promise<T> {
@@ -140,6 +150,11 @@ export const backendApi = {
     signatureValueBase64: string,
   ) => postJson<AssembleResponse>('/sign/assemble', { documentBase64, documentName, params, signatureValueBase64 }),
 
-  validate: (documentBase64: string) =>
-    postJson<ValidationResponse>('/validate', { documentBase64 }),
+  validate: (documentBase64: string, opts?: ValidateOptions) =>
+    postJson<ValidationResponse>('/validate', {
+      documentBase64,
+      documentName: opts?.documentName,
+      detachedContentBase64: opts?.detachedContentBase64,
+      detachedContentName: opts?.detachedContentName,
+    }),
 };
