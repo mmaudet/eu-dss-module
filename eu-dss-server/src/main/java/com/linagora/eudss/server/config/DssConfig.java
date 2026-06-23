@@ -130,6 +130,9 @@ public class DssConfig {
         ocspSource.setDataLoader(new OCSPDataLoader());
         verifier.setOcspSource(ocspSource);                          // revocation (OCSP)
         verifier.setTrustedCertSources(trustedListSource);           // EU trusted lists -> QES qualification
+        // Revocation (and thus outbound OCSP/CRL fetches) is only performed for chains anchored in the
+        // EU trust list, so a supplied untrusted signature can't drive arbitrary outbound requests.
+        verifier.setCheckRevocationForUntrustedChains(false);
         return verifier;
     }
 
@@ -155,7 +158,7 @@ public class DssConfig {
         return service;
     }
 
-    /** Standalone (non-ASiC) XAdES service, used for ENVELOPING and DETACHED XAdES signatures. */
+    /** Standalone (non-ASiC) XAdES service, used for ENVELOPING XAdES signatures. */
     @Bean
     public XAdESService xadesService(CommonCertificateVerifier verifier, TSPSource tspSource) {
         XAdESService service = new XAdESService(verifier);
@@ -166,10 +169,5 @@ public class DssConfig {
     @Bean
     public DocumentSigner xadesEnvelopingSigningService(XAdESService xadesService) {
         return new XadesSigningService(xadesService, SignaturePackaging.ENVELOPING);
-    }
-
-    @Bean
-    public DocumentSigner xadesDetachedSigningService(XAdESService xadesService) {
-        return new XadesSigningService(xadesService, SignaturePackaging.DETACHED);
     }
 }

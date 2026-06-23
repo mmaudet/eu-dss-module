@@ -14,9 +14,7 @@ public enum SigningFormat {
     /** ASiC-E container wrapping a XAdES signature (default for non-PDF files). */
     ASIC,
     /** Standalone XAdES signature, ENVELOPING packaging (file embedded in the XML). */
-    XADES_ENVELOPING,
-    /** Standalone XAdES signature, DETACHED packaging (only the signature XML is returned). */
-    XADES_DETACHED;
+    XADES_ENVELOPING;
 
     /** PDFs are signed in place (PAdES); everything else is wrapped in an ASiC-E/XAdES container. */
     public static SigningFormat forFileName(String fileName) {
@@ -36,7 +34,6 @@ public enum SigningFormat {
             case PADES -> PADES;
             case ASIC_E -> ASIC;
             case XADES_ENVELOPING -> XADES_ENVELOPING;
-            case XADES_DETACHED -> XADES_DETACHED;
         };
     }
 }

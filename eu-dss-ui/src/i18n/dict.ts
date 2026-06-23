@@ -124,7 +124,6 @@ export const fr = {
   'sign.form.pades': 'PAdES (PDF)',
   'sign.form.asice': 'ASiC‑E',
   'sign.form.xadesEnv': 'XAdES (enveloppant)',
-  'sign.form.xadesDet': 'XAdES détaché',
 
   // Documents panel
   'sign.dropzone.title': 'Déposer vos documents',
@@ -136,7 +135,6 @@ export const fr = {
   'sign.docs.typePdf': 'document PDF',
   'sign.docs.typeOther': 'document {ext}',
   'sign.docs.alreadySigned': 'déjà signé : {n}',
-  'sign.docs.detachedNote': 'Produit un fichier de signature séparé (.xml). Le document d’origine reste inchangé et doit être conservé.',
   'sign.docs.formatAria': 'Format de signature pour {name}',
   'sign.docs.remove': 'Retirer',
   'sign.cancelledPin': 'Signature annulée (PIN requis)',
@@ -292,6 +290,21 @@ export const fr = {
   'verify.report.copiedAria': 'Rapport XML copié dans le presse-papiers',
   'verify.report.disclosure': 'Rapport DSS détaillé (XML)',
   'verify.report.unavailable': 'Rapport XML indisponible.',
+
+  'verify.detached.title': 'Signature détachée',
+  'verify.detached.hint': 'Cette signature ne contient pas le document. Ajoutez le document source d’origine pour vérifier le couple.',
+  'verify.notSig.title': 'Ce fichier n’est pas une signature',
+  'verify.notSig.hint': 'Aucune signature trouvée. S’il s’agit du document source, ajoutez son fichier de signature (.p7s, .xml…).',
+  'verify.addSecondFile': 'Déposer le second fichier, ou le choisir',
+  'verify.chooseSecond': 'Choisir le fichier',
+  'verify.awaitingSecond': 'En attente du second fichier',
+  'verify.addSourceDocShort': 'Ajoutez le document source',
+  'verify.addSigFileShort': 'Ajoutez le fichier de signature (.p7s, .xml…)',
+  'verify.wrongSecondFile': 'Le second fichier ne correspond pas — vérifiez que vous avez fourni le bon fichier.',
+  'verify.checks.mismatchTitle': 'Le document ne correspond pas à la signature',
+  'verify.checks.mismatchSub': 'Vérifiez que vous avez fourni le bon document source — son contenu ne correspond pas à l’empreinte signée.',
+  'deeplinkVerify.notASignature': 'Le fichier fourni ne contient pas de signature numérique.',
+  'deeplinkVerify.detachedUnsupported': 'Signature détachée : la vérification par lien ne la prend pas en charge. Ouvrez l’application et utilisez l’onglet « Vérifier » avec le document source.',
 
   // ── Clé & certificat (KeyCertScreen) ────────────────────────────────────────
   'key.title': 'Clé & certificat',
@@ -524,7 +537,6 @@ export const en: Record<TKey, string> = {
   'sign.form.pades': 'PAdES (PDF)',
   'sign.form.asice': 'ASiC‑E',
   'sign.form.xadesEnv': 'XAdES (enveloping)',
-  'sign.form.xadesDet': 'XAdES detached',
 
   'sign.dropzone.title': 'Drop your documents',
   'sign.dropzone.hint': 'PDF → PAdES · office & images → ASiC‑E container',
@@ -535,7 +547,6 @@ export const en: Record<TKey, string> = {
   'sign.docs.typePdf': 'PDF document',
   'sign.docs.typeOther': '{ext} document',
   'sign.docs.alreadySigned': 'already signed: {n}',
-  'sign.docs.detachedNote': 'Produces a separate signature file (.xml). The original document is left unchanged and must be kept.',
   'sign.docs.formatAria': 'Signature format for {name}',
   'sign.docs.remove': 'Remove',
   'sign.cancelledPin': 'Signing cancelled (PIN required)',
@@ -687,6 +698,21 @@ export const en: Record<TKey, string> = {
   'verify.report.copiedAria': 'XML report copied to the clipboard',
   'verify.report.disclosure': 'Detailed DSS report (XML)',
   'verify.report.unavailable': 'XML report unavailable.',
+
+  'verify.detached.title': 'Detached signature',
+  'verify.detached.hint': 'This signature does not contain the document. Add the original source document to verify the pair.',
+  'verify.notSig.title': 'This file is not a signature',
+  'verify.notSig.hint': 'No signature found. If this is the source document, add its signature file (.p7s, .xml…).',
+  'verify.addSecondFile': 'Drop the second file, or choose one',
+  'verify.chooseSecond': 'Choose file',
+  'verify.awaitingSecond': 'Awaiting second file',
+  'verify.addSourceDocShort': 'Add the source document',
+  'verify.addSigFileShort': 'Add the signature file (.p7s, .xml…)',
+  'verify.wrongSecondFile': 'The second file does not match — check you supplied the right file.',
+  'verify.checks.mismatchTitle': 'The document does not match the signature',
+  'verify.checks.mismatchSub': 'Check you supplied the correct source document — its content does not match the signed digest.',
+  'deeplinkVerify.notASignature': 'The file provided does not contain a digital signature.',
+  'deeplinkVerify.detachedUnsupported': 'Detached signature: link verification does not support it. Open the app and use the “Verify” tab with the source document.',
 
   // ── Clé & certificat ──────────────────────────────────────────────────────────
   'key.title': 'Key & certificate',

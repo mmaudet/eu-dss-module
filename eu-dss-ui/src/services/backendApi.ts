@@ -45,9 +45,8 @@ export type SignatureLevel = 'BASELINE_B' | 'BASELINE_T' | 'BASELINE_LT' | 'BASE
  *  - PADES            → PAdES (PDF input required); output = signed PDF.
  *  - ASIC_E           → ASiC-E container; output = <base>.asice.
  *  - XADES_ENVELOPING → standalone XAdES with the file embedded; output = <base>.xml.
- *  - XADES_DETACHED   → detached XAdES; output = the signature .xml only (original kept).
  */
-export type SignatureForm = 'PADES' | 'ASIC_E' | 'XADES_ENVELOPING' | 'XADES_DETACHED';
+export type SignatureForm = 'PADES' | 'ASIC_E' | 'XADES_ENVELOPING';
 
 export interface SignatureParams {
   certificateChainBase64: string[];
@@ -80,10 +79,21 @@ export interface SignatureSummary {
   signingDate: string | null;
 }
 
+export type ValidationKind = 'VALIDATED' | 'DETACHED_CONTENT_REQUIRED' | 'NOT_A_SIGNATURE';
+
 export interface ValidationResponse {
+  kind: ValidationKind;
   signatureCount: number;
   signatures: SignatureSummary[];
   simpleReportXml: string | null;
+  overallIndication: string | null;
+}
+
+/** Optional second document + names for validating a DETACHED signature. */
+export interface ValidateOptions {
+  documentName?: string;
+  detachedContentBase64?: string;
+  detachedContentName?: string;
 }
 
 async function postJson<T>(path: string, body: unknown): Promise<T> {
@@ -140,6 +150,11 @@ export const backendApi = {
     signatureValueBase64: string,
   ) => postJson<AssembleResponse>('/sign/assemble', { documentBase64, documentName, params, signatureValueBase64 }),
 
-  validate: (documentBase64: string) =>
-    postJson<ValidationResponse>('/validate', { documentBase64 }),
+  validate: (documentBase64: string, opts?: ValidateOptions) =>
+    postJson<ValidationResponse>('/validate', {
+      documentBase64,
+      documentName: opts?.documentName,
+      detachedContentBase64: opts?.detachedContentBase64,
+      detachedContentName: opts?.detachedContentName,
+    }),
 };
