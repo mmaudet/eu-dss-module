@@ -347,53 +347,107 @@ function XmlReport({ xml, t }: { xml: string | null; t: TFunction }) {
 export function ValidatePage() {
   const t = useT();
   const inputRef = useRef<HTMLInputElement>(null);
+  const secondInputRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
+  const [secondFile, setSecondFile] = useState<File | null>(null);
+  // What the backend asked for after the first pass: a source document, a signature file, or nothing.
+  const [need, setNeed] = useState<'source' | 'signature' | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<ValidationResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  function clearFile() {
+  function clearAll() {
     setFile(null);
+    setSecondFile(null);
+    setNeed(null);
     setResult(null);
     setError(null);
     if (inputRef.current) inputRef.current.value = '';
+    if (secondInputRef.current) secondInputRef.current.value = '';
   }
 
   function pickFile(chosen: File | undefined) {
     if (!chosen) return;
     setFile(chosen);
+    setSecondFile(null);
+    setNeed(null);
     setResult(null);
     setError(null);
   }
 
-  async function validate() {
+  function recordHistory(res: ValidationResponse, name: string, sizeBytes: number) {
+    try {
+      history.add({
+        kind: 'verify',
+        name,
+        format: res.signatures?.[0]?.signatureFormat ?? '',
+        sizeBytes,
+        verdict: overallVariant(res) === 'ok' ? 'TOTAL_PASSED' : res.signatures?.[0]?.indication ?? '',
+        atIso: new Date().toISOString(),
+      });
+    } catch {
+      // logging failure must never propagate
+    }
+  }
+
+  // First pass: classify the dropped file. Self-contained → show result; otherwise ask for file #2.
+  async function verifyPrimary() {
     if (!file) return;
     setBusy(true);
     setResult(null);
     setError(null);
+    setNeed(null);
     try {
       const base64 = await fileToBase64(file);
-      const res = await backendApi.validate(base64);
+      const res = await backendApi.validate(base64, { documentName: file.name });
+      if (res.kind === 'DETACHED_CONTENT_REQUIRED') { setNeed('source'); return; }
+      if (res.kind === 'NOT_A_SIGNATURE') { setNeed('signature'); return; }
       setResult(res);
-      // ── Record in local history (additive; never breaks validation flow) ───
-      try {
-        history.add({
-          kind: 'verify',
-          name: file.name,
-          format: res.signatures?.[0]?.signatureFormat ?? '',
-          sizeBytes: file.size,
-          verdict: overallVariant(res) === 'ok' ? 'TOTAL_PASSED' : res.signatures?.[0]?.indication ?? '',
-          atIso: new Date().toISOString(),
-        });
-      } catch {
-        // logging failure must never propagate
-      }
+      recordHistory(res, file.name, file.size);
     } catch (e) {
       setError((e as Error).message ?? t('common.unknownError'));
     } finally {
       setBusy(false);
     }
+  }
+
+  // Second pass: we have the pair. Roles depend on which file the backend asked for.
+  async function verifyPair(second: File) {
+    if (!file) return;
+    setBusy(true);
+    setResult(null);
+    setError(null);
+    try {
+      const primaryB64 = await fileToBase64(file);
+      const secondB64 = await fileToBase64(second);
+      const res =
+        need === 'source'
+          ? // file = the signature, second = the original source document
+            await backendApi.validate(primaryB64, {
+              documentName: file.name,
+              detachedContentBase64: secondB64,
+              detachedContentName: second.name,
+            })
+          : // need === 'signature': file = the source document, second = the signature file
+            await backendApi.validate(secondB64, {
+              documentName: second.name,
+              detachedContentBase64: primaryB64,
+              detachedContentName: file.name,
+            });
+      setResult(res);
+      recordHistory(res, need === 'source' ? file.name : second.name, file.size + second.size);
+    } catch (e) {
+      setError((e as Error).message ?? t('common.unknownError'));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function pickSecondFile(chosen: File | undefined) {
+    if (!chosen) return;
+    setSecondFile(chosen);
+    void verifyPair(chosen);
   }
 
   return (
@@ -404,7 +458,7 @@ export function ValidatePage() {
         <p className="signer-subtitle">{t('verify.subtitle')}</p>
       </div>
 
-      {/* hidden file input */}
+      {/* hidden file inputs */}
       <input
         ref={inputRef}
         type="file"
@@ -412,23 +466,23 @@ export function ValidatePage() {
         style={{ display: 'none' }}
         onChange={(e) => pickFile(e.target.files?.[0])}
       />
+      <input
+        ref={secondInputRef}
+        type="file"
+        style={{ display: 'none' }}
+        onChange={(e) => pickSecondFile(e.target.files?.[0])}
+      />
 
-      {/* ── Drop / file row ── */}
+      {/* ── Primary drop / file row ── */}
       {!file ? (
         <div
           className={`vd-dropzone${dragOver ? ' vd-dropzone--over' : ''}`}
           onClick={() => inputRef.current?.click()}
           onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
           onDragLeave={() => setDragOver(false)}
-          onDrop={(e) => {
-            e.preventDefault();
-            setDragOver(false);
-            pickFile(e.dataTransfer.files?.[0]);
-          }}
+          onDrop={(e) => { e.preventDefault(); setDragOver(false); pickFile(e.dataTransfer.files?.[0]); }}
         >
-          <span className="vd-dz-icon-tile">
-            <Icon.upload size={20} />
-          </span>
+          <span className="vd-dz-icon-tile"><Icon.upload size={20} /></span>
           <div className="vd-dz-text">
             <div className="vd-dz-title">{t('verify.dropTitle')}</div>
             <div className="vd-dz-hint">{t('verify.dropHint')}</div>
@@ -445,37 +499,87 @@ export function ValidatePage() {
           </button>
         </div>
       ) : (
-        /* ── File chosen row ── */
         <div className="vd-file-row">
           <div className="fic">{fileKind(file.name).ext}</div>
           <div className="fmeta">
             <div className="fname">{file.name}</div>
-            <div className="fsub">
-              <span>{formatBytes(file.size)} · {t('verify.readyToVerify')}</span>
-            </div>
+            <div className="fsub"><span>{formatBytes(file.size)} · {t('verify.readyToVerify')}</span></div>
           </div>
           <div className="vd-file-actions">
-            <Btn
-              onClick={validate}
-              disabled={busy}
-              icon={busy ? <span className="spinner" /> : <Icon.shieldCheck size={16} />}
-            >
-              {busy ? t('verify.verifying') : t('common.verify')}
-            </Btn>
-            {result !== null && (
+            {need === null && result === null && (
               <Btn
-                variant="ghost"
-                onClick={() => { setResult(null); setError(null); }}
-                icon={<Icon.refresh size={15} />}
+                onClick={verifyPrimary}
+                disabled={busy}
+                icon={busy ? <span className="spinner" /> : <Icon.shieldCheck size={16} />}
               >
+                {busy ? t('verify.verifying') : t('common.verify')}
+              </Btn>
+            )}
+            {result !== null && (
+              <Btn variant="ghost" onClick={clearAll} icon={<Icon.refresh size={15} />}>
                 {t('verify.reset')}
               </Btn>
             )}
-            <button className="x-btn" title={t('verify.removeFile')} onClick={clearFile}>
+            <button className="x-btn" title={t('verify.removeFile')} onClick={clearAll}>
               <Icon.x size={15} />
             </button>
           </div>
         </div>
+      )}
+
+      {/* ── Second-file prompt (detached pair / source-first) ── */}
+      {file && need !== null && result === null && (
+        <>
+          <Banner
+            kind="info"
+            icon={<Icon.alert size={20} />}
+            title={need === 'source' ? t('verify.detached.title') : t('verify.notSig.title')}
+          >
+            {need === 'source' ? t('verify.detached.hint') : t('verify.notSig.hint')}
+          </Banner>
+
+          {secondFile ? (
+            <div className="vd-file-row">
+              <div className="fic">{fileKind(secondFile.name).ext}</div>
+              <div className="fmeta">
+                <div className="fname">{secondFile.name}</div>
+                <div className="fsub">
+                  <span>{formatBytes(secondFile.size)}{busy ? ` · ${t('verify.verifying')}` : ''}</span>
+                </div>
+              </div>
+              <div className="vd-file-actions">
+                <button
+                  className="x-btn"
+                  title={t('verify.removeFile')}
+                  onClick={() => { setSecondFile(null); if (secondInputRef.current) secondInputRef.current.value = ''; }}
+                >
+                  <Icon.x size={15} />
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div
+              className={`vd-dropzone${dragOver ? ' vd-dropzone--over' : ''}`}
+              onClick={() => secondInputRef.current?.click()}
+              onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+              onDragLeave={() => setDragOver(false)}
+              onDrop={(e) => { e.preventDefault(); setDragOver(false); pickSecondFile(e.dataTransfer.files?.[0]); }}
+            >
+              <span className="vd-dz-icon-tile"><Icon.upload size={20} /></span>
+              <div className="vd-dz-text">
+                <div className="vd-dz-title">{t('verify.addSecondFile')}</div>
+                <div className="vd-dz-hint">{need === 'source' ? t('verify.detached.hint') : t('verify.notSig.hint')}</div>
+              </div>
+              <button
+                className="vd-dz-btn"
+                onClick={(e) => { e.stopPropagation(); secondInputRef.current?.click(); }}
+                tabIndex={-1}
+              >
+                {t('verify.chooseSecond')}
+              </button>
+            </div>
+          )}
+        </>
       )}
 
       {/* ── Error banner ── */}
@@ -488,31 +592,23 @@ export function ValidatePage() {
       {/* ── Result section ── */}
       {result !== null && (
         <div className="vd-result rise">
-          {/* Verdict banner — driven off result.signatures[*].indication */}
           <VerdictBanner result={result} />
 
-          {result.signatures.length > 0 && (
-            result.signatures.map((s) => (
-              <div key={s.signatureId} className="vd-sig-block">
-                <div className="vd-sig-cols">
-                  {/* Left: signataire — reads s.signedBy, s.signatureId, s.signatureFormat, s.signingDate, s.indication */}
-                  <SignataireCard s={s} />
-                  {/* Right: checks — reads s.indication, s.subIndication, s.signatureFormat */}
-                  <ChecksCard s={s} />
-                </div>
+          {result.signatures.length > 0 && result.signatures.map((s) => (
+            <div key={s.signatureId} className="vd-sig-block">
+              <div className="vd-sig-cols">
+                <SignataireCard s={s} />
+                <ChecksCard s={s} />
               </div>
-            ))
-          )}
+            </div>
+          ))}
 
-          {/* Count + date */}
           <div className="vd-footer-note">
             <span dangerouslySetInnerHTML={{ __html: t('verify.footerNote', { n: result.signatureCount, date: todayFR() }) }} />
           </div>
 
-          {/* Download / copy report XML */}
           <ReportActions xml={result.simpleReportXml} />
 
-          {/* DSS XML disclosure */}
           <details className="disclosure">
             <summary>
               <span className="chev"><Icon.chevR size={16} /></span>

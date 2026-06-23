@@ -182,6 +182,11 @@ export function DeepLinkVerifyModal({ url, onClose }: DeepLinkVerifyModalProps) 
       return;
     }
     if (runId !== runIdRef.current) return;
+    if (res.kind === 'DETACHED_CONTENT_REQUIRED') {
+      // Link verification carries one document; detached pairs are in-app only (by design).
+      fail(t('deeplinkVerify.detachedUnsupported'), runId);
+      return;
+    }
     setResult(res);
 
     // ── POST the report back. Past this point validation has SUCCEEDED, so a

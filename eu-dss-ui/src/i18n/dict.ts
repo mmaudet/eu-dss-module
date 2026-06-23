@@ -291,6 +291,14 @@ export const fr = {
   'verify.report.disclosure': 'Rapport DSS détaillé (XML)',
   'verify.report.unavailable': 'Rapport XML indisponible.',
 
+  'verify.detached.title': 'Signature détachée',
+  'verify.detached.hint': 'Cette signature ne contient pas le document. Ajoutez le document source d’origine pour vérifier le couple.',
+  'verify.notSig.title': 'Ce fichier n’est pas une signature',
+  'verify.notSig.hint': 'Aucune signature trouvée. S’il s’agit du document source, ajoutez son fichier de signature (.p7s, .xml…).',
+  'verify.addSecondFile': 'Déposer le second fichier, ou le choisir',
+  'verify.chooseSecond': 'Choisir le fichier',
+  'deeplinkVerify.detachedUnsupported': 'Signature détachée : la vérification par lien ne la prend pas en charge. Ouvrez l’application et utilisez l’onglet « Vérifier » avec le document source.',
+
   // ── Clé & certificat (KeyCertScreen) ────────────────────────────────────────
   'key.title': 'Clé & certificat',
   'key.subtitle': 'Votre token de signature et son certificat.',
@@ -683,6 +691,14 @@ export const en: Record<TKey, string> = {
   'verify.report.copiedAria': 'XML report copied to the clipboard',
   'verify.report.disclosure': 'Detailed DSS report (XML)',
   'verify.report.unavailable': 'XML report unavailable.',
+
+  'verify.detached.title': 'Detached signature',
+  'verify.detached.hint': 'This signature does not contain the document. Add the original source document to verify the pair.',
+  'verify.notSig.title': 'This file is not a signature',
+  'verify.notSig.hint': 'No signature found. If this is the source document, add its signature file (.p7s, .xml…).',
+  'verify.addSecondFile': 'Drop the second file, or choose one',
+  'verify.chooseSecond': 'Choose file',
+  'deeplinkVerify.detachedUnsupported': 'Detached signature: link verification does not support it. Open the app and use the "Verify" tab with the source document.',
 
   // ── Clé & certificat ──────────────────────────────────────────────────────────
   'key.title': 'Key & certificate',
