@@ -3,6 +3,7 @@ package com.linagora.eudss.server.service;
 import com.linagora.eudss.server.dto.ValidationResponseDto;
 import com.linagora.eudss.server.dto.ValidationResponseDto.SignatureSummary;
 import com.linagora.eudss.server.dto.ValidationResponseDto.ValidationKind;
+import eu.europa.esig.dss.enumerations.Indication;
 import eu.europa.esig.dss.enumerations.SubIndication;
 import eu.europa.esig.dss.model.DSSDocument;
 import eu.europa.esig.dss.model.InMemoryDocument;
@@ -41,15 +42,19 @@ public class DocumentValidationService {
      */
     public ValidationResponseDto validate(String documentBase64, String documentName,
                                           String detachedContentBase64, String detachedContentName) {
-        DSSDocument document = new InMemoryDocument(
-                Base64.getDecoder().decode(documentBase64),
+        byte[] documentBytes = Base64.getDecoder().decode(documentBase64);
+        if (documentBytes.length == 0) {
+            return notASignature();
+        }
+        DSSDocument document = new InMemoryDocument(documentBytes,
                 hasText(documentName) ? documentName : "document");
 
         SignedDocumentValidator validator;
         try {
             validator = SignedDocumentValidator.fromDocument(document);
-        } catch (UnsupportedOperationException e) {
-            // DSS does not recognise this file as any signature container (e.g. a plain .xlsx ZIP).
+        } catch (RuntimeException e) {
+            // DSS does not recognise this file as any signature container (e.g. a plain .xlsx ZIP or corrupt bytes).
+            log.warn("Unrecognised/invalid document during validation", e);
             return notASignature();
         }
         validator.setCertificateVerifier(verifier);
@@ -69,7 +74,7 @@ public class DocumentValidationService {
             return notASignature();
         }
         if (!detachedProvided && needsDetachedContent(simple)) {
-            return new ValidationResponseDto(ValidationKind.DETACHED_CONTENT_REQUIRED, 0, List.of(), null);
+            return new ValidationResponseDto(ValidationKind.DETACHED_CONTENT_REQUIRED, null, 0, List.of(), null);
         }
 
         List<SignatureSummary> summaries = new ArrayList<>();
@@ -85,7 +90,8 @@ public class DocumentValidationService {
                             : null
             ));
         }
-        return new ValidationResponseDto(ValidationKind.VALIDATED, simple.getSignaturesCount(), summaries, marshalSimpleReport(reports));
+        String overallIndication = computeOverallIndication(simple);
+        return new ValidationResponseDto(ValidationKind.VALIDATED, overallIndication, simple.getSignaturesCount(), summaries, marshalSimpleReport(reports));
     }
 
     /** A signature whose detached content is missing surfaces as SIGNED_DATA_NOT_FOUND. */
@@ -99,7 +105,21 @@ public class DocumentValidationService {
     }
 
     private static ValidationResponseDto notASignature() {
-        return new ValidationResponseDto(ValidationKind.NOT_A_SIGNATURE, 0, List.of(), null);
+        return new ValidationResponseDto(ValidationKind.NOT_A_SIGNATURE, null, 0, List.of(), null);
+    }
+
+    private static String computeOverallIndication(SimpleReport simple) {
+        boolean allPassed = true;
+        for (String sigId : simple.getSignatureIdList()) {
+            Indication ind = simple.getIndication(sigId);
+            if (ind == Indication.TOTAL_FAILED) {
+                return "TOTAL_FAILED";
+            }
+            if (ind != Indication.TOTAL_PASSED) {
+                allPassed = false;
+            }
+        }
+        return allPassed ? "TOTAL_PASSED" : "INDETERMINATE";
     }
 
     private static boolean hasText(String s) {

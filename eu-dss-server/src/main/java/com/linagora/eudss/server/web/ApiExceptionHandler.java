@@ -26,7 +26,7 @@ public class ApiExceptionHandler {
     public ResponseEntity<Map<String, Object>> badRequest(IllegalArgumentException ex) {
         LOG.warn("Bad request", ex);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(Map.of("error", "bad_request", "message", ex.getMessage()));
+                .body(Map.of("error", "bad_request", "message", "Invalid request parameters"));
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
@@ -40,6 +40,6 @@ public class ApiExceptionHandler {
     public ResponseEntity<Map<String, Object>> generic(Exception ex) {
         LOG.error("Unhandled error", ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Map.of("error", "internal_error", "message", ex.getMessage()));
+                .body(Map.of("error", "internal_error", "message", "An internal error occurred"));
     }
 }

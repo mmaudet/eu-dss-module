@@ -130,6 +130,9 @@ public class DssConfig {
         ocspSource.setDataLoader(new OCSPDataLoader());
         verifier.setOcspSource(ocspSource);                          // revocation (OCSP)
         verifier.setTrustedCertSources(trustedListSource);           // EU trusted lists -> QES qualification
+        // Revocation (and thus outbound OCSP/CRL fetches) is only performed for chains anchored in the
+        // EU trust list, so a supplied untrusted signature can't drive arbitrary outbound requests.
+        verifier.setCheckRevocationForUntrustedChains(false);
         return verifier;
     }
 

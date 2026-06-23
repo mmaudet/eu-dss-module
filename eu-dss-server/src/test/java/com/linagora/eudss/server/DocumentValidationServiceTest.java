@@ -57,6 +57,27 @@ class DocumentValidationServiceTest {
         assertThat(res.kind()).isEqualTo(ValidationKind.VALIDATED);
         assertThat(res.signatureCount()).isEqualTo(1);
         assertThat(res.signatures().get(0).signedBy()).contains("eu-dss test signer");
+        assertThat(res.overallIndication()).isNotNull();
+    }
+
+    @Test
+    void detached_with_tampered_content_is_validated_but_not_total_passed() throws Exception {
+        byte[] original = "the signed payload".getBytes(StandardCharsets.UTF_8);
+        byte[] sig = XadesFixtures.xades(xadesService, pki, SignaturePackaging.DETACHED, original, "data.bin");
+
+        byte[] tampered = original.clone();
+        tampered[0] ^= 0xFF;
+
+        ValidationResponseDto res = validation.validate(b64(sig), "data.xml", b64(tampered), "data.bin");
+
+        assertThat(res.kind()).isEqualTo(ValidationKind.VALIDATED);
+        assertThat(res.overallIndication()).isNotEqualTo("TOTAL_PASSED");
+    }
+
+    @Test
+    void empty_bytes_are_not_a_signature() {
+        ValidationResponseDto res = validation.validate(b64(new byte[0]), "empty.bin", null, null);
+        assertThat(res.kind()).isEqualTo(ValidationKind.NOT_A_SIGNATURE);
     }
 
     @Test
