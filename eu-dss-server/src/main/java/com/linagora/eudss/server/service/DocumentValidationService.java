@@ -1,6 +1,9 @@
 package com.linagora.eudss.server.service;
 
 import com.linagora.eudss.server.dto.ValidationResponseDto;
+import com.linagora.eudss.server.dto.ValidationResponseDto.SignatureSummary;
+import com.linagora.eudss.server.dto.ValidationResponseDto.ValidationKind;
+import eu.europa.esig.dss.enumerations.SubIndication;
 import eu.europa.esig.dss.model.DSSDocument;
 import eu.europa.esig.dss.model.InMemoryDocument;
 import eu.europa.esig.dss.simplereport.SimpleReport;
@@ -27,16 +30,47 @@ public class DocumentValidationService {
         this.verifier = verifier;
     }
 
-    public ValidationResponseDto validate(String documentBase64) {
-        DSSDocument document = new InMemoryDocument(Base64.getDecoder().decode(documentBase64), "document");
-        SignedDocumentValidator validator = SignedDocumentValidator.fromDocument(document);
-        validator.setCertificateVerifier(verifier);
-        Reports reports = validator.validateDocument();
+    /**
+     * Validates an uploaded file. When {@code detachedContentBase64} is supplied it is wired as the
+     * detached signed data ({@link SignedDocumentValidator#setDetachedContents}). The returned
+     * {@link ValidationKind} tells the caller whether it must resend with the missing document.
+     */
+    public ValidationResponseDto validate(String documentBase64, String documentName,
+                                          String detachedContentBase64, String detachedContentName) {
+        DSSDocument document = new InMemoryDocument(
+                Base64.getDecoder().decode(documentBase64),
+                hasText(documentName) ? documentName : "document");
 
+        SignedDocumentValidator validator;
+        try {
+            validator = SignedDocumentValidator.fromDocument(document);
+        } catch (UnsupportedOperationException e) {
+            // DSS does not recognise this file as any signature container (e.g. a plain .xlsx ZIP).
+            return notASignature();
+        }
+        validator.setCertificateVerifier(verifier);
+
+        boolean detachedProvided = hasText(detachedContentBase64);
+        if (detachedProvided) {
+            DSSDocument original = new InMemoryDocument(
+                    Base64.getDecoder().decode(detachedContentBase64),
+                    hasText(detachedContentName) ? detachedContentName : "detached-content");
+            validator.setDetachedContents(List.of(original));
+        }
+
+        Reports reports = validator.validateDocument();
         SimpleReport simple = reports.getSimpleReport();
-        List<ValidationResponseDto.SignatureSummary> summaries = new ArrayList<>();
+
+        if (simple.getSignaturesCount() == 0) {
+            return notASignature();
+        }
+        if (!detachedProvided && needsDetachedContent(simple)) {
+            return new ValidationResponseDto(ValidationKind.DETACHED_CONTENT_REQUIRED, 0, List.of(), null);
+        }
+
+        List<SignatureSummary> summaries = new ArrayList<>();
         for (String sigId : simple.getSignatureIdList()) {
-            summaries.add(new ValidationResponseDto.SignatureSummary(
+            summaries.add(new SignatureSummary(
                     sigId,
                     simple.getSignatureFormat(sigId) != null ? simple.getSignatureFormat(sigId).toString() : null,
                     String.valueOf(simple.getIndication(sigId)),
@@ -47,7 +81,25 @@ public class DocumentValidationService {
                             : null
             ));
         }
-        return new ValidationResponseDto(simple.getSignaturesCount(), summaries, marshalSimpleReport(reports));
+        return new ValidationResponseDto(ValidationKind.VALIDATED, simple.getSignaturesCount(), summaries, marshalSimpleReport(reports));
+    }
+
+    /** A signature whose detached content is missing surfaces as SIGNED_DATA_NOT_FOUND. */
+    private static boolean needsDetachedContent(SimpleReport simple) {
+        for (String sigId : simple.getSignatureIdList()) {
+            if (simple.getSubIndication(sigId) == SubIndication.SIGNED_DATA_NOT_FOUND) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static ValidationResponseDto notASignature() {
+        return new ValidationResponseDto(ValidationKind.NOT_A_SIGNATURE, 0, List.of(), null);
+    }
+
+    private static boolean hasText(String s) {
+        return s != null && !s.isBlank();
     }
 
     private String marshalSimpleReport(Reports reports) {

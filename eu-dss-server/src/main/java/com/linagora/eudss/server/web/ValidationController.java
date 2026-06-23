@@ -19,10 +19,26 @@ public class ValidationController {
         this.service = service;
     }
 
-    public record ValidateRequest(@NotBlank String documentBase64) {}
+    /**
+     * Validation request. Only {@code documentBase64} is required. For a DETACHED signature, the
+     * caller resends with {@code detachedContentBase64} (+ optional {@code detachedContentName} so
+     * XAdES references that resolve by file name match).
+     */
+    public record ValidateRequest(
+            @NotBlank String documentBase64,
+            String documentName,
+            String detachedContentBase64,
+            String detachedContentName) {
+
+        /** Back-compatible single-file request (no detached content). */
+        public ValidateRequest(String documentBase64) {
+            this(documentBase64, null, null, null);
+        }
+    }
 
     @PostMapping
     public ValidationResponseDto validate(@Valid @RequestBody ValidateRequest req) {
-        return service.validate(req.documentBase64());
+        return service.validate(req.documentBase64(), req.documentName(),
+                req.detachedContentBase64(), req.detachedContentName());
     }
 }
