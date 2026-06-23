@@ -89,6 +89,10 @@ jobs:
           distribution: temurin
           java-version: '21'
 
+      - name: Resolve app version (from tauri.conf.json — single source of truth)
+        shell: bash
+        run: echo "VERSION=$(jq -r .version eu-dss-ui/src-tauri/tauri.conf.json)" >> "$GITHUB_ENV"
+
       - name: Build + stage embedded backend (Unix)
         if: runner.os != 'Windows'
         shell: bash
@@ -117,7 +121,7 @@ jobs:
             security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KCPASS" "$KEYCHAIN" >/dev/null
             security list-keychains -d user -s "$KEYCHAIN" $(security list-keychains -d user | sed 's/"//g')
             "$JAVA_HOME/bin/jpackage" \
-              --type app-image --name eu-dss-server --app-version 1.1.0 --vendor LINAGORA \
+              --type app-image --name eu-dss-server --app-version "$VERSION" --vendor LINAGORA \
               --java-options "-Djava.awt.headless=true" \
               --input "$JAR_DIR" --main-jar eu-dss-server-0.1.0-SNAPSHOT.jar --dest "$OUT_DIR" \
               --mac-sign --mac-signing-key-user-name "Linagora (KUT463DS29)"
@@ -125,7 +129,7 @@ jobs:
             codesign -dvvv "$DEST/eu-dss-server.app/Contents/MacOS/eu-dss-server" 2>&1 | grep -iE "Authority|Runtime" | head -3 || true
           else
             "$JAVA_HOME/bin/jpackage" \
-              --type app-image --name eu-dss-server --app-version 1.1.0 --vendor LINAGORA \
+              --type app-image --name eu-dss-server --app-version "$VERSION" --vendor LINAGORA \
               --java-options "-Djava.awt.headless=true" \
               --input "$JAR_DIR" --main-jar eu-dss-server-0.1.0-SNAPSHOT.jar --dest "$OUT_DIR"
             cp -R "$OUT_DIR/eu-dss-server/." "$DEST/"
@@ -143,7 +147,7 @@ jobs:
           & "$env:JAVA_HOME\bin\jpackage.exe" `
             --type app-image `
             --name eu-dss-server `
-            --app-version 1.1.0 `
+            --app-version $env:VERSION `
             --vendor LINAGORA `
             --java-options "-Djava.awt.headless=true" `
             --input "$jarDir" `
@@ -254,7 +258,7 @@ jobs:
           # ── 5. Build the .dmg from the stapled .app ───────────────────────────────
           DMG_DIR="eu-dss-ui/src-tauri/target/release/bundle/dmg"
           mkdir -p "$DMG_DIR"
-          DMG="$DMG_DIR/EU-DSS Sign_1.1.0_aarch64.dmg"
+          DMG="$DMG_DIR/EU-DSS Sign_${VERSION}_aarch64.dmg"
           hdiutil create -volname "EU-DSS Sign" -srcfolder "$APP" -ov -format UDZO "$DMG"
 
           # ── 6. Sign the .dmg ──────────────────────────────────────────────────────
