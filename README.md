@@ -11,6 +11,7 @@ Public visé : utilisateurs disposant d'un token de signature (ex. **ChamberSign
 
 - **Installation utilisateur (Windows, macOS & Linux)** : voir le guide pas-à-pas [`docs/INSTALL.md`](docs/INSTALL.md).
 - **Téléchargements** : voir [Téléchargements / Releases](#téléchargements--releases).
+- **Journal des modifications** : voir [`CHANGELOG.md`](CHANGELOG.md).
 
 ---
 
