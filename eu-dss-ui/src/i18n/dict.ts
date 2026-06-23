@@ -124,7 +124,6 @@ export const fr = {
   'sign.form.pades': 'PAdES (PDF)',
   'sign.form.asice': 'ASiC‑E',
   'sign.form.xadesEnv': 'XAdES (enveloppant)',
-  'sign.form.xadesDet': 'XAdES détaché',
 
   // Documents panel
   'sign.dropzone.title': 'Déposer vos documents',
@@ -136,7 +135,6 @@ export const fr = {
   'sign.docs.typePdf': 'document PDF',
   'sign.docs.typeOther': 'document {ext}',
   'sign.docs.alreadySigned': 'déjà signé : {n}',
-  'sign.docs.detachedNote': 'Produit un fichier de signature séparé (.xml). Le document d’origine reste inchangé et doit être conservé.',
   'sign.docs.formatAria': 'Format de signature pour {name}',
   'sign.docs.remove': 'Retirer',
   'sign.cancelledPin': 'Signature annulée (PIN requis)',
@@ -524,7 +522,6 @@ export const en: Record<TKey, string> = {
   'sign.form.pades': 'PAdES (PDF)',
   'sign.form.asice': 'ASiC‑E',
   'sign.form.xadesEnv': 'XAdES (enveloping)',
-  'sign.form.xadesDet': 'XAdES detached',
 
   'sign.dropzone.title': 'Drop your documents',
   'sign.dropzone.hint': 'PDF → PAdES · office & images → ASiC‑E container',
@@ -535,7 +532,6 @@ export const en: Record<TKey, string> = {
   'sign.docs.typePdf': 'PDF document',
   'sign.docs.typeOther': '{ext} document',
   'sign.docs.alreadySigned': 'already signed: {n}',
-  'sign.docs.detachedNote': 'Produces a separate signature file (.xml). The original document is left unchanged and must be kept.',
   'sign.docs.formatAria': 'Signature format for {name}',
   'sign.docs.remove': 'Remove',
   'sign.cancelledPin': 'Signing cancelled (PIN required)',

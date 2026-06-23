@@ -8,7 +8,7 @@ import { downloadBase64, downloadZip, fileToBase64 } from '../services/fileUtils
 import { history } from '../services/history';
 import { Banner, Btn, Card, CertGrid, fileKind, Icon, Tag } from './ui';
 import { useToast } from './Toast';
-import { useLang, useT, type TFunction, type TKey } from '../i18n';
+import { useLang, useT, type TKey } from '../i18n';
 
 type DocStatus = 'pending' | 'signing' | 'signed' | 'error';
 
@@ -29,7 +29,6 @@ const FORM_OPTIONS: { value: SignatureForm | ''; labelKey: TKey; pdfOnly?: boole
   { value: 'PADES', labelKey: 'sign.form.pades', pdfOnly: true },
   { value: 'ASIC_E', labelKey: 'sign.form.asice' },
   { value: 'XADES_ENVELOPING', labelKey: 'sign.form.xadesEnv' },
-  { value: 'XADES_DETACHED', labelKey: 'sign.form.xadesDet' },
 ];
 
 let counter = 0;
@@ -53,9 +52,8 @@ function effectiveForm(doc: SignDoc): SignatureForm {
   return fileKind(doc.file.name).asic ? 'ASIC_E' : 'PADES'; // auto-detect mirror
 }
 
-/** Short label for the resolved output format (used on the signed-state pill).
- *  Format names are standard identifiers; only "XAdES détaché" is localised. */
-function formLabel(form: SignatureForm, t: TFunction): string {
+/** Short label for the resolved output format (used on the signed-state pill). */
+function formLabel(form: SignatureForm): string {
   switch (form) {
     case 'PADES':
       return 'PAdES‑B‑T';
@@ -63,8 +61,6 @@ function formLabel(form: SignatureForm, t: TFunction): string {
       return 'ASiC‑E';
     case 'XADES_ENVELOPING':
       return 'XAdES';
-    case 'XADES_DETACHED':
-      return t('sign.form.xadesDet');
   }
 }
 
@@ -690,18 +686,12 @@ function DocumentsPanel({ docs, addFiles, setDocs, busy }: DocumentsPanelProps) 
                       <Tag kind="warn">{t('sign.docs.alreadySigned', { n: doc.existingSignatures })}</Tag>
                     )}
                   </div>
-                  {doc.signatureForm === 'XADES_DETACHED' && (
-                    <div className="doc-detached-note">
-                      <Icon.alert size={12} />
-                      {t('sign.docs.detachedNote')}
-                    </div>
-                  )}
                 </div>
 
                 {/* Signature-format selector (per document); read-only pill once signed */}
                 {doc.status === 'signed' && doc.signed ? (
                   <div className="doc-format-pill">
-                    <span className="mono">{formLabel(effectiveForm(doc), t)}</span>
+                    <span className="mono">{formLabel(effectiveForm(doc))}</span>
                   </div>
                 ) : (
                   <select
@@ -884,8 +874,8 @@ function SuccessView({ signedDocs, cert, reason, location, signedAtIso, onReset,
   const localStamp = signedAtIso
     ? new Date(signedAtIso).toLocaleString(lang === 'en' ? 'en-GB' : 'fr-FR', { dateStyle: 'long', timeStyle: 'short' })
     : '';
-  // Distinct resolved formats across the batch (e.g. "PAdES‑B‑T" or "ASiC‑E + XAdES détaché").
-  const distinctForms = Array.from(new Set(signedDocs.map((d) => formLabel(effectiveForm(d), t))));
+  // Distinct resolved formats across the batch (e.g. "PAdES‑B‑T" or "ASiC‑E + XAdES").
+  const distinctForms = Array.from(new Set(signedDocs.map((d) => formLabel(effectiveForm(d)))));
   const formatSummary = distinctForms.length ? distinctForms.join(' + ') : '—';
 
   return (
@@ -942,7 +932,7 @@ function SuccessView({ signedDocs, cert, reason, location, signedAtIso, onReset,
                         <path d="m8.5 12.2 2.3 2.3 4.6-4.8" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
                     </span>
-                    <span>{t('sign.success.fileSigned', { format: formLabel(effectiveForm(d), t), size: sizeFmt })}</span>
+                    <span>{t('sign.success.fileSigned', { format: formLabel(effectiveForm(d)), size: sizeFmt })}</span>
                   </div>
                 </div>
                 <Btn
