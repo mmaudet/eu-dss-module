@@ -86,6 +86,7 @@ export interface ValidationResponse {
   signatureCount: number;
   signatures: SignatureSummary[];
   simpleReportXml: string | null;
+  overallIndication: string | null;
 }
 
 /** Optional second document + names for validating a DETACHED signature. */

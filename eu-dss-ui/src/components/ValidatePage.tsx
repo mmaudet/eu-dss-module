@@ -317,10 +317,18 @@ function ChecksCard({ s }: { s: SignatureSummary }) {
           </svg>
           <div style={{ flex: 1 }}>
             <div className="vd-check-title">
-              {failed ? t('verify.checks.invalidTitle') : t('verify.checks.indetTitle')}
+              {failed && (s.subIndication === 'HASH_FAILURE' || s.subIndication === 'SIG_CRYPTO_FAILURE')
+                ? t('verify.checks.mismatchTitle')
+                : failed
+                ? t('verify.checks.invalidTitle')
+                : t('verify.checks.indetTitle')}
             </div>
             <div className="vd-check-sub">
-              {failed ? t('verify.checks.invalidSub') : t('verify.checks.indetSub')}
+              {failed && (s.subIndication === 'HASH_FAILURE' || s.subIndication === 'SIG_CRYPTO_FAILURE')
+                ? t('verify.checks.mismatchSub')
+                : failed
+                ? t('verify.checks.invalidSub')
+                : t('verify.checks.indetSub')}
             </div>
           </div>
         </div>
@@ -348,16 +356,20 @@ export function ValidatePage() {
   const t = useT();
   const inputRef = useRef<HTMLInputElement>(null);
   const secondInputRef = useRef<HTMLInputElement>(null);
+  const runIdRef = useRef(0);
   const [file, setFile] = useState<File | null>(null);
   const [secondFile, setSecondFile] = useState<File | null>(null);
   // What the backend asked for after the first pass: a source document, a signature file, or nothing.
   const [need, setNeed] = useState<'source' | 'signature' | null>(null);
   const [dragOver, setDragOver] = useState(false);
+  const [dragOverSecond, setDragOverSecond] = useState(false);
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<ValidationResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   function clearAll() {
+    runIdRef.current++;
+    setBusy(false);
     setFile(null);
     setSecondFile(null);
     setNeed(null);
@@ -368,6 +380,8 @@ export function ValidatePage() {
   }
 
   function pickFile(chosen: File | undefined) {
+    runIdRef.current++;
+    setBusy(false);
     if (!chosen) return;
     setFile(chosen);
     setSecondFile(null);
@@ -383,7 +397,7 @@ export function ValidatePage() {
         name,
         format: res.signatures?.[0]?.signatureFormat ?? '',
         sizeBytes,
-        verdict: overallVariant(res) === 'ok' ? 'TOTAL_PASSED' : res.signatures?.[0]?.indication ?? '',
+        verdict: overallVariant(res) === 'ok' ? 'TOTAL_PASSED' : (res.overallIndication ?? res.signatures?.[0]?.indication ?? ''),
         atIso: new Date().toISOString(),
       });
     } catch {
@@ -394,33 +408,40 @@ export function ValidatePage() {
   // First pass: classify the dropped file. Self-contained → show result; otherwise ask for file #2.
   async function verifyPrimary() {
     if (!file) return;
+    const runId = ++runIdRef.current;
     setBusy(true);
     setResult(null);
     setError(null);
     setNeed(null);
     try {
       const base64 = await fileToBase64(file);
+      if (runId !== runIdRef.current) return;
       const res = await backendApi.validate(base64, { documentName: file.name });
+      if (runId !== runIdRef.current) return;
       if (res.kind === 'DETACHED_CONTENT_REQUIRED') { setNeed('source'); return; }
       if (res.kind === 'NOT_A_SIGNATURE') { setNeed('signature'); return; }
       setResult(res);
       recordHistory(res, file.name, file.size);
     } catch (e) {
+      if (runId !== runIdRef.current) return;
       setError((e as Error).message ?? t('common.unknownError'));
     } finally {
-      setBusy(false);
+      if (runId === runIdRef.current) setBusy(false);
     }
   }
 
   // Second pass: we have the pair. Roles depend on which file the backend asked for.
   async function verifyPair(second: File) {
+    if (!need) { setError(t('common.unknownError')); return; }
     if (!file) return;
+    const runId = ++runIdRef.current;
     setBusy(true);
     setResult(null);
     setError(null);
     try {
       const primaryB64 = await fileToBase64(file);
       const secondB64 = await fileToBase64(second);
+      if (runId !== runIdRef.current) return;
       const res =
         need === 'source'
           ? // file = the signature, second = the original source document
@@ -435,12 +456,20 @@ export function ValidatePage() {
               detachedContentBase64: primaryB64,
               detachedContentName: file.name,
             });
+      if (runId !== runIdRef.current) return;
+      if (res.kind !== 'VALIDATED') {
+        setError(t('verify.wrongSecondFile'));
+        setSecondFile(null);
+        if (secondInputRef.current) secondInputRef.current.value = '';
+        return;
+      }
       setResult(res);
       recordHistory(res, need === 'source' ? file.name : second.name, file.size + second.size);
     } catch (e) {
+      if (runId !== runIdRef.current) return;
       setError((e as Error).message ?? t('common.unknownError'));
     } finally {
-      setBusy(false);
+      if (runId === runIdRef.current) setBusy(false);
     }
   }
 
@@ -462,13 +491,13 @@ export function ValidatePage() {
       <input
         ref={inputRef}
         type="file"
-        accept=".pdf,.asice,.asics,.p7s,.p7m,.xml,.scs"
         style={{ display: 'none' }}
         onChange={(e) => pickFile(e.target.files?.[0])}
       />
       <input
         ref={secondInputRef}
         type="file"
+        accept={need === 'signature' ? '.pdf,.asice,.asics,.p7s,.p7m,.xml,.scs' : undefined}
         style={{ display: 'none' }}
         onChange={(e) => pickSecondFile(e.target.files?.[0])}
       />
@@ -503,7 +532,7 @@ export function ValidatePage() {
           <div className="fic">{fileKind(file.name).ext}</div>
           <div className="fmeta">
             <div className="fname">{file.name}</div>
-            <div className="fsub"><span>{formatBytes(file.size)} · {t('verify.readyToVerify')}</span></div>
+            <div className="fsub"><span>{formatBytes(file.size)} · {need !== null ? t('verify.awaitingSecond') : t('verify.readyToVerify')}</span></div>
           </div>
           <div className="vd-file-actions">
             {need === null && result === null && (
@@ -551,7 +580,7 @@ export function ValidatePage() {
                 <button
                   className="x-btn"
                   title={t('verify.removeFile')}
-                  onClick={() => { setSecondFile(null); if (secondInputRef.current) secondInputRef.current.value = ''; }}
+                  onClick={() => { runIdRef.current++; setBusy(false); setSecondFile(null); if (secondInputRef.current) secondInputRef.current.value = ''; }}
                 >
                   <Icon.x size={15} />
                 </button>
@@ -559,16 +588,16 @@ export function ValidatePage() {
             </div>
           ) : (
             <div
-              className={`vd-dropzone${dragOver ? ' vd-dropzone--over' : ''}`}
+              className={`vd-dropzone${dragOverSecond ? ' vd-dropzone--over' : ''}`}
               onClick={() => secondInputRef.current?.click()}
-              onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-              onDragLeave={() => setDragOver(false)}
-              onDrop={(e) => { e.preventDefault(); setDragOver(false); pickSecondFile(e.dataTransfer.files?.[0]); }}
+              onDragOver={(e) => { e.preventDefault(); setDragOverSecond(true); }}
+              onDragLeave={() => setDragOverSecond(false)}
+              onDrop={(e) => { e.preventDefault(); setDragOverSecond(false); pickSecondFile(e.dataTransfer.files?.[0]); }}
             >
               <span className="vd-dz-icon-tile"><Icon.upload size={20} /></span>
               <div className="vd-dz-text">
                 <div className="vd-dz-title">{t('verify.addSecondFile')}</div>
-                <div className="vd-dz-hint">{need === 'source' ? t('verify.detached.hint') : t('verify.notSig.hint')}</div>
+                <div className="vd-dz-hint">{need === 'source' ? t('verify.addSourceDocShort') : t('verify.addSigFileShort')}</div>
               </div>
               <button
                 className="vd-dz-btn"

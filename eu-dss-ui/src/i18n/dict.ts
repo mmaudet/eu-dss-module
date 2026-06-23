@@ -297,6 +297,13 @@ export const fr = {
   'verify.notSig.hint': 'Aucune signature trouvée. S’il s’agit du document source, ajoutez son fichier de signature (.p7s, .xml…).',
   'verify.addSecondFile': 'Déposer le second fichier, ou le choisir',
   'verify.chooseSecond': 'Choisir le fichier',
+  'verify.awaitingSecond': 'En attente du second fichier',
+  'verify.addSourceDocShort': 'Ajoutez le document source',
+  'verify.addSigFileShort': 'Ajoutez le fichier de signature (.p7s, .xml…)',
+  'verify.wrongSecondFile': 'Le second fichier ne correspond pas — vérifiez que vous avez fourni le bon fichier.',
+  'verify.checks.mismatchTitle': 'Le document ne correspond pas à la signature',
+  'verify.checks.mismatchSub': 'Vérifiez que vous avez fourni le bon document source — son contenu ne correspond pas à l’empreinte signée.',
+  'deeplinkVerify.notASignature': 'Le fichier fourni ne contient pas de signature numérique.',
   'deeplinkVerify.detachedUnsupported': 'Signature détachée : la vérification par lien ne la prend pas en charge. Ouvrez l’application et utilisez l’onglet « Vérifier » avec le document source.',
 
   // ── Clé & certificat (KeyCertScreen) ────────────────────────────────────────
@@ -698,7 +705,14 @@ export const en: Record<TKey, string> = {
   'verify.notSig.hint': 'No signature found. If this is the source document, add its signature file (.p7s, .xml…).',
   'verify.addSecondFile': 'Drop the second file, or choose one',
   'verify.chooseSecond': 'Choose file',
-  'deeplinkVerify.detachedUnsupported': 'Detached signature: link verification does not support it. Open the app and use the "Verify" tab with the source document.',
+  'verify.awaitingSecond': 'Awaiting second file',
+  'verify.addSourceDocShort': 'Add the source document',
+  'verify.addSigFileShort': 'Add the signature file (.p7s, .xml…)',
+  'verify.wrongSecondFile': 'The second file does not match — check you supplied the right file.',
+  'verify.checks.mismatchTitle': 'The document does not match the signature',
+  'verify.checks.mismatchSub': 'Check you supplied the correct source document — its content does not match the signed digest.',
+  'deeplinkVerify.notASignature': 'The file provided does not contain a digital signature.',
+  'deeplinkVerify.detachedUnsupported': 'Detached signature: link verification does not support it. Open the app and use the “Verify” tab with the source document.',
 
   // ── Clé & certificat ──────────────────────────────────────────────────────────
   'key.title': 'Key & certificate',

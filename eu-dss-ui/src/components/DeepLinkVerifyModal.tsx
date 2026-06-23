@@ -187,6 +187,10 @@ export function DeepLinkVerifyModal({ url, onClose }: DeepLinkVerifyModalProps) 
       fail(t('deeplinkVerify.detachedUnsupported'), runId);
       return;
     }
+    if (res.kind === 'NOT_A_SIGNATURE') {
+      fail(t('deeplinkVerify.notASignature'), runId);
+      return;
+    }
     setResult(res);
 
     // ── POST the report back. Past this point validation has SUCCEEDED, so a
