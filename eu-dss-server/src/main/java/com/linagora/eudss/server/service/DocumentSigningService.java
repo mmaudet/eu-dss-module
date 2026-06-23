@@ -26,16 +26,13 @@ public class DocumentSigningService {
     private final DocumentSigner padesSigner;
     private final DocumentSigner asicSigner;
     private final DocumentSigner xadesEnvelopingSigner;
-    private final DocumentSigner xadesDetachedSigner;
 
     public DocumentSigningService(@Qualifier("padesSigningService") DocumentSigner padesSigner,
                                   @Qualifier("asicSigningService") DocumentSigner asicSigner,
-                                  @Qualifier("xadesEnvelopingSigningService") DocumentSigner xadesEnvelopingSigner,
-                                  @Qualifier("xadesDetachedSigningService") DocumentSigner xadesDetachedSigner) {
+                                  @Qualifier("xadesEnvelopingSigningService") DocumentSigner xadesEnvelopingSigner) {
         this.padesSigner = padesSigner;
         this.asicSigner = asicSigner;
         this.xadesEnvelopingSigner = xadesEnvelopingSigner;
-        this.xadesDetachedSigner = xadesDetachedSigner;
     }
 
     public PrepareSignatureResponse prepare(PrepareSignatureRequest req) {
@@ -76,7 +73,6 @@ public class DocumentSigningService {
             case PADES -> padesSigner;
             case ASIC -> asicSigner;
             case XADES_ENVELOPING -> xadesEnvelopingSigner;
-            case XADES_DETACHED -> xadesDetachedSigner;
         };
     }
 
@@ -95,9 +91,8 @@ public class DocumentSigningService {
 
     /**
      * Names the produced artifact per format: PDFs keep their name (PAdES, in place); ASiC-E
-     * becomes an {@code .asice} container; standalone XAdES (enveloping or detached) becomes an
-     * {@code .xml} signature file (for detached, this is the signature only — the client keeps the
-     * original document).
+     * becomes an {@code .asice} container; standalone XAdES (enveloping) becomes an {@code .xml}
+     * signature file.
      */
     private static String signedFileName(String fileName, SigningFormat format) {
         if (format == SigningFormat.PADES) {
@@ -106,7 +101,7 @@ public class DocumentSigningService {
         String base = baseName(fileName);
         return switch (format) {
             case ASIC -> base + ".asice";
-            case XADES_ENVELOPING, XADES_DETACHED -> base + ".xml";
+            case XADES_ENVELOPING -> base + ".xml";
             case PADES -> fileName; // unreachable, handled above
         };
     }

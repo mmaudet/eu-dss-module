@@ -155,7 +155,7 @@ public class DssConfig {
         return service;
     }
 
-    /** Standalone (non-ASiC) XAdES service, used for ENVELOPING and DETACHED XAdES signatures. */
+    /** Standalone (non-ASiC) XAdES service, used for ENVELOPING XAdES signatures. */
     @Bean
     public XAdESService xadesService(CommonCertificateVerifier verifier, TSPSource tspSource) {
         XAdESService service = new XAdESService(verifier);
@@ -166,10 +166,5 @@ public class DssConfig {
     @Bean
     public DocumentSigner xadesEnvelopingSigningService(XAdESService xadesService) {
         return new XadesSigningService(xadesService, SignaturePackaging.ENVELOPING);
-    }
-
-    @Bean
-    public DocumentSigner xadesDetachedSigningService(XAdESService xadesService) {
-        return new XadesSigningService(xadesService, SignaturePackaging.DETACHED);
     }
 }

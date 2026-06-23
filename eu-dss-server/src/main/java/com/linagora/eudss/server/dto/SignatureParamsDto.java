@@ -52,11 +52,9 @@ public record SignatureParamsDto(
      *   <li>{@code ASIC_E} – ASiC-E container holding a XAdES signature (wraps any file).</li>
      *   <li>{@code XADES_ENVELOPING} – standalone XAdES (ENVELOPING): the file is base64-embedded
      *       inside the returned XML signature.</li>
-     *   <li>{@code XADES_DETACHED} – standalone XAdES (DETACHED): only the signature XML is
-     *       returned; the client keeps the original document unchanged.</li>
      * </ul>
      */
     public enum SignatureFormDto {
-        PADES, ASIC_E, XADES_ENVELOPING, XADES_DETACHED
+        PADES, ASIC_E, XADES_ENVELOPING
     }
 }
