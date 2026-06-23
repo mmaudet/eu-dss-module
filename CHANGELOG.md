@@ -1,10 +1,5 @@
 # Journal des modifications
 
-Toutes les évolutions notables de **EU-DSS Sign** sont consignées dans ce fichier.
-
-Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/),
-et le projet suit le [versionnage sémantique](https://semver.org/lang/fr/).
-
 ## [1.2.0] — 2026-06-23
 
 ### Ajouté
