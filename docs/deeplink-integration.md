@@ -89,6 +89,8 @@ L'app télécharge `doc_url` → écran de confirmation (**sans PIN**, la valida
 lecture seule) → valide via la bibliothèque DSS (listes de confiance UE / LOTL) → POST
 le rapport.
 
+> **Limite — signatures détachées.** `eudss://verify` ne transporte qu'un seul document (`doc_url`) et ne valide donc que des signatures **auto-suffisantes** (PAdES, ASiC, XAdES enveloppant, CAdES attaché). Une signature **détachée** (couple signature + document source) n'est pas prise en charge par le lien : ouvrez l'application et utilisez l'onglet « Vérifier », qui réclamera le second fichier.
+
 **Payload POST envoyé au `callback_url`** :
 
 ```json

@@ -60,6 +60,8 @@ Niveau de signature par défaut : **PAdES-B-T** (PDF) / **XAdES-B-T** (ASiC, aut
 
 > Les signatures produites sont des **signatures électroniques avancées** (eIDAS). L'application ne peut pas certifier qu'elles sont qualifiées — cela dépend du certificat porté par le token.
 
+> **Vérification.** L'onglet « Vérifier » accepte les signatures **auto-suffisantes** (PAdES, ASiC, XAdES enveloppant, CAdES attaché) en un seul fichier. Pour une signature **détachée** (le fichier de signature ne contient pas le document), l'application détecte le cas et réclame le **document source** pour valider le couple. L'application ne **produit** que des signatures auto-suffisantes (PAdES / ASiC-E / XAdES enveloppant).
+
 ---
 
 ## Architecture / modules
