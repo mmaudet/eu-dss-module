@@ -11,6 +11,8 @@ import eu.europa.esig.dss.simplereport.SimpleReportFacade;
 import eu.europa.esig.dss.spi.validation.CommonCertificateVerifier;
 import eu.europa.esig.dss.validation.SignedDocumentValidator;
 import eu.europa.esig.dss.validation.reports.Reports;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
@@ -23,6 +25,8 @@ import java.util.List;
 
 @Service
 public class DocumentValidationService {
+
+    private static final Logger log = LoggerFactory.getLogger(DocumentValidationService.class);
 
     private final CommonCertificateVerifier verifier;
 
@@ -108,6 +112,7 @@ public class DocumentValidationService {
             SimpleReportFacade.newFacade().marshall(reports.getSimpleReportJaxb(), baos);
             return baos.toString(StandardCharsets.UTF_8);
         } catch (Exception e) {
+            log.warn("Failed to marshal DSS simple report", e);
             return null;
         }
     }
